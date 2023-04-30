@@ -41,21 +41,21 @@ from mojo.networking.multicast import create_multicast_socket
 from mojo.networking.resolution import get_arp_table, refresh_arp_table
 from mojo.networking.trafficcapturecontext import TrafficCaptureContext
 
-import mojo.protocols.upnp as upnp_module
+import mojo.interop.protocols.upnp as upnp_module
 
-from mojo.xmods.landscaping.coordinatorbase import CoordinatorBase
+from mojo.xmods.landscaping.coordinators.coordinatorbase import CoordinatorBase
 from mojo.xmods.landscaping.landscapedevice import LandscapeDevice
 
-from mojo.protocols.upnp.upnpconstants import UPNP_HEADERS
-from mojo.protocols.upnp.devices.upnprootdevice import UpnpRootDevice
-from mojo.protocols.upnp.devices.upnprootdevice import device_description_load
-from mojo.protocols.upnp.devices.upnprootdevice import device_description_find_components
+from mojo.interop.protocols.upnp.upnpconstants import UPNP_HEADERS
+from mojo.interop.protocols.upnp.devices.upnprootdevice import UpnpRootDevice
+from mojo.interop.protocols.upnp.devices.upnprootdevice import device_description_load
+from mojo.interop.protocols.upnp.devices.upnprootdevice import device_description_find_components
 
-from mojo.protocols.upnp.upnpfactory import UpnpFactory
-from mojo.protocols.upnp.upnpprotocol import msearch_query_host, msearch_scan, notify_parse_request
-from mojo.protocols.upnp.upnpprotocol import MSearchKeys, MSearchRouteKeys, UpnpProtocol
-from mojo.protocols.upnp.services.upnpserviceproxy import UpnpServiceProxy
-from mojo.protocols.upnp.xml.upnpdevice1 import UPNP_DEVICE1_NAMESPACE
+from mojo.interop.protocols.upnp.upnpfactory import UpnpFactory
+from mojo.interop.protocols.upnp.upnpprotocol import msearch_query_host, msearch_scan, notify_parse_request
+from mojo.interop.protocols.upnp.upnpprotocol import MSearchKeys, MSearchRouteKeys, UpnpProtocol
+from mojo.interop.protocols.upnp.services.upnpserviceproxy import UpnpServiceProxy
+from mojo.interop.protocols.upnp.xml.upnpdevice1 import UPNP_DEVICE1_NAMESPACE
 
 from mojo.networking.interfaces import get_ipv4_address
 

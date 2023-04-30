@@ -8,7 +8,7 @@ import zeroconf
 
 from mojo.xmods.xlogging.foundations import AKitLoggerWrapper, AKitLogLevels
 
-from mojo.protocols.dns.mdnsserviceinfo import MdnsServiceInfo
+from mojo.interop.protocols.dns.mdnsserviceinfo import MdnsServiceInfo
 from mojo.waiting import WaitContext
 
 class MdnsServiceCatalog(zeroconf.ServiceListener):

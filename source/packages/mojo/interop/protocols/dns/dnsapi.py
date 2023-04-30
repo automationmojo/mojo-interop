@@ -1,10 +1,10 @@
 from typing import List
 
-from mojo.protocols.dns.dnsconst import DnsRecordClass, DnsRecordType
+from mojo.interop.protocols.dns.dnsconst import DnsRecordClass, DnsRecordType
 
-from mojo.protocols.dns.dnsquestion import DnsQuestion
+from mojo.interop.protocols.dns.dnsquestion import DnsQuestion
 
-from mojo.protocols.dns.dnsserver import DnsServer
+from mojo.interop.protocols.dns.dnsserver import DnsServer
 
 def dns_query_name(name: str, rtype: DnsRecordType, rclass: DnsRecordClass):
 

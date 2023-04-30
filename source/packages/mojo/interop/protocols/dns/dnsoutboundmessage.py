@@ -23,12 +23,12 @@ import struct
 
 from enum import IntEnum
 
-from mojo.protocols.dns.dnsconst import DnsFlags, DnsRecordClass, DnsRecordType, MAX_MSG_ABSOLUTE, MAX_MSG_TYPICAL
+from mojo.interop.protocols.dns.dnsconst import DnsFlags, DnsRecordClass, DnsRecordType, MAX_MSG_ABSOLUTE, MAX_MSG_TYPICAL
 
-from mojo.protocols.dns.exceptions import DnsNamePartTooLongError
-from mojo.protocols.dns.dnsquestion import DnsQuestion
-from mojo.protocols.dns.dnsrecord import DnsRecord
-from mojo.protocols.dns.dnspointer import DnsPointer
+from mojo.interop.protocols.dns.exceptions import DnsNamePartTooLongError
+from mojo.interop.protocols.dns.dnsquestion import DnsQuestion
+from mojo.interop.protocols.dns.dnsrecord import DnsRecord
+from mojo.interop.protocols.dns.dnspointer import DnsPointer
 
 logger = logging.getLogger()
 

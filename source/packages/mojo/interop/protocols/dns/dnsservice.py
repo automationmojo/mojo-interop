@@ -19,10 +19,10 @@ from typing import Union, TYPE_CHECKING
 
 import threading
 
-from mojo.protocols.dns.dnsrecord import DnsRecord
+from mojo.interop.protocols.dns.dnsrecord import DnsRecord
 
 if TYPE_CHECKING:
-    from mojo.protocols.dns.dnsoutboundmessage import DnsOutboundMessage
+    from mojo.interop.protocols.dns.dnsoutboundmessage import DnsOutboundMessage
 
 class DnsService(DnsRecord):
     """

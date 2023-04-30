@@ -17,8 +17,8 @@ __license__ = "MIT"
 
 import struct
 
-from mojo.protocols.dns.dnsconst import DnsRecordClass, DnsRecordType
-from mojo.protocols.dns.dnsrecord import DnsRecord
+from mojo.interop.protocols.dns.dnsconst import DnsRecordClass, DnsRecordType
+from mojo.interop.protocols.dns.dnsrecord import DnsRecord
 
 class DnsQuestion:
     """

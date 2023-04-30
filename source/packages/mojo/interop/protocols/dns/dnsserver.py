@@ -20,12 +20,12 @@ from typing import TYPE_CHECKING
 import socket
 import threading
 
-from mojo.protocols.dns.dnsquestion import DnsQuestion
-from mojo.protocols.dns.dnsinboundmessage import DnsInboundMessage
+from mojo.interop.protocols.dns.dnsquestion import DnsQuestion
+from mojo.interop.protocols.dns.dnsinboundmessage import DnsInboundMessage
 from mojo.xmods.xnetworking.constants import MDNS_GROUP_ADDR, MDNS_GROUP_ADDR6, MDNS_PORT
 
 if TYPE_CHECKING:
-    from mojo.protocols.dns.dnsoutboundmessage import DnsOutboundMessage
+    from mojo.interop.protocols.dns.dnsoutboundmessage import DnsOutboundMessage
 
 class DnsServer:
     """

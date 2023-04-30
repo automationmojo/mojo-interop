@@ -17,7 +17,7 @@ __status__ = "Development" # Prototype, Development or Production
 __license__ = "MIT"
 
 from mojo.xmods.exceptions import SemanticError
-from mojo.protocols.upnp.devices.upnpdevice import UpnpDevice
+from mojo.interop.protocols.upnp.devices.upnpdevice import UpnpDevice
 
 class UpnpEmbeddedDevice(UpnpDevice):
     """

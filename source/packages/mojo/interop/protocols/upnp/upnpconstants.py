@@ -9,7 +9,7 @@ __license__ = "MIT"
 
 import platform
 
-from mojo.protocols.upnp.aspectsupnp import AspectsUPnP
+from mojo.interop.protocols.upnp.aspectsupnp import AspectsUPnP
 
 TIMEDELTA_RENEWAL_WINDOW = 120
 

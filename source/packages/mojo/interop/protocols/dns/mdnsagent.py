@@ -6,10 +6,10 @@ import time
 from mojo.xmods.xnetworking.multicast import create_multicast_socket
 from mojo.xmods.xnetworking.constants import MDNS_GROUP_ADDR, MDNS_GROUP_ADDR6, MDNS_PORT
 
-from mojo.protocols.dns.dnsinboundmessage import DnsInboundMessage
-from mojo.protocols.dns.dnsoutboundmessage import DnsOutboundMessage
-from mojo.protocols.dns.dnsquestion import DnsQuestion
-from mojo.protocols.dns.dnsconst import DnsRecordType, DnsRecordClass
+from mojo.interop.protocols.dns.dnsinboundmessage import DnsInboundMessage
+from mojo.interop.protocols.dns.dnsoutboundmessage import DnsOutboundMessage
+from mojo.interop.protocols.dns.dnsquestion import DnsQuestion
+from mojo.interop.protocols.dns.dnsconst import DnsRecordType, DnsRecordClass
 
 class MdnsAgent:
 

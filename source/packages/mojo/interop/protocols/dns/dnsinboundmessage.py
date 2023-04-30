@@ -22,16 +22,16 @@ from typing import cast, List, Optional
 import logging
 import struct
 
-from mojo.protocols.dns.dnsconst import DnsFlags, DnsQr, DnsRecordType
-from mojo.protocols.dns.exceptions import DnsDecodeError
+from mojo.interop.protocols.dns.dnsconst import DnsFlags, DnsQr, DnsRecordType
+from mojo.interop.protocols.dns.exceptions import DnsDecodeError
 
-from mojo.protocols.dns.dnsaddress import DnsAddress
-from mojo.protocols.dns.dnshostinfo import DnsHostInfo
-from mojo.protocols.dns.dnspointer import DnsPointer
-from mojo.protocols.dns.dnsquestion import DnsQuestion
-from mojo.protocols.dns.dnsrecord import DnsRecord
-from mojo.protocols.dns.dnsservice import DnsService
-from mojo.protocols.dns.dnstext import DnsText
+from mojo.interop.protocols.dns.dnsaddress import DnsAddress
+from mojo.interop.protocols.dns.dnshostinfo import DnsHostInfo
+from mojo.interop.protocols.dns.dnspointer import DnsPointer
+from mojo.interop.protocols.dns.dnsquestion import DnsQuestion
+from mojo.interop.protocols.dns.dnsrecord import DnsRecord
+from mojo.interop.protocols.dns.dnsservice import DnsService
+from mojo.interop.protocols.dns.dnstext import DnsText
 
 logger = logging.getLogger()
 

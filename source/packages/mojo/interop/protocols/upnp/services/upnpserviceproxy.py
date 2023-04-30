@@ -39,19 +39,19 @@ from mojo.xmods.eventing.eventedvariable import EventedVariable
 from mojo.xmods.xcollections.context import Context, ContextPaths
 from mojo.xmods.xlogging.scopemonitoring import MonitoredScope
 
-from mojo.protocols.upnp.aspectsupnp import AspectsUPnP, DEFAULT_UPNP_ASPECTS
-from mojo.protocols.upnp.soap import SoapProcessor, SOAP_TIMEOUT
-from mojo.protocols.upnp.upnpconstants import DEFAULT_UPNP_CALL_ASPECTS
-from mojo.protocols.upnp.upnperrors import UpnpError
-from mojo.protocols.upnp.services.upnpdefaultvar import UpnpDefaultVar
+from mojo.interop.protocols.upnp.aspectsupnp import AspectsUPnP, DEFAULT_UPNP_ASPECTS
+from mojo.interop.protocols.upnp.soap import SoapProcessor, SOAP_TIMEOUT
+from mojo.interop.protocols.upnp.upnpconstants import DEFAULT_UPNP_CALL_ASPECTS
+from mojo.interop.protocols.upnp.upnperrors import UpnpError
+from mojo.interop.protocols.upnp.services.upnpdefaultvar import UpnpDefaultVar
 
-from mojo.protocols.upnp.xml.upnpdevice1 import UpnpDevice1Service
+from mojo.interop.protocols.upnp.xml.upnpdevice1 import UpnpDevice1Service
 
 
 logger = logging.getLogger()
 
 if TYPE_CHECKING:
-    from mojo.protocols.upnp.devices.upnpdevice import UpnpDevice
+    from mojo.interop.protocols.upnp.devices.upnpdevice import UpnpDevice
 
 class UpnpServiceProxy(EventedVariableSink):
     """

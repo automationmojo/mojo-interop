@@ -26,11 +26,11 @@ from mojo.xmods.extension.dynamic import (
 )
 from mojo.xmods.ximport import import_by_name
 
-from mojo.protocols.upnp.devices.upnpembeddeddevice import UpnpEmbeddedDevice
-from mojo.protocols.upnp.devices.upnprootdevice import UpnpRootDevice
-from mojo.protocols.upnp.services.upnpserviceproxy import UpnpServiceProxy
+from mojo.interop.protocols.upnp.devices.upnpembeddeddevice import UpnpEmbeddedDevice
+from mojo.interop.protocols.upnp.devices.upnprootdevice import UpnpRootDevice
+from mojo.interop.protocols.upnp.services.upnpserviceproxy import UpnpServiceProxy
 
-from mojo.protocols.upnp.extensions import standard as standard_extensions
+from mojo.interop.protocols.upnp.extensions import standard as standard_extensions
 
 
 class UpnpFactory:

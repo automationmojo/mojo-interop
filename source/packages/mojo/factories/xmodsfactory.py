@@ -12,7 +12,7 @@ from mojo.interop.clients.windows.windowsclientcoordinatorcoupling import Window
 
 from mojo.interop.protocols.serial.tcpserialcoordinatorcoupling import TcpSerialCoordinatorCoupling
 from mojo.interop.protocols.ssh.sshcoordinatorcoupling import SshCoordinatorCoupling
-
+from mojo.interop.protocols.power.dlipower.dlipowercoordinatorcoupling import PowerCoordinatorCoupling
 
 class LandscapingExtentionPointsFactory(ExtensionPointsFactory, LandscapingExtentionPoints):
 
@@ -29,6 +29,7 @@ class LandscapingExtentionPointsFactory(ExtensionPointsFactory, LandscapingExten
         coupling_types = [
             LinuxClientCoordinatorCoupling,
             OsxClientCoordinatorCoupling,
+            PowerCoordinatorCoupling,
             SshCoordinatorCoupling,
             TcpSerialCoordinatorCoupling,
             WindowsClientCoordinatorCoupling

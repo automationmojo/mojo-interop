@@ -19,12 +19,12 @@ from typing import TYPE_CHECKING
 
 import socket
 
-from mojo.xmods.xnetworking.interfaces import is_ipv6_address
+from mojo.networking.interfaces import is_ipv6_address
 
-from mojo.protocols.dns.dnsrecord import DnsRecord
+from mojo.interop.protocols.dns.dnsrecord import DnsRecord
 
 if TYPE_CHECKING:
-    from mojo.protocols.dns.dnsoutboundmessage import DnsOutboundMessage
+    from mojo.interop.protocols.dns.dnsoutboundmessage import DnsOutboundMessage
 
 class DnsAddress(DnsRecord):
     """

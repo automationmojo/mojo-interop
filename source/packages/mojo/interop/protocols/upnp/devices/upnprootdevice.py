@@ -45,30 +45,30 @@ from mojo.xmods.extension.dynamic import generate_extension_key
 from mojo.xmods.fspath import normalize_name_for_path
 from mojo.xmods.landscaping.landscapedeviceextension import LandscapeDeviceExtension
 
-from mojo.protocols.upnp.upnperrors import UpnpError
-from mojo.protocols.upnp.aliases import StrSvcId, StrSvcType, StrSubId
-from mojo.protocols.upnp.upnpconstants import TIMEDELTA_RENEWAL_WINDOW, UPNP_HEADERS
-from mojo.protocols.upnp.upnpprotocol import MSearchRouteKeys
-from mojo.protocols.upnp.devices.upnpdevice import UpnpDevice
-from mojo.protocols.upnp.devices.upnpembeddeddevice import UpnpEmbeddedDevice
-from mojo.protocols.upnp.xml.upnpdevice1 import UPNP_DEVICE1_NAMESPACE, UpnpDevice1Device, UpnpDevice1SpecVersion
-from mojo.protocols.upnp.soap import NS_UPNP_EVENT
+from mojo.interop.protocols.upnp.upnperrors import UpnpError
+from mojo.interop.protocols.upnp.aliases import StrSvcId, StrSvcType, StrSubId
+from mojo.interop.protocols.upnp.upnpconstants import TIMEDELTA_RENEWAL_WINDOW, UPNP_HEADERS
+from mojo.interop.protocols.upnp.upnpprotocol import MSearchRouteKeys
+from mojo.interop.protocols.upnp.devices.upnpdevice import UpnpDevice
+from mojo.interop.protocols.upnp.devices.upnpembeddeddevice import UpnpEmbeddedDevice
+from mojo.interop.protocols.upnp.xml.upnpdevice1 import UPNP_DEVICE1_NAMESPACE, UpnpDevice1Device, UpnpDevice1SpecVersion
+from mojo.interop.protocols.upnp.soap import NS_UPNP_EVENT
 
-from mojo.protocols.upnp.paths import DIR_UPNP_SCAN_INTEGRATION_EMBEDDEDDEVICES
-from mojo.protocols.upnp.paths import DIR_UPNP_SCAN_INTEGRATION_ROOTDEVICES
-from mojo.protocols.upnp.paths import DIR_UPNP_SCAN_INTEGRATION_SERVICES
-from mojo.protocols.upnp.upnpprotocol import MSearchKeys
+from mojo.interop.protocols.upnp.paths import DIR_UPNP_SCAN_INTEGRATION_EMBEDDEDDEVICES
+from mojo.interop.protocols.upnp.paths import DIR_UPNP_SCAN_INTEGRATION_ROOTDEVICES
+from mojo.interop.protocols.upnp.paths import DIR_UPNP_SCAN_INTEGRATION_SERVICES
+from mojo.interop.protocols.upnp.upnpprotocol import MSearchKeys
 
-from mojo.protocols.upnp.services.upnpserviceproxy import UpnpServiceProxy
+from mojo.interop.protocols.upnp.services.upnpserviceproxy import UpnpServiceProxy
 
-import mojo.protocols.upnp as upnp_module
+import mojo.interop.protocols.upnp as upnp_module
 
 from mojo.networking.exceptions import raise_for_http_status
 
 
 # Types imported only for type checking purposes
 if TYPE_CHECKING:
-    from mojo.protocols.upnp.upnpfactory import UpnpFactory
+    from mojo.interop.protocols.upnp.upnpfactory import UpnpFactory
 
 UPNP_DIR = os.path.dirname(upnp_module.__file__)
 

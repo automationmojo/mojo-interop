@@ -17,12 +17,12 @@ __email__ = "myron.walker@gmail.com"
 __status__ = "Development" # Prototype, Development or Production
 __license__ = "MIT"
 
-from mojo.protocols.dns.dnsconst import HAS_A_TO_Z
-from mojo.protocols.dns.dnsconst import HAS_ONLY_A_TO_Z_NUM_HYPHEN
-from mojo.protocols.dns.dnsconst import HAS_ASCII_CONTROL_CHARS
-from mojo.protocols.dns.dnsconst import HAS_ONLY_A_TO_Z_NUM_HYPHEN_UNDERSCORE
+from mojo.interop.protocols.dns.dnsconst import HAS_A_TO_Z
+from mojo.interop.protocols.dns.dnsconst import HAS_ONLY_A_TO_Z_NUM_HYPHEN
+from mojo.interop.protocols.dns.dnsconst import HAS_ASCII_CONTROL_CHARS
+from mojo.interop.protocols.dns.dnsconst import HAS_ONLY_A_TO_Z_NUM_HYPHEN_UNDERSCORE
 
-from mojo.protocols.dns.exceptions import DnsBadTypeInNameError
+from mojo.interop.protocols.dns.exceptions import DnsBadTypeInNameError
 
 def validate_service_name(service_name: str, allow_underscores: bool = False):
     """

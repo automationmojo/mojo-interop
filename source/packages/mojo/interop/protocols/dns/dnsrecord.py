@@ -20,7 +20,7 @@ from typing import Optional, Union, TYPE_CHECKING
 
 import time
 
-from mojo.protocols.dns.dnsconst import (
+from mojo.interop.protocols.dns.dnsconst import (
     DnsLiftimePercent,
     DnsRecordClass,
     DnsRecordType
@@ -30,8 +30,8 @@ from mojo.xmods.xdatetime import current_time_millis
 
 
 if TYPE_CHECKING:
-    from mojo.protocols.dns.dnsinboundmessage import DnsInboundMessage
-    from mojo.protocols.dns.dnsoutboundmessage import DnsOutboundMessage
+    from mojo.interop.protocols.dns.dnsinboundmessage import DnsInboundMessage
+    from mojo.interop.protocols.dns.dnsoutboundmessage import DnsOutboundMessage
 
 class DnsRecord:
     """

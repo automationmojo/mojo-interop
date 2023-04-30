@@ -31,7 +31,7 @@ from xml.etree.ElementTree import fromstring as xml_fromstring
 
 from mojo.xmods.fspath import ensure_directory_is_package
 
-from mojo.protocols.upnp.coordinators.upnpcoordinator import UpnpCoordinator
+from mojo.interop.protocols.upnp.coordinators.upnpcoordinator import UpnpCoordinator
 
 # pylint: disable=unused-import
 
@@ -45,7 +45,7 @@ CONTENT_PROXY_FILE_HEADER = """
     NOTE: This is a code generated file.  This file should not be edited directly.
 """
 
-PROXY_BASE_CLASS_IMPORT = "from mojo.protocols.upnp.services.upnpserviceproxy import UpnpServiceProxy"
+PROXY_BASE_CLASS_IMPORT = "from mojo.interop.protocols.upnp.services.upnpserviceproxy import UpnpServiceProxy"
 PROXY_BASE_CLASS_NAME = "UpnpServiceProxy"
 
 TEMPLATE_CLASS_PREFIX = """

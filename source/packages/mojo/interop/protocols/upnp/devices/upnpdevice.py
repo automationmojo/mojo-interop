@@ -26,18 +26,18 @@ from xml.etree.ElementTree import Element
 
 import requests
 
-from mojo.protocols.upnp.upnperrors import UpnpServiceNotAvailableError
+from mojo.interop.protocols.upnp.upnperrors import UpnpServiceNotAvailableError
 
 from mojo.xmods.extension.dynamic import generate_extension_key
 
 from mojo.xmods.fspath import normalize_name_for_path
 
-from mojo.protocols.upnp.services.upnpserviceproxy import UpnpServiceProxy
-from mojo.protocols.upnp.xml.upnpdevice1 import UpnpDevice1Device
+from mojo.interop.protocols.upnp.services.upnpserviceproxy import UpnpServiceProxy
+from mojo.interop.protocols.upnp.xml.upnpdevice1 import UpnpDevice1Device
 
 # Types imported only for type checking purposes
 if TYPE_CHECKING:
-    from mojo.protocols.upnp.upnpfactory import UpnpFactory
+    from mojo.interop.protocols.upnp.upnpfactory import UpnpFactory
 
 UPNP_SERVICE1_NAMESPACE = "urn:schemas-upnp-org:service-1-0"
 

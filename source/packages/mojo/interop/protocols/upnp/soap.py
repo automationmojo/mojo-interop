@@ -28,7 +28,7 @@ from mojo.xmods.xconvert import safe_as_str
 
 from mojo.networking.exceptions import ProtocolError
 
-from mojo.protocols.upnp.upnperrors import UPNP_ERROR_TEST_LOOKUP
+from mojo.interop.protocols.upnp.upnperrors import UPNP_ERROR_TEST_LOOKUP
 
 NS_SOAP_ENV = "http://schemas.xmlsoap.org/soap/envelope/"
 NS_SOAP_ENC = "http://schemas.xmlsoap.org/soap/encoding/"
