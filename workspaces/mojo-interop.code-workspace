@@ -19,6 +19,7 @@
             "/home/myron/repos/mojo-interop/.venv/lib/python3.10/site-packages",
             "/home/myron/repos/mojo-interop/source/packages"
         ],
-        "python.terminal.activateEnvInCurrentTerminal": true
+        "python.terminal.activateEnvInCurrentTerminal": true,
+        "esbonio.sphinx.confDir": ""
     }
 }
