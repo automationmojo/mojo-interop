@@ -3,7 +3,7 @@ name = "mojo-interop"
 description = "Automation Mojo Interop Extension"
 version = "0.0.1"
 authors = []
-readme = "README.md"
+readme = "README.rst"
 license = "LICENSE.txt"
 classifiers = [
     "Programming Language :: Python :: 3",
