@@ -1,0 +1,33 @@
+<device>
+   <serviceList>
+      <service>
+         <serviceType>urn:schemas-upnp-org:service:HVAC_UserOperatingMode:1</serviceType>
+         <serviceID>SystemUserMode</serviceID>
+      </service>
+      <service>
+         <Optional/>
+         <serviceType>urn:schemas-upnp-org:service:HVAC_FanOperatingMode:1</serviceType>
+         <serviceID>SystemFanMode</serviceID>
+      </service>
+      <service>
+         <Optional/>
+         <serviceType>urn:schemas-upnp-org:service:FanSpeed:1</serviceType>
+         <serviceID>SystemFanSpeed</serviceID>
+      </service>
+      <service>
+         <Optional/>
+         <serviceType>urn:schemas-upnp-org:service:TemperatureSensor:1</serviceType>
+         <serviceID>OutsideTemperature</serviceID>
+      </service>
+      <service>
+         <Optional/>
+         <serviceType>urn:schemas-upnp-org:service:HVAC_SetpointSchedule:1</serviceType>
+         <serviceID>SystemSetpointSchedule</serviceID>
+      </service>
+   </serviceList>
+   <deviceList>
+      <device>
+         <deviceType>urn:schemas-upnp-org:device:HVAC_ZoneThermostat:1</deviceType>
+      </device>
+   </deviceList>
+</device>

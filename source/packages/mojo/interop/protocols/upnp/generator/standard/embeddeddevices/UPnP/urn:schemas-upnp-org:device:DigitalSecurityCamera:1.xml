@@ -1,0 +1,9 @@
+<device>
+    <serviceList>
+        <service>
+		<Optional/>
+            <serviceType>urn:schemas-upnp-org:service:DigitalSecurityCameraSettings:1</serviceType>
+            <serviceId>urn:upnp-org:serviceId:cam_set</serviceId>
+        </service>
+    </serviceList>
+</device>

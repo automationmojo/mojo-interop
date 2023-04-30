@@ -6,9 +6,9 @@ from mojo.xmods.extension.configured import ExtensionPointsFactory
 from mojo.xmods.landscaping.coupling.integrationcoupling import IntegrationCoupling
 from mojo.xmods.landscaping.extensionpoints import LandscapingExtentionPoints
 
-from mojo.clients.linux.linuxclientcoordinatorcoupling import LinuxClientCoordinatorCoupling
-from mojo.clients.osx.osxclientcoordinatorcoupling import OsxClientCoordinatorCoupling
-from mojo.clients.windows.windowsclientcoordinatorcoupling import WindowsClientCoordinatorCoupling
+from mojo.interop.clients.linux.linuxclientcoordinatorcoupling import LinuxClientCoordinatorCoupling
+from mojo.interop.clients.osx.osxclientcoordinatorcoupling import OsxClientCoordinatorCoupling
+from mojo.interop.clients.windows.windowsclientcoordinatorcoupling import WindowsClientCoordinatorCoupling
 
 from mojo.interop.protocols.serial.tcpserialcoordinatorcoupling import TcpSerialCoordinatorCoupling
 from mojo.interop.protocols.ssh.sshcoordinatorcoupling import SshCoordinatorCoupling

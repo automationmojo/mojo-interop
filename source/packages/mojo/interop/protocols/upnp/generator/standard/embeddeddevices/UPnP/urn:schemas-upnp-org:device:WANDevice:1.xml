@@ -1,0 +1,14 @@
+<device>
+    <serviceList>
+        <service>
+            <serviceType>urn:schemas-upnp-org:service:WANCommonInterfaceConfig:1</serviceType>
+        </service>
+    </serviceList>
+
+    <deviceList>
+		<device>
+			<deviceType>urn:schemas-upnp-org:device:WANConnectionDevice:1</deviceType>
+		</device>
+    </deviceList>
+
+</device>

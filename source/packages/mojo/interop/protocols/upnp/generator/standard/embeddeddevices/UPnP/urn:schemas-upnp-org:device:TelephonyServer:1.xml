@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<device>
+  <serviceList>
+    <service>
+      <serviceType>urn:schemas-upnp-org:service:CallManagement:1</serviceType>
+    </service>
+    <service>
+      <serviceType>urn:schemas-upnp-org:service:Messaging:1</serviceType>
+    </service>
+	<service>
+      <serviceType>urn:schemas-upnp-org:service:InputConfig:1</serviceType>
+    </service>
+  </serviceList>
+</device>

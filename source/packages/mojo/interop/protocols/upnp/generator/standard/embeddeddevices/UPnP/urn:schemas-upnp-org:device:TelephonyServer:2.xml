@@ -1,0 +1,24 @@
+<device xmlns="urn:schemas-upnp-org:device-1-0">
+		<serviceList>					
+			<service>
+				<serviceType>urn:schemas-upnp-org:service:Calendar:1</serviceType>
+				<serviceId>urn:upnp-org:serviceId:Calendar</serviceId>
+			</service>			
+			<service>
+				<serviceType>urn:schemas-upnp-org:service:AddressBook:1</serviceType>
+				<serviceId>urn:upnp-org:serviceId:AddressBook</serviceId>
+			</service>		
+			<service>
+				<serviceType>urn:schemas-upnp-org:service:Presence:1</serviceType>
+				<serviceId>urn:upnp-org:serviceId:Presence</serviceId>
+			</service>
+			<service>
+				<serviceType>urn:schemas-upnp-org:service:CallManagement:2</serviceType>
+				<serviceId>urn:upnp-org:serviceId:CallManagement</serviceId>
+			</service>			
+			<service>
+				<serviceType>urn:schemas-upnp-org:service:Messaging:2</serviceType>
+				<serviceId>urn:upnp-org:serviceId:Messaging</serviceId>
+			</service>		
+		</serviceList>
+</device>

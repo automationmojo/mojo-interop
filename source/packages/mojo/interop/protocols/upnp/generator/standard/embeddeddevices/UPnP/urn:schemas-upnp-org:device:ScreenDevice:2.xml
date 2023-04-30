@@ -1,0 +1,13 @@
+﻿<device>
+	<serviceList>
+		<service>
+		<serviceType>urn:schemas-upnp-org:service:ApplicationManagement:2</serviceType>
+			<serviceId>ApplicationManagement</serviceId>
+		</service>
+		<service>
+			<Optional/>
+			<serviceType>urn:schemas-upnp-org:service:DeviceProtection:1</serviceType>
+			<serviceId>DeviceProtection</serviceId>
+		</service>
+	</serviceList>
+</device>

@@ -1,0 +1,14 @@
+<device>
+  <serviceList>
+    <service>
+      <serviceType>urn:schemas-upnp-org:service:BasicManagement:2</serviceType>
+    </service>
+    <service>
+      <serviceType>urn:schemas-upnp-org:service:ConfigurationManagement:2</serviceType>
+    </service>
+    <service>
+      <Optional/>
+      <serviceType>urn:schemas-upnp-org:service:SoftwareManagement:2</serviceType>
+    </service>
+  </serviceList>
+</device>

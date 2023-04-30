@@ -1,0 +1,18 @@
+<device>
+    <serviceList>
+        <service>
+			<Required/>
+            <serviceType>urn:schemas-upnp-org:service:WLANConfiguration:1</serviceType>
+        </service>
+        <service>
+			<Optional/>
+            <serviceType>urn:schemas-upnp-org:service:RadiusClient:1</serviceType>
+        </service>
+        <service>
+			<Optional/>
+            <serviceType>urn:schemas-upnp-org:service:LinkAuthentication:1</serviceType>
+        </service>
+
+    </serviceList>
+
+</device>
