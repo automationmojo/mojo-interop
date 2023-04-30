@@ -1,8 +1,9 @@
-=======================
-python-package-template
-=======================
+===============================
+Automation Mojo Interop Package
+===============================
 
-This is a template repository that can be used to quickly create a python package project.
+This *Automation Mojo Interop Package* contains interop extensions that add interop functionality to
+the test environment *Landscape* object for a variety of platform clients, clusters, and protocols.
 
 ==========
 References
