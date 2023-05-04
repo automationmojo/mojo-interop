@@ -17,12 +17,10 @@ __license__ = "MIT"
 
 from typing import TYPE_CHECKING
 
-from mojo.xmods.landscaping.coupling.coordinatorcoupling import CoordinatorCoupling
-
 from mojo.interop.clients.constants import INTEGRATION_CLASS_FOR_OSX_CLIENT
+from mojo.interop.clients.base.baseclientcoordinatorcoupling import BaseClientCoordinatorCoupling
 
-
-class OsxClientCoordinatorCoupling(CoordinatorCoupling):
+class OsxClientCoordinatorCoupling(BaseClientCoordinatorCoupling):
     """
         The OsxClientCoordinatorCoupling handle the requirement registration for the OSX coordinator.
     """

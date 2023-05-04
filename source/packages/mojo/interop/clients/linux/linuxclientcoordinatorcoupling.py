@@ -17,12 +17,10 @@ __license__ = "MIT"
 
 from typing import TYPE_CHECKING
 
-from mojo.xmods.landscaping.coupling.coordinatorcoupling import CoordinatorCoupling
-
 from mojo.interop.clients.constants import INTEGRATION_CLASS_FOR_LINUX_CLIENT
+from mojo.interop.clients.base.baseclientcoordinatorcoupling import BaseClientCoordinatorCoupling
 
-
-class LinuxClientCoordinatorCoupling(CoordinatorCoupling):
+class LinuxClientCoordinatorCoupling(BaseClientCoordinatorCoupling):
     """
         The LinuxClientCoordinatorCoupling handle the requirement registration for the Linux coordinator.
     """

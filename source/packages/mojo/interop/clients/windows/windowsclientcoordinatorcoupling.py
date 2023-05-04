@@ -17,12 +17,10 @@ __license__ = "MIT"
 
 from typing import TYPE_CHECKING
 
-from mojo.xmods.landscaping.coupling.coordinatorcoupling import CoordinatorCoupling
-
 from mojo.interop.clients.constants import INTEGRATION_CLASS_FOR_WINDOWS_CLIENT
+from mojo.interop.clients.base.baseclientcoordinatorcoupling import BaseClientCoordinatorCoupling
 
-
-class WindowsClientCoordinatorCoupling(CoordinatorCoupling):
+class WindowsClientCoordinatorCoupling(BaseClientCoordinatorCoupling):
     """
         The WindowsClientCoordinatorCoupling handle the requirement registration for the Windows coordinator.
     """

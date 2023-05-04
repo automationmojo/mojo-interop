@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 
 SUPPORTED_INTEGRATION_CLASS = "network/client-osx"
 
-def is_matching_client_config(device_info, integ_class):
+def is_matching_client_config(integ_class, device_info):
     is_matching_client = False
 
     dev_type = device_info["deviceType"]
