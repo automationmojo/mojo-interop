@@ -1,7 +1,8 @@
 """
-.. module:: linuxclientcoordinatorcoupling
+.. module:: pinodecoordinatorcoupling
     :platform: Darwin, Linux, Unix, Windows
-    :synopsis: Contains a LinuxClientCoordinatorCoupling object to use for working with the LINUX clients.
+    :synopsis: Contains a PiNodeCoordinatorCoupling object to use for working with the raspberry
+               pi 'PiNode' cluster nodes.
 
 .. moduleauthor:: Myron Walker <myron.walker@gmail.com>
 """
@@ -17,7 +18,7 @@ __license__ = "MIT"
 
 from typing import TYPE_CHECKING
 
-from mojo.interop.clients.constants import INTEGRATION_CLASS_FOR_LINUX_CLIENT
+from mojo.interop.clusters.constants import INTEGRATION_CLASS_FOR_RASPBERRYPI_NODE
 from mojo.xmods.landscaping.client.clientcoordinatorcouplingbase import ClientCoordinatorCouplingBase
 
 
@@ -28,7 +29,7 @@ class LinuxClientCoordinatorCoupling(ClientCoordinatorCouplingBase):
 
     integration_section: str = "devices"
     integration_leaf: str = "deviceType"
-    integration_class: str = INTEGRATION_CLASS_FOR_LINUX_CLIENT
+    integration_class: str = INTEGRATION_CLASS_FOR_RASPBERRYPI_NODE
 
     def __init__(self, *args, **kwargs):
         """

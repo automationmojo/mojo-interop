@@ -17,16 +17,15 @@ __license__ = "MIT"
 
 from typing import TYPE_CHECKING
 
+from mojo.xmods.landscaping.client.clientcoordinatorbase import ClientCoordinatorBase
+
 from mojo.interop.clients.constants import INTEGRATION_CLASS_FOR_WINDOWS_CLIENT
-
-from mojo.interop.clients.base.baseclientcoordinator import BaseClientCoordinator
-
 from mojo.interop.clients.windows.windowsclient import WindowsClient
 
 if TYPE_CHECKING:
     from mojo.xmods.landscaping.landscape import Landscape
 
-class WindowsClientCoordinator(BaseClientCoordinator):
+class WindowsClientCoordinator(ClientCoordinatorBase):
     """
         The :class:`WindowsPoolCoordinator` creates a pool of agents that can be used to
         coordinate the interop activities of the automation process and remote Windows

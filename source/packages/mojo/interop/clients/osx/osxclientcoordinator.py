@@ -17,16 +17,15 @@ __license__ = "MIT"
 
 from typing import TYPE_CHECKING
 
+from mojo.xmods.landscaping.client.clientcoordinatorbase import ClientCoordinatorBase
+
 from mojo.interop.clients.constants import INTEGRATION_CLASS_FOR_OSX_CLIENT
-
-from mojo.interop.clients.base.baseclientcoordinator import BaseClientCoordinator
-
 from mojo.interop.clients.osx.osxclient import OsxClient
 
 if TYPE_CHECKING:
     from mojo.xmods.landscaping.landscape import Landscape
 
-class OsxClientCoordinator(BaseClientCoordinator):
+class OsxClientCoordinator(ClientCoordinatorBase):
     """
         The :class:`OsxPoolCoordinator` creates a pool of agents that can be used to
         coordinate the interop activities of the automation process and remote OSX

@@ -1,7 +1,8 @@
 """
-.. module:: linuxclientcoordinator
+.. module:: pinodecoordinator
     :platform: Darwin, Linux, Unix, Windows
-    :synopsis: Contains the LinuxPoolCoordinator which is used for managing connectivity with pools of LINUX capable devices
+    :synopsis: Contains the PiNodeCoordinator which is used for managing connectivity with raspberry
+               pi computer nodes in a raspberry pi cluster.
 
 .. moduleauthor:: Myron Walker <myron.walker@gmail.com>
 """
@@ -17,23 +18,25 @@ __license__ = "MIT"
 
 from typing import TYPE_CHECKING
 
-from mojo.xmods.landscaping.client.clientcoordinatorbase import ClientCoordinatorBase
+from mojo.xmods.landscaping.cluster.nodecoordinatorbase import NodeCoordinatorBase
 
-from mojo.interop.clients.constants import INTEGRATION_CLASS_FOR_LINUX_CLIENT
-from mojo.interop.clients.linux.linuxclient import LinuxClient
+from mojo.interop.clusters.constants import INTEGRATION_CLASS_FOR_RASPBERRYPI_NODE
+from mojo.interop.clusters.raspberrypi.pinode import PiNode
+from mojo.interop.clusters.raspberrypi.picluster import PiCluster
 
 if TYPE_CHECKING:
     from mojo.xmods.landscaping.landscape import Landscape
 
-class LinuxClientCoordinator(ClientCoordinatorBase):
+class PiNodeCoordinator(NodeCoordinatorBase):
     """
         The :class:`LinuxPoolCoordinator` creates a pool of agents that can be used to
         coordinate the interop activities of the automation process and remote Linux
         client.
     """
 
-    INTEGRATION_CLASS = INTEGRATION_CLASS_FOR_LINUX_CLIENT
-    CLIENT_TYPE = LinuxClient
+    INTEGRATION_CLASS = INTEGRATION_CLASS_FOR_RASPBERRYPI_NODE
+    CLIENT_TYPE = PiNode
+    CLUSTER_TYPE = PiCluster
 
     # pylint: disable=attribute-defined-outside-init
 
