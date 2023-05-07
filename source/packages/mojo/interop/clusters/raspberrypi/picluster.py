@@ -1,5 +1,6 @@
 
 from typing import Dict
+
 from mojo.xmods.landscaping.cluster.nodebase import NodeBase
 from mojo.xmods.landscaping.landscapedevicecluster import LandscapeDeviceCluster
 from mojo.xmods.landscaping.landscapedevicegroup import LandscapeDeviceGroup

@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "mojo-interop"
 description = "Automation Mojo Interop Extensions"
-version = "0.0.4"
+version = "0.0.5"
 authors = []
 readme = "README.rst"
 license = "LICENSE.txt"

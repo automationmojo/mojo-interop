@@ -19,10 +19,10 @@ __license__ = "MIT"
 from typing import TYPE_CHECKING
 
 from mojo.interop.clusters.constants import INTEGRATION_CLASS_FOR_RASPBERRYPI_NODE
-from mojo.xmods.landscaping.client.clientcoordinatorcouplingbase import ClientCoordinatorCouplingBase
+from mojo.xmods.landscaping.cluster.nodecoordinatorcouplingbase import NodeCoordinatorCouplingBase
 
 
-class LinuxClientCoordinatorCoupling(ClientCoordinatorCouplingBase):
+class PiNodeCoordinatorCoupling(NodeCoordinatorCouplingBase):
     """
         The LinuxClientCoordinatorCoupling handle the requirement registration for the Linux coordinator.
     """
