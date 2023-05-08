@@ -24,7 +24,7 @@ from mojo.xmods.landscaping.friendlyidentifier import FriendlyIdentifier
 from mojo.xmods.landscaping.landscape import LandscapeDevice
 from mojo.interop.protocols.ssh.sshcoordinator import SshCoordinator
 
-from mojo.xmods.landscaping.precedence import StartupLevel
+from mojo.xmods.landscaping.constants import StartupLevel
 
 # Types imported only for type checking purposes
 if TYPE_CHECKING:

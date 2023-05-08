@@ -21,7 +21,7 @@ from typing import Any, Dict, List, Tuple, TYPE_CHECKING
 from mojo.xmods.landscaping.coupling.coordinatorcoupling import CoordinatorCoupling
 from mojo.interop.protocols.ssh.sshcoordinator import SshCoordinator
 
-from mojo.xmods.landscaping.precedence import StartupLevel
+from mojo.xmods.landscaping.constants import StartupLevel
 
 # Types imported only for type checking purposes
 if TYPE_CHECKING:
