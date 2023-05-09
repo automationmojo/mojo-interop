@@ -17,7 +17,7 @@ packages = [{include="mojo", from="source/packages"}]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<4.0"
-mojo-xmodules = ">=0.0.25 <0.1.0"
+mojo-xmodules = ">=0.0.34 <0.1.0"
 mojo-networking = ">=0.0.4 <0.1.0"
 
 [tool.poetry.group.dev.dependencies]
