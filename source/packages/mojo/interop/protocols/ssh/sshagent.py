@@ -622,10 +622,18 @@ class SshBase(ICommandContext):
         self._primary_credential = primary_credential
         self._username = primary_credential.username
         self._password = primary_credential.password
-        self._keyfile = primary_credential.keyfile
-        self._keypasswd = primary_credential.keypasswd
-        self._allow_agent = primary_credential.allow_agent
-        self._primitive = primary_credential.primitive
+        self._keyfile = None
+        if hasattr(primary_credential, "keyfile"):
+            self._keyfile = primary_credential.keyfile
+        self._keypasswd = None
+        if hasattr(primary_credential, "keypasswd"):
+            self._keypasswd = primary_credential.keypasswd
+        self._allow_agent = None
+        if hasattr(primary_credential, "allow_agent"):
+            self._allow_agent = primary_credential.allow_agent
+        self._primitive = None
+        if hasattr(primary_credential, "primitive"):
+            self._primitive = primary_credential.primitive
 
         self._users = users
         self._port = port
