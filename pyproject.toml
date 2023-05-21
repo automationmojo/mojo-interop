@@ -1,8 +1,10 @@
 [tool.poetry]
 name = "mojo-interop"
 description = "Automation Mojo Interop Extensions"
-version = "0.0.10"
-authors = []
+version = "0.0.11"
+authors = [
+    "Myron Walker <myron.walker@gmail.com>"
+]
 readme = "README.rst"
 license = "LICENSE.txt"
 classifiers = [
