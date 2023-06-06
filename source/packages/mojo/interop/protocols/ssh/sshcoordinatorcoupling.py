@@ -19,8 +19,6 @@ from typing import Any, Dict, List, Tuple, TYPE_CHECKING
 
 from mojo.xmods.exceptions import SemanticError
 from mojo.xmods.landscaping.coupling.coordinatorcoupling import CoordinatorCoupling
-from mojo.xmods.landscaping.friendlyidentifier import FriendlyIdentifier
-from mojo.xmods.landscaping.landscape import LandscapeDevice
 from mojo.interop.protocols.ssh.sshcoordinator import SshCoordinator
 
 from mojo.xmods.landscaping.constants import StartupLevel
@@ -47,6 +45,7 @@ class SshCoordinatorCoupling(CoordinatorCoupling):
 
     pathbase = "/ssh"
 
+    integration_root: str = "apod"
     integration_section: str = "devices"
     integration_leaf: str = "deviceType"
     integration_class: str = SUPPORTED_INTEGRATION_CLASS

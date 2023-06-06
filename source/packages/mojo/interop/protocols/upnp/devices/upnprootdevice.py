@@ -43,7 +43,7 @@ from mojo.networking.exceptions import ProtocolError, HttpRequestError, NotOverl
 from mojo.xmods.exceptions import  HttpRequestError, NotOverloadedError
 from mojo.xmods.extension.dynamic import generate_extension_key
 from mojo.xmods.fspath import normalize_name_for_path
-from mojo.xmods.landscaping.landscapedeviceextension import LandscapeDeviceExtension
+from mojo.xmods.landscaping.protocolextension import ProtocolExtension
 
 from mojo.interop.protocols.upnp.upnperrors import UpnpError
 from mojo.interop.protocols.upnp.aliases import StrSvcId, StrSvcType, StrSubId
@@ -144,7 +144,7 @@ def device_description_find_components(location: str, docTree: ElementTree, name
 
     return devNode, urlBase, manufacturer, modelName, modelNumber, modelDescription
 
-class UpnpRootDevice(UpnpDevice, LandscapeDeviceExtension):
+class UpnpRootDevice(UpnpDevice, ProtocolExtension):
     """
         The UPNP Root device is the base device for the hierarchy that is
         associated with a unique network devices location.  The :class:`UpnpRootDevice`
@@ -416,7 +416,7 @@ class UpnpRootDevice(UpnpDevice, LandscapeDeviceExtension):
         """
         # pylint: disable=arguments-differ
 
-        LandscapeDeviceExtension.initialize(self, coord_ref, basedevice_ref, extid, location, configinfo)
+        ProtocolExtension.initialize(self, coord_ref, basedevice_ref, extid, location, configinfo)
 
         # We have to make a copy of the dictionary because we use
         # pop semantics to remove the items so we can pass on remaining

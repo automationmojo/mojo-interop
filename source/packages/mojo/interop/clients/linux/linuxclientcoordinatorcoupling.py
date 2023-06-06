@@ -17,15 +17,19 @@ __license__ = "MIT"
 
 from typing import TYPE_CHECKING
 
-from mojo.interop.clients.constants import INTEGRATION_CLASS_FOR_LINUX_CLIENT
 from mojo.xmods.landscaping.client.clientcoordinatorcouplingbase import ClientCoordinatorCouplingBase
 
+from mojo.interop.clients.constants import INTEGRATION_CLASS_FOR_LINUX_CLIENT
+from mojo.interop.clients.linux.linuxclientcoordinator import LinuxClientCoordinator
 
 class LinuxClientCoordinatorCoupling(ClientCoordinatorCouplingBase):
     """
         The LinuxClientCoordinatorCoupling handle the requirement registration for the Linux coordinator.
     """
 
+    COORDINATOR_TYPE = LinuxClientCoordinator
+
+    integration_root: str = "apod"
     integration_section: str = "devices"
     integration_leaf: str = "deviceType"
     integration_class: str = INTEGRATION_CLASS_FOR_LINUX_CLIENT

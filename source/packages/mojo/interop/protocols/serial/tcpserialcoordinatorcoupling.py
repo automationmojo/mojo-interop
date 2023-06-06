@@ -44,6 +44,7 @@ class TcpSerialCoordinatorCoupling(CoordinatorCoupling):
         The TcpSerialCoordinatorCoupling handle the requirement registration for the SSH coordinator.
     """
 
+    integration_root: str = "apod"
     integration_section: str = "serial"
     integration_leaf: str = "serialType"
     integration_class: str = SUPPORTED_INTEGRATION_CLASS

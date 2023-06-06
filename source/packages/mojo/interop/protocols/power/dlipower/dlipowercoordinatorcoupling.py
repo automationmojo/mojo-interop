@@ -47,6 +47,7 @@ class PowerCoordinatorCoupling(CoordinatorCoupling):
         The PowerCoordinatorCoupling handle the requirement registration for the SSH coordinator.
     """
 
+    integration_root: str = "apod"
     integration_section: str = "power"
     integration_leaf: str = "powerType"
     integration_class: str = SUPPORTED_INTEGRATION_CLASS

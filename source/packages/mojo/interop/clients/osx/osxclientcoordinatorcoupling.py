@@ -17,8 +17,10 @@ __license__ = "MIT"
 
 from typing import TYPE_CHECKING
 
-from mojo.interop.clients.constants import INTEGRATION_CLASS_FOR_OSX_CLIENT
 from mojo.xmods.landscaping.client.clientcoordinatorcouplingbase import ClientCoordinatorCouplingBase
+
+from mojo.interop.clients.constants import INTEGRATION_CLASS_FOR_OSX_CLIENT
+from mojo.interop.clients.osx.osxclientcoordinator import OsxClientCoordinator
 
 
 class OsxClientCoordinatorCoupling(ClientCoordinatorCouplingBase):
@@ -26,6 +28,9 @@ class OsxClientCoordinatorCoupling(ClientCoordinatorCouplingBase):
         The OsxClientCoordinatorCoupling handle the requirement registration for the OSX coordinator.
     """
 
+    COORDINATOR_TYPE = OsxClientCoordinator
+
+    integration_root: str = "apod"
     integration_section: str = "devices"
     integration_leaf: str = "deviceType"
     integration_class: str = INTEGRATION_CLASS_FOR_OSX_CLIENT

@@ -40,7 +40,7 @@ from mojo.xmods.xformatting import indent_lines, format_command_result
 from mojo.xmods.xlogging.scopemonitoring import MonitoredScope
 
 from mojo.xmods.credentials.sshcredential import SshCredential
-from mojo.xmods.landscaping.landscapedeviceextension import LandscapeDeviceExtension
+from mojo.xmods.landscaping.protocolextension import ProtocolExtension
 
 import paramiko
 
@@ -1335,8 +1335,8 @@ class SshSession(SshBase):
 
         return
 
-    def open_session(self, primitive: bool = False, pty_params: Optional[dict] = None, interactive=False, basis_session: Optional["SshSession"] = None,
-                     aspects: Optional[AspectsCmd] = None) -> "SshSession":
+    def open_session(self, primitive: bool = False, pty_params: Optional[dict] = None, interactive=False, cmd_context: Optional[ICommandContext] = None,
+                     aspects: Optional[AspectsCmd] = None) -> ICommandContext:
         """
             Provies a mechanism to create a :class:`SshSession` object with derived settings.  This method allows various parameters for the session
             to be overridden.  This allows for the performing of a series of SSH operations under a particular set of shared settings and or credentials.
@@ -1352,13 +1352,13 @@ class SshSession(SshBase):
             aspects = self._aspects
 
         session = None
-        if basis_session is not None:
-            bs = basis_session
+        if cmd_context is not None:
+            bs: SshBase = cmd_context
             session = SshSession(bs._host, bs._primary_credential, users=bs._users, port=bs._port, pty_params=pty_params,
-                             interactive=interactive, basis_session=basis_session, aspects=aspects)
+                             interactive=interactive, cmd_context=cmd_context, aspects=aspects)
         else:
             session = SshSession(self._host, self._primary_credential, users=self._users, port=self._port, pty_params=pty_params,
-                             interactive=interactive, basis_session=basis_session, aspects=aspects)
+                             interactive=interactive, cmd_context=cmd_context, aspects=aspects)
         return session
 
     def _create_client(self, session_user: Optional[str] = None) -> paramiko.SSHClient:
@@ -1394,7 +1394,7 @@ class SshSession(SshBase):
             status, stdout, stderr = ssh_execute_command(ssh_runner, command, pty_params=pty_params, inactivity_timeout=inactivity_timeout, inactivity_interval=inactivity_interval)
         return status, stdout, stderr
 
-class SshAgent(SshBase, LandscapeDeviceExtension):
+class SshAgent(SshBase, ProtocolExtension):
     """
         The :class:`SshAgent` provides an extension of the :class:`SshBase` class interface and api(s).  The :class:`SshAgent` manages connection
         and interop settings that are used to perform operations and interact with a remote SSH service.  The :class:`SshAgent` provides standard
@@ -1404,7 +1404,7 @@ class SshAgent(SshBase, LandscapeDeviceExtension):
     def __init__(self, host: str, primary_credential: SshCredential, users: Optional[dict] = None, port: int = 22,
                  pty_params: Optional[dict] = None, called_id: Optional[str]=None, aspects: AspectsCmd = DEFAULT_CMD_ASPECTS):
         SshBase.__init__(self, host, primary_credential, users=users, port=port, pty_params=pty_params, called_id=called_id, aspects=aspects)
-        LandscapeDeviceExtension.__init__(self)
+        ProtocolExtension.__init__(self)
         return
 
     def initialize(self, coord_ref: weakref.ReferenceType, basedevice_ref: weakref.ReferenceType, extid: str, location: str, configinfo: dict):
@@ -1418,11 +1418,11 @@ class SshAgent(SshBase, LandscapeDeviceExtension):
             :param location: The location reference where this device can be found via the coordinator.
             :param configinfo: The configuration information dictionary from the landscape file for the specified host.
         """
-        LandscapeDeviceExtension.initialize(self, coord_ref, basedevice_ref, extid, location, configinfo)
+        ProtocolExtension.initialize(self, coord_ref, basedevice_ref, extid, location, configinfo)
         return
 
-    def open_session(self, primitive: bool = False, pty_params: Optional[dict] = None, interactive=False, basis_session: Optional[SshSession] = None,
-                     aspects: Optional[AspectsCmd] = None) -> SshSession:
+    def open_session(self, primitive: bool = False, pty_params: Optional[dict] = None, interactive=False, cmd_context: Optional[ICommandContext] = None,
+                     aspects: Optional[AspectsCmd] = None) -> ICommandContext:
         """
             Provies a mechanism to create a :class:`SshSession` object with derived settings.  This method allows various parameters for the session
             to be overridden.  This allows for the performing of a series of SSH operations under a particular set of shared settings and or credentials.
@@ -1430,7 +1430,7 @@ class SshAgent(SshBase, LandscapeDeviceExtension):
             :param primitive: Use primitive mode for FTP operations for the session.
             :param pty_params: The default pty parameters to use to request a PTY when running commands through the session.
             :param interactive: Creates an interactive session which holds open an interactive shell so commands can interact in the shell.
-            :param basis_session: An optional SshSession instance to use as a session basis.  This allows re-use of sessions.
+            :param cmd_context: An optional ICommandContext instance to use as a session basis.  This allows re-use of sessions.
             :param aspects: The default run aspects to use for the operations performed by the session.
         """
 
@@ -1438,13 +1438,13 @@ class SshAgent(SshBase, LandscapeDeviceExtension):
             aspects = self._aspects
 
         session = None
-        if basis_session is not None:
-            bs = basis_session
+        if cmd_context is not None:
+            bs: SshBase = cmd_context
             session = SshSession(bs._host, bs._primary_credential, users=bs._users, port=bs._port, pty_params=pty_params,
-                             interactive=interactive, basis_session=basis_session, aspects=aspects)
+                             interactive=interactive, basis_session=cmd_context, aspects=aspects)
         else:
             session = SshSession(self._host, self._primary_credential, users=self._users, port=self._port, pty_params=pty_params,
-                             interactive=interactive, basis_session=basis_session, aspects=aspects)
+                             interactive=interactive, basis_session=cmd_context, aspects=aspects)
         return session
 
     def reboot(self, aspects: Optional[AspectsCmd] = None):
