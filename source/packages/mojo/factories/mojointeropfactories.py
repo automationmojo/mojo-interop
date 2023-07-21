@@ -14,6 +14,8 @@ from mojo.interop.protocols.serial.tcpserialcoordinatorcoupling import TcpSerial
 from mojo.interop.protocols.ssh.sshcoordinatorcoupling import SshCoordinatorCoupling
 from mojo.interop.protocols.power.dlipower.dlipowercoordinatorcoupling import PowerCoordinatorCoupling
 
+from mojo.interop.services.vmware.vsphere.vspherecoordinatorcoupling import VSphereCoordinatorCoupling
+
 class LandscapingExtentionPointsFactory(ExtensionPointsFactory, LandscapingExtentionPoints):
 
     @classmethod
@@ -32,6 +34,7 @@ class LandscapingExtentionPointsFactory(ExtensionPointsFactory, LandscapingExten
             PowerCoordinatorCoupling,
             SshCoordinatorCoupling,
             TcpSerialCoordinatorCoupling,
+            VSphereCoordinatorCoupling,
             WindowsClientCoordinatorCoupling
         ]
         return coupling_types
