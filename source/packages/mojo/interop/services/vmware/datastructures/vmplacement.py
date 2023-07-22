@@ -8,9 +8,12 @@
 
 from typing import Optional
 
-class VmPlacementSpec(dataclass):
+from dataclasses import dataclass
+
+@dataclass
+class VmPlacementSpec:
     datastore: str
     folder: str
-    cluster: Optional[str] = None
-    host: Optional[str] = None
-    resource_pool: Optional[str] = None
+    cluster: Optional[str]
+    host: Optional[str]
+    resource_pool: Optional[str]

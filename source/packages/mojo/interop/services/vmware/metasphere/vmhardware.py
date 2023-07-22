@@ -32,3 +32,83 @@ class VmHardwareBootNetworkProtocol:
 class VmHardwareBootType:
     BIOS = "BIOS"
     EFI = "EFI"
+
+class VmHardwareDiskBackingType:
+    VMDK_FILE = "VMDK_FILE"
+
+class VmHardwareDiskHostBusAdapterType:
+    IDE = "IDE"
+    SCSI = "SCSI"
+    SATA = "SATA"
+    NVME = "NVME"
+
+class VmHardwareFloppyBackingType:
+    IMAGE_FILE = "IMAGE_FILE"
+    HOST_DEVICE = "HOST_DEVICE"
+    CLIENT_DEVICE = "CLIENT_DEVICE"
+
+class VmHardwareCdromDeviceAccessType:
+    EMULATION = "EMULATION"
+    PASSTHRU = "PASSTHRU"
+    PASSTHRU_EXCLUSIVE = "PASSTHRU_EXCLUSIVE"
+
+class VmHardwareCdromBackingType:
+    ISO_FILE = "ISO_FILE"
+    HOST_DEVICE = "HOST_DEVICE"
+    CLIENT_DEVICE = "CLIENT_DEVICE"
+
+class VmHardwareCdromHostBusAdapterType:
+    IDE = "IDE"
+    SATA = "SATA"
+
+class VmHardwareEthernetBackingType:
+    STANDARD_PORTGROUP = "STANDARD_PORTGROUP"
+    HOST_DEVICE = "HOST_DEVICE"
+    DISTRIBUTED_PORTGROUP = "DISTRIBUTED_PORTGROUP"
+    OPAQUE_NETWORK = "OPAQUE_NETWORK"
+
+class VmHardwareEthernetMacAddressType:
+    MANUAL = "MANUAL"
+    GENERATED = "GENERATED"
+    ASSIGNED = "ASSINGED"
+
+class VmHardwareEthernetEmulationType:
+    E1000 = "E1000"
+    E1000E = "E1000E"
+    PCNET32 = "PCNET32"
+    VMXNET = "VMXNET"
+    VMXNET2 = "VMXNET2"
+    VMXNET3 = "VMXNET3"
+
+class VmHardwareParallelBackingType:
+    FILE = "FILE"
+    HOST_DEVICE = "HOST_DEVICE"
+
+class VmHardwareBootDeviceType:
+    CDROM = "CDROM"
+    DISK = "DISK"
+    ETHERNET = "ETHERNET"
+    FLOPPY = "FLOPPY"
+
+class VmHardwareAdapterSataType:
+    AHCI = "AHCI"
+
+class VmHardwareAdapterScsiSharing:
+    NONE = "NONE"
+    VIRTUAL = "VIRTUAL"
+    PHYSICAL = "PHYSICAL"
+
+class VmHardwareAdapterScsiType:
+    BUSLOGIC = "BUSLOGIC"
+    LSILOGIC = "LSILOGIC"
+    LSILOGICSAS = "LSILOGICSAS"
+    PVSCSI = "PVSCSI"
+
+class VmHardwareSerialBackingType:
+    FILE = "FILE"
+    HOST_DEVICE = "HOST_DEVICE"
+    PIPE_SERVER = "PIPE_SERVER"
+    PIPE_CLIENT = "PIPE_CLIENT"
+    NETWORK_SERVER = "NETWORK_SERVER"
+    NETWORK_CLIENT = "NETWORK_CLIENT"
+
