@@ -53,8 +53,46 @@ from mojo.interop.services.vmware.vsphere.ext.topologyext import TopologyExt
 from mojo.interop.services.vmware.vsphere.ext.trustedinfrastructureext import TrustedInfrastructureExt
 from mojo.interop.services.vmware.vsphere.ext.vmext import VmExt
 
-#Deployment
-#Storage
+
+class VSphereFilterState:
+
+    def __init__(self) -> None:
+        self._datacenter_record = None
+        self._working_folder_record = None
+        return
+    
+    @property
+    def datacenters(self):
+        rtnval = []
+
+        if self._datacenter_record is not None:
+            rtnval = [self._datacenter_record["datacenter"]]
+        
+        return rtnval
+
+    @property
+    def working_folder(self):
+        return self._working_folder_record
+
+    def has_datacenter_filters(self):
+        rtnval = False
+        if self._datacenter_record is not None:
+            rtnval = True
+        return rtnval
+    
+    def has_working_folder_filters(self):
+        rtnval = False
+        if self._working_folder_record is not None:
+            rtnval = True
+        return rtnval
+
+    def set_datacenter_filter(self, datacenter_record):
+        self._datacenter_record = datacenter_record
+        return
+    
+    def set_working_folder_filter(self, working_folder_record):
+        self._working_folder_record = working_folder_record
+        return
 
 
 class VSphereAgent:
@@ -102,8 +140,14 @@ class VSphereAgent:
         self._ext_trustedinfrastructure = TrustedInfrastructureExt(self)
         self._ext_vm = VmExt(self)
 
+        self._filter_state = VSphereFilterState()
+
         return
     
+    @property
+    def filter_state(self) -> VSphereFilterState:
+        return self._filter_state
+
     @property
     def CertificateManagement(self) -> CertificateManagementExt:
         return self._ext_certificatemanagement
@@ -216,6 +260,24 @@ class VSphereAgent:
     def Vm(self) -> VmExt:
         return self._ext_vm
 
+    def apply_working_folder_filter(self, container_path: str):
+
+        dcrecord = None
+        folderspec = None
+
+        if container_path.find(":") >= 0:
+            datacenter, folderspec = container_path.split(":")
+            dcrecord = self.DataCenter.get(datacenter)
+            self._filter_state.set_datacenter_filter(dcrecord)
+
+        folderspec = folderspec.lstrip("/")
+        folder_leafs = folderspec.split("/")
+
+        cont_folder = self.Folder.find_descendant(folder_leafs)
+        self._filter_state.set_working_folder_filter(cont_folder)
+
+        return
+
     def build_api_url(self, leaf: str) -> str:
 
         url = self._api_root + leaf
@@ -226,7 +288,7 @@ class VSphereAgent:
         
         req_url = f"{self._rest_root}/com/vmware/cis/session"
 
-        resp = self._session.post(req_url, auth=(self._credential.username, self._credential.password))
+        resp = self._session.post(req_url, auth=(self._credential.username, self._credential.password), verify=False)
         if resp.status_code == HTTPStatus.OK:
             rcontent = resp.json()
             self._auth_token = rcontent["value"]
@@ -270,3 +332,4 @@ if __name__ == "__main__":
     vm_list = agent.VM.list()
 
     print(vm_list)
+
