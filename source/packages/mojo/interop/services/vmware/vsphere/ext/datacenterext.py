@@ -29,7 +29,7 @@ class DataCenterExt(BaseExt):
     def __init__(self, agent: "VSphereAgent"):
         super().__init__(agent)
         return
-    
+
     def delete(self, name: str):
 
         agent = self.agent
@@ -44,17 +44,15 @@ class DataCenterExt(BaseExt):
 
     def get(self, name: str):
 
+        agent = self.agent
+        
         dcinfo = None
 
-        agent = self.agent
-
-        req_url = agent.build_api_url(f"/vcenter/datacenter/{name}")
-
-        resp = agent.session_get(req_url)
-        if resp.status_code == HTTPStatus.OK:
-            dcinfo = resp.json()
-        else:
-            resp.raise_for_status()
+        datacenter_list = self.list()
+        for dcitem in datacenter_list:
+            if dcitem["name"] == name:
+                dcinfo = dcitem
+                break
 
         return dcinfo
 
