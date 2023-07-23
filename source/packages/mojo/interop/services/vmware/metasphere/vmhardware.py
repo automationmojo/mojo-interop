@@ -112,3 +112,30 @@ class VmHardwareSerialBackingType:
     NETWORK_SERVER = "NETWORK_SERVER"
     NETWORK_CLIENT = "NETWORK_CLIENT"
 
+class VmHardwareConnectionState:
+    CONNECTED = "CONNECTED"
+    RECOVERABLE_ERROR = "RECOVERABLE_ERROR"
+    UNRECOVERABLE_ERROR = "UNRECOVERABLE_ERROR"
+    NOT_CONNECTED = "NOT_CONNECTED"
+    UNKNOWN = "UNKNOWN"
+
+class VmHardwareUpgradePolicy:
+    NEVER = "NEVER"
+    AFTER_CLEAN_SHUTDOWN = "AFTER_CLEAN_SHUTDOWN"
+    ALWAYS = "ALWAYS"
+
+class VmHardwareUpgradeStatus:
+    NONE = "NONE"
+    PENDING = "PENDING"
+    SUCCESS = "SUCCESS"
+    FAILED = "FAILED"
+
+class VmHardwareAdapterScsiSharing:
+    NONE = "NONE"
+    VIRTUAL = "VIRTUAL"
+    PHYSICAL = "PHYSICAL"
+
+class VmPowerState:
+    POWERED_OFF = "POWERED_OFF"
+    POWERED_ON = "POWERED_ON"
+    SUSPENDED = "SUSPENDED"

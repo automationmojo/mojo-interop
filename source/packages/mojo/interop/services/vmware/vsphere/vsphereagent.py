@@ -23,6 +23,12 @@ import requests
 
 from mojo.xmods.credentials.basiccredential import BasicCredential
 
+from mojo.interop.services.vmware.datastructures.specs.vmplacement import VmPlacementSpec
+
+from mojo.interop.services.vmware.datastructures.vcenter import (
+    DatacenterSummary, FolderSummary
+)
+
 from mojo.interop.services.vmware.vsphere.ext.certificatemanagementext import CertificateManagementExt
 from mojo.interop.services.vmware.vsphere.ext.clusterext import ClusterExt
 from mojo.interop.services.vmware.vsphere.ext.computeext import ComputeExt
@@ -53,45 +59,46 @@ from mojo.interop.services.vmware.vsphere.ext.topologyext import TopologyExt
 from mojo.interop.services.vmware.vsphere.ext.trustedinfrastructureext import TrustedInfrastructureExt
 from mojo.interop.services.vmware.vsphere.ext.vmext import VmExt
 
-
 class VSphereFilterState:
 
     def __init__(self) -> None:
-        self._datacenter_record = None
-        self._working_folder_record = None
+        self._working_datacenter = None
+        self._working_folder = None
         return
     
     @property
-    def datacenters(self):
-        rtnval = []
-
-        if self._datacenter_record is not None:
-            rtnval = [self._datacenter_record["datacenter"]]
-        
-        return rtnval
+    def working_datacenter(self) -> DatacenterSummary:
+        return self._working_datacenter
 
     @property
-    def working_folder(self):
-        return self._working_folder_record
+    def working_placement(self) -> VmPlacementSpec:
+        datastore = self._working_datacenter["datacenter"]
+        folder = self._working_folder["folder"]
+        placement = VmPlacementSpec(datastore=datastore, folder=folder)
+        return placement
 
-    def has_datacenter_filters(self):
-        rtnval = False
-        if self._datacenter_record is not None:
-            rtnval = True
+    @property
+    def working_folder(self) -> FolderSummary:
+        return self._working_folder
+
+    def has_datacenter_filter(self):
+        rtnval = self._working_datacenter is not None
         return rtnval
     
-    def has_working_folder_filters(self):
-        rtnval = False
-        if self._working_folder_record is not None:
-            rtnval = True
+    def has_working_placement(self):
+        rtnval = self._working_datacenter is not None and self._working_folder is not None
         return rtnval
 
-    def set_datacenter_filter(self, datacenter_record):
-        self._datacenter_record = datacenter_record
+    def has_working_folder_filter(self):
+        rtnval = self._working_folder is not None
+        return rtnval
+
+    def set_working_datacenter(self, datacenter_summary: DatacenterSummary):
+        self._working_datacenter = datacenter_summary
         return
     
-    def set_working_folder_filter(self, working_folder_record):
-        self._working_folder_record = working_folder_record
+    def set_working_folder(self, folder_summary: FolderSummary):
+        self._working_folder = folder_summary
         return
 
 
@@ -268,13 +275,13 @@ class VSphereAgent:
         if container_path.find(":") >= 0:
             datacenter, folderspec = container_path.split(":")
             dcrecord = self.DataCenter.get(datacenter)
-            self._filter_state.set_datacenter_filter(dcrecord)
+            self._filter_state.set_working_datacenter(dcrecord)
 
         folderspec = folderspec.lstrip("/")
         folder_leafs = folderspec.split("/")
 
         cont_folder = self.Folder.find_descendant(folder_leafs)
-        self._filter_state.set_working_folder_filter(cont_folder)
+        self._filter_state.set_working_folder(cont_folder)
 
         return
 

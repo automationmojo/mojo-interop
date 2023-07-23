@@ -14,6 +14,6 @@ from dataclasses import dataclass
 class VmPlacementSpec:
     datastore: str
     folder: str
-    cluster: Optional[str]
-    host: Optional[str]
-    resource_pool: Optional[str]
+    cluster: Optional[str] = None
+    host: Optional[str] = None
+    resource_pool: Optional[str] = None

@@ -19,6 +19,10 @@ from typing import List, Optional, TYPE_CHECKING
 
 from  http import HTTPStatus
 
+from mojo.interop.services.vmware.datastructures.vcenter import (
+    DatacenterSummary, FolderSummary
+)
+
 from mojo.interop.services.vmware.vsphere.ext.baseext import BaseExt
 
 if TYPE_CHECKING:
@@ -47,19 +51,19 @@ class FolderExt(BaseExt):
 
             folders = self.list(datacenters=filter_datacenters, parentfolders=parentFolders)
             for fitem in folders:
-                if fitem["name"] == nxtleaf:
+                if fitem.name == nxtleaf:
                     nxtfound = fitem
                     break
 
             if len(folder_leaf_names) > 0:
-                parentFolders = [nxtfound["folder"]]
+                parentFolders = [nxtfound.folder]
             else:
                 found = nxtfound
                 break
     
         return found
 
-    def list(self, *, datacenters: Optional[List[str]]=None, parentfolders: Optional[List[str]]=None):
+    def list(self, *, datacenters: Optional[List[DatacenterSummary]]=None, parentfolders: Optional[List[FolderSummary]]=None) -> List[FolderSummary]:
         folder_list = None
 
         agent = self.agent
@@ -68,19 +72,25 @@ class FolderExt(BaseExt):
 
         params = {}
         if datacenters is not None:
-            params['datacenters'] = datacenters
+            filter_datacenters = [ dc.datacenter for dc in datacenters]
+            params['datacenters'] = filter_datacenters
         elif agent.filter_state.has_datacenter_filters:
-            params['datacenters'] = agent.filter_state.datacenters
+            filter_datacenters = [agent.filter_state.working_datacenter.datacenter]
+            params['datacenters'] = filter_datacenters
 
         if parentfolders is not None:
-            params['parent_folders'] = parentfolders
+            filter_parent_folders = [ pf.folder for pf in parentfolders ]
+            params['parent_folders'] = filter_parent_folders
         elif agent.filter_state.has_working_folder_filters:
-            params['parent_folders'] = [agent.filter_state.working_folder]
+            filter_parent_folders = [ agent.filter_state.working_folder.folder ]
+            params['parent_folders'] = filter_parent_folders
 
         resp = agent.session_get(req_url, params=params)
 
         if resp.status_code == HTTPStatus.OK:
-            folder_list = resp.json()
+            found_list = resp.json()
+
+            folder_list = [FolderSummary(**fitem) for fitem in found_list]
         else:
             resp.raise_for_status()
 

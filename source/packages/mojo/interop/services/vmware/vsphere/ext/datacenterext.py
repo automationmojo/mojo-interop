@@ -15,9 +15,13 @@ __email__ = "myron.walker@gmail.com"
 __status__ = "Development" # Prototype, Development or Production
 __license__ = "MIT"
 
-from typing import TYPE_CHECKING
+from typing import List, TYPE_CHECKING
 
 from  http import HTTPStatus
+
+from mojo.interop.services.vmware.datastructures.vcenter import (
+    DatacenterSummary
+)
 
 from mojo.interop.services.vmware.vsphere.ext.baseext import BaseExt
 
@@ -30,11 +34,11 @@ class DataCenterExt(BaseExt):
         super().__init__(agent)
         return
 
-    def delete(self, name: str):
+    def delete(self, id: str):
 
         agent = self.agent
 
-        req_url = agent.build_api_url(f"/vcenter/datacenter/{name}")
+        req_url = agent.build_api_url(f"/vcenter/datacenter/{id}")
         resp = agent.session_delete(req_url)
 
         if resp.status_code != HTTPStatus.OK:
@@ -42,21 +46,38 @@ class DataCenterExt(BaseExt):
         
         return
 
-    def get(self, name: str):
+    def get(self, id: str) -> DatacenterSummary:
+
+        datacenter = None
+
+        agent = self.agent
+
+        req_url = agent.build_api_url("/vcenter/datacenter/{id}")
+        resp = agent.session_get(req_url)
+
+        if resp.status_code == HTTPStatus.OK:
+            datacenter_json = resp.json()
+            datacenter = DatacenterSummary(**datacenter_json)
+        else:
+            resp.raise_for_status()
+
+        return datacenter
+
+    def get_by_name(self, name: str) -> DatacenterSummary:
 
         agent = self.agent
         
-        dcinfo = None
+        dc_summary = None
 
         datacenter_list = self.list()
         for dcitem in datacenter_list:
-            if dcitem["name"] == name:
-                dcinfo = dcitem
+            if dcitem.name == name:
+                dc_summary = dcitem
                 break
 
-        return dcinfo
+        return dc_summary
 
-    def list(self):
+    def list(self) -> List[DatacenterSummary]:
         datacenter_list = None
 
         agent = self.agent
@@ -65,7 +86,8 @@ class DataCenterExt(BaseExt):
         resp = agent.session_get(req_url)
 
         if resp.status_code == HTTPStatus.OK:
-            datacenter_list = resp.json()
+            found_list = resp.json()
+            datacenter_list = [DatacenterSummary(**fitem) for fitem in found_list]
         else:
             resp.raise_for_status()
 

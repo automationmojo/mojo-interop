@@ -15,20 +15,99 @@ __email__ = "myron.walker@gmail.com"
 __status__ = "Development" # Prototype, Development or Production
 __license__ = "MIT"
 
-from typing import Optional, TYPE_CHECKING
+from typing import List, Optional, TYPE_CHECKING
 
 from  http import HTTPStatus
 
+from mojo.xmods.exceptions import SemanticError
+
+from mojo.interop.services.vmware.metasphere.vmguestos import VmGuestOS
+from mojo.interop.services.vmware.metasphere.vmhardware import VmHardwareVersion
+
+from mojo.interop.services.vmware.datastructures.vcenter import (
+    DatacenterSummary, FolderSummary
+)
+
+from mojo.interop.services.vmware.datastructures.specs.vmcreate import VmCreateSpec
+from mojo.interop.services.vmware.datastructures.specs.vmplacement import VmPlacementSpec
+from mojo.interop.services.vmware.datastructures.specs.vmhardware import (
+    VmHardwareBootCreateSpec,
+    VmHardwareCpuUpdateSpec,
+    VmHardwareDiskCreateSpec,
+    VmHardwareFloppyCreateSpec,
+    VmHardwareCdromCreateSpec,
+    VmHardwareMemoryUpdateSpec,
+    VmHardwareEthernetCreateSpec,
+    VmHardwareAdapterNvmeCreateSpec,
+    VmHardwareParallelCreateSpec,
+    VmHardwareBootDeviceEntryCreateSpec,
+    VmHardwareAdapterSataCreateSpec,
+    VmHardwareAdapterScsiCreateSpec,
+    VmHardwareSerialCreateSpec
+)
+from mojo.interop.services.vmware.datastructures.specs.vmstorage import VmStoragePolicySpec
+
+
 from mojo.interop.services.vmware.vsphere.ext.baseext import BaseExt
+
 
 if TYPE_CHECKING:
     from mojo.interop.services.vmware.vsphere.vsphereagent import VSphereAgent
+
 
 class VmExt(BaseExt):
 
     def __init__(self, agent: "VSphereAgent"):
         super().__init__(agent)
         return
+
+    def create(self, *, guestos: VmGuestOS, placement: Optional[VmPlacementSpec],
+               name: Optional[str],
+               boot: Optional[VmHardwareBootCreateSpec],
+               cpu: Optional[VmHardwareCpuUpdateSpec],
+               memory: Optional[VmHardwareMemoryUpdateSpec],
+               disks: Optional[List[VmHardwareDiskCreateSpec]],
+               nics: Optional[List[VmHardwareEthernetCreateSpec]],
+               hardware_version: Optional[VmHardwareVersion],
+               floppies: Optional[List[VmHardwareFloppyCreateSpec]],
+               cdroms: Optional[List[VmHardwareCdromCreateSpec]],
+               nvme_adapters: Optional[List[VmHardwareAdapterNvmeCreateSpec]],
+               parallel_ports: Optional[List[VmHardwareParallelCreateSpec]],
+               boot_devices: Optional[List[VmHardwareBootDeviceEntryCreateSpec]],
+               sata_adapters: Optional[List[VmHardwareAdapterSataCreateSpec]],
+               scsi_adapters: Optional[List[VmHardwareAdapterScsiCreateSpec]],
+               serial_ports: Optional[List[VmHardwareSerialCreateSpec]],
+               storage_policy: Optional[VmStoragePolicySpec]
+               ):
+
+        agent = self.agent
+
+        if placement is None:
+            if not agent.filter_state.has_working_placement():
+                errmsg = "If a placement specificate is not passed, then " \
+                    "one must be actively applied before trying to create a VM."
+                raise SemanticError(errmsg)
+        
+            placement = agent.filter_state.working_placement
+
+        createSpec = VmCreateSpec(guest_OS=guestos, placement=placement, name=name, boot=boot, cpu=cpu,
+                                  memory=memory, disks=disks, nics=nics, hardware_version=hardware_version,
+                                  floppies=floppies, cdroms=cdroms, nvme_adapters=nvme_adapters,
+                                  parallel_ports=parallel_ports, boot_devices=boot_devices, sata_adapters=sata_adapters,
+                                  scsi_adapters=scsi_adapters, serial_ports=serial_ports, storage_policy=storage_policy)
+        
+
+        payload = createSpec.asdict()
+
+        req_url = agent.build_api_url(f"/vcenter/vm")
+
+        resp = agent.session_post(req_url, data=payload, action="clone")
+        if resp.status_code == HTTPStatus.OK:
+            vminfo = resp.json()
+        else:
+            resp.raise_for_status()
+
+        return vminfo
 
     def clone(self, source: str, name: str, power_on: bool=False, customizations: Optional[dict]=None):
 
@@ -110,14 +189,30 @@ class VmExt(BaseExt):
 
         return vminfo
 
-    def list(self):
+    def list(self, *, datacenters: Optional[List[DatacenterSummary]]=None, parentfolders: Optional[List[FolderSummary]]=None):
 
         vm_list = None
 
         agent = self.agent
 
         req_url = agent.build_api_url("/vcenter/vm")
-        resp = agent.session_get(req_url)
+        
+        params = {}
+        if datacenters is not None:
+            filter_datacenters = [ dc.datacenter for dc in datacenters]
+            params['datacenters'] = filter_datacenters
+        elif agent.filter_state.has_datacenter_filters:
+            filter_datacenters = [agent.filter_state.working_datacenter.datacenter]
+            params['datacenters'] = filter_datacenters
+
+        if parentfolders is not None:
+            filter_parent_folders = [ pf.folder for pf in parentfolders ]
+            params['parent_folders'] = filter_parent_folders
+        elif agent.filter_state.has_working_folder_filters:
+            filter_parent_folders = [ agent.filter_state.working_folder.folder ]
+            params['parent_folders'] = filter_parent_folders
+
+        resp = agent.session_get(req_url, params=params)
 
         if resp.status_code == HTTPStatus.OK:
             vm_list = resp.json()
