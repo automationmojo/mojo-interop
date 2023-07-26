@@ -8,3 +8,7 @@ class FolderType(str, Enum):
     NETWORK = "NETWORK"
     VIRTUAL_MACHINE = "VIRTUAL_MACHINE"
 
+class VmPowerState(str, Enum):
+    POWERED_OFF = "POWERED_OFF"
+    POWERED_ON = "POWERED_ON"
+    SUSPENDED = "SUSPENDED"

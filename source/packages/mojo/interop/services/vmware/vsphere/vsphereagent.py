@@ -72,8 +72,8 @@ class VSphereFilterState:
 
     @property
     def working_placement(self) -> VmPlacementSpec:
-        datastore = self._working_datacenter["datacenter"]
-        folder = self._working_folder["folder"]
+        datastore = self._working_datacenter.datacenter
+        folder = self._working_folder.folder
         placement = VmPlacementSpec(datastore=datastore, folder=folder)
         return placement
 
@@ -81,7 +81,7 @@ class VSphereFilterState:
     def working_folder(self) -> FolderSummary:
         return self._working_folder
 
-    def has_datacenter_filter(self):
+    def has_working_datacenter_filter(self):
         rtnval = self._working_datacenter is not None
         return rtnval
     
@@ -328,15 +328,4 @@ class VSphereAgent:
         resp = self._session.put(url, data=data, **kwargs)
 
         return resp
-
-    
-if __name__ == "__main__":
-
-    cred = BasicCredential(identifier='vmuser', categories=['basic'], username='vmuser', password='Virtual11!!')
-
-    agent = VSphereAgent('https://localhost', cred, port=8697)
-
-    vm_list = agent.VM.list()
-
-    print(vm_list)
 

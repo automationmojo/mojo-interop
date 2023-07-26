@@ -40,7 +40,7 @@ class FolderExt(BaseExt):
 
         search_leaves = [lf for lf in folder_leaf_names]
 
-        filter_datacenters = agent.filter_state.datacenters
+        filter_datacenters = [agent.filter_state.working_datacenter]
 
         found = None
         nxtfound = None
@@ -56,7 +56,7 @@ class FolderExt(BaseExt):
                     break
 
             if len(folder_leaf_names) > 0:
-                parentFolders = [nxtfound.folder]
+                parentFolders = [nxtfound]
             else:
                 found = nxtfound
                 break
@@ -74,14 +74,14 @@ class FolderExt(BaseExt):
         if datacenters is not None:
             filter_datacenters = [ dc.datacenter for dc in datacenters]
             params['datacenters'] = filter_datacenters
-        elif agent.filter_state.has_datacenter_filters:
+        elif agent.filter_state.has_working_datacenter_filter:
             filter_datacenters = [agent.filter_state.working_datacenter.datacenter]
             params['datacenters'] = filter_datacenters
 
         if parentfolders is not None:
             filter_parent_folders = [ pf.folder for pf in parentfolders ]
             params['parent_folders'] = filter_parent_folders
-        elif agent.filter_state.has_working_folder_filters:
+        elif agent.filter_state.has_working_folder_filter:
             filter_parent_folders = [ agent.filter_state.working_folder.folder ]
             params['parent_folders'] = filter_parent_folders
 

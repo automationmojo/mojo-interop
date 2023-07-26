@@ -232,7 +232,7 @@ class VmIdentityInfo:
     name: str
 
 @dataclass
-class VMInfo:
+class VmInfo:
     serial_ports: List[VmHardwareSerialInfo]
     boot_devices: List[VmHardwareBootDeviceEntry]
     cdroms: List[VmHardwareCdromInfo]

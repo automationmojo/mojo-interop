@@ -23,9 +23,10 @@ from mojo.xmods.exceptions import SemanticError
 
 from mojo.interop.services.vmware.metasphere.vmguestos import VmGuestOS
 from mojo.interop.services.vmware.metasphere.vmhardware import VmHardwareVersion
+from mojo.interop.services.vmware.datastructures.model.vm import VmInfo
 
-from mojo.interop.services.vmware.datastructures.vcenter import (
-    DatacenterSummary, FolderSummary
+from mojo.interop.services.vmware.datastructures.model.summary import (
+    DatacenterSummary, FolderSummary, VmSummary
 )
 
 from mojo.interop.services.vmware.datastructures.specs.vmcreate import VmCreateSpec
@@ -103,7 +104,8 @@ class VmExt(BaseExt):
 
         resp = agent.session_post(req_url, data=payload, action="clone")
         if resp.status_code == HTTPStatus.OK:
-            vminfo = resp.json()
+            vminfo_dict = resp.json()
+            vminfo = VmInfo(**vminfo_dict)
         else:
             resp.raise_for_status()
 
@@ -157,6 +159,7 @@ class VmExt(BaseExt):
         resp = agent.session_get(req_url)
         if resp.status_code == HTTPStatus.OK:
             vminfo = resp.json()
+
         else:
             resp.raise_for_status()
 
@@ -201,21 +204,24 @@ class VmExt(BaseExt):
         if datacenters is not None:
             filter_datacenters = [ dc.datacenter for dc in datacenters]
             params['datacenters'] = filter_datacenters
-        elif agent.filter_state.has_datacenter_filters:
+        elif agent.filter_state.has_working_datacenter_filter:
             filter_datacenters = [agent.filter_state.working_datacenter.datacenter]
             params['datacenters'] = filter_datacenters
 
         if parentfolders is not None:
             filter_parent_folders = [ pf.folder for pf in parentfolders ]
             params['parent_folders'] = filter_parent_folders
-        elif agent.filter_state.has_working_folder_filters:
+        elif agent.filter_state.has_working_folder_filter:
             filter_parent_folders = [ agent.filter_state.working_folder.folder ]
             params['parent_folders'] = filter_parent_folders
 
         resp = agent.session_get(req_url, params=params)
 
         if resp.status_code == HTTPStatus.OK:
-            vm_list = resp.json()
+            vm_json_list = resp.json()
+            for vmitem in vm_json_list:
+                vmsummary = VmSummary(**vmitem)
+                vm_list.append(vmsummary)
         else:
             resp.raise_for_status()
 
