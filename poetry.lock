@@ -64,14 +64,14 @@ typecheck = ["mypy"]
 
 [[package]]
 name = "certifi"
-version = "2023.5.7"
+version = "2023.7.22"
 description = "Python package for providing Mozilla's CA Bundle."
 category = "main"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "certifi-2023.5.7-py3-none-any.whl", hash = "sha256:c6c2e98f5c7869efca1f8916fed228dd91539f9f1b444c314c06eef02980c716"},
-    {file = "certifi-2023.5.7.tar.gz", hash = "sha256:0f0d56dc5a6ad56fd4ba36484d6cc34451e1c6548c61daad8c320169f91eddc7"},
+    {file = "certifi-2023.7.22-py3-none-any.whl", hash = "sha256:92d6037539857d8206b8f6ae472e8b77db8058fec5937a1ef3f54304089edbb9"},
+    {file = "certifi-2023.7.22.tar.gz", hash = "sha256:539cc1d13202e33ca466e88b2807e29f4c13049d6d87031a3c110744495cb082"},
 ]
 
 [[package]]
@@ -558,14 +558,14 @@ files = [
 
 [[package]]
 name = "mojo-xmodules"
-version = "0.0.62"
+version = "0.0.63"
 description = "Automation Mojo X-Modules"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "mojo_xmodules-0.0.62-py3-none-any.whl", hash = "sha256:1d324fef3034eb82527bd497a9339fb26fea31ba4d125d0a1ebe51ce2d8e45a0"},
-    {file = "mojo_xmodules-0.0.62.tar.gz", hash = "sha256:95b13052027df82698f2e53c67a54764eff8e18e51329b355feb7828830aafb8"},
+    {file = "mojo_xmodules-0.0.63-py3-none-any.whl", hash = "sha256:f5672b30991bbe98d1e097c433cad1aae36b636ca99250c0162930fe7d1f712f"},
+    {file = "mojo_xmodules-0.0.63.tar.gz", hash = "sha256:e1d63879e8e0aa424169a7a7d395a9c1f476c0b66bdffc862ff517e1601b983a"},
 ]
 
 [package.dependencies]
@@ -655,14 +655,14 @@ files = [
 
 [[package]]
 name = "paramiko"
-version = "3.2.0"
+version = "3.3.1"
 description = "SSH2 protocol library"
 category = "main"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "paramiko-3.2.0-py3-none-any.whl", hash = "sha256:df0f9dd8903bc50f2e10580af687f3015bf592a377cd438d2ec9546467a14eb8"},
-    {file = "paramiko-3.2.0.tar.gz", hash = "sha256:93cdce625a8a1dc12204439d45033f3261bdb2c201648cfcdc06f9fd0f94ec29"},
+    {file = "paramiko-3.3.1-py3-none-any.whl", hash = "sha256:b7bc5340a43de4287bbe22fe6de728aa2c22468b2a849615498dd944c2f275eb"},
+    {file = "paramiko-3.3.1.tar.gz", hash = "sha256:6a3777a961ac86dbef375c5f5b8d50014a1a96d0fd7f054a43bc880134b0ff77"},
 ]
 
 [package.dependencies]
@@ -1039,4 +1039,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0"
-content-hash = "b5d2d7e88ea0d76faab3d5c50452f78f991962e8e724aafe955875828ba8db0b"
+content-hash = "61464d5caeb0092cba165eedaafa6839a7a6f1ab9cd7b49236cae90e87aaa5bd"
