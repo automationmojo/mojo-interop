@@ -22,7 +22,7 @@ repository = "https://github.com/automationmojo/mojo-interop"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<4.0"
-mojo-xmodules = ">=0.0.63 <0.1.0"
+mojo-xmodules = ">=0.0.66 <0.1.0"
 mojo-networking = ">=0.0.4 <0.1.0"
 
 [tool.poetry.group.dev.dependencies]

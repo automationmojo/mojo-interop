@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argparse
 import configparser
 import os
 import platform
@@ -84,7 +85,7 @@ def generate_python_path():
         VENV_SITEPACKAGES_FOLDER)
     return python_path
 
-def generate_devemopment_env_file():
+def generate_development_env_file():
 
     env_file = "{}/.env".format(REPOSITORY_FOLDER)
     with open(env_file, 'w') as envf:
@@ -138,9 +139,19 @@ def generate_vscode_workspace_files():
 
 def rehome_repository_main():
 
+    parser = argparse.ArgumentParser(
+                    prog='rehome-repository',
+                    description='Configures a repository for operations in a new location.')
+
+    parser.add_argument('--skip-workspaces', default=False, dest='skip_workspaces', action='store_true',
+        help="Indicates that VS Code workspaces should not be created.")
+    args = parser.parse_args()
+
     generate_directories()
-    generate_devemopment_env_file()
-    generate_vscode_workspace_files()
+    generate_development_env_file()
+
+    if not args.skip_workspaces:
+        generate_vscode_workspace_files()
 
     return
 
