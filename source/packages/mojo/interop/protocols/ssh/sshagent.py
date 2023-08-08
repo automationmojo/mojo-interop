@@ -840,9 +840,11 @@ class SshBase(ICommandContext):
 
         if self._jump_cmd is not None:
             proxy = paramiko.ProxyCommand(self._jump_cmd)
-            ssh_client.connect(self._ipaddr, port=self._port, username=cl_username, password=cl_password, pkey=pkey, allow_agent=cl_allow_agent, sock = proxy)
+            ssh_client.connect(self._ipaddr, port=self._port, username=cl_username, password=cl_password,
+                               pkey=pkey, allow_agent=cl_allow_agent, sock = proxy)
         else:
-            ssh_client.connect(self._ipaddr, port=self._port, username=cl_username, password=cl_password, pkey=pkey, allow_agent=cl_allow_agent)
+            ssh_client.connect(self._ipaddr, port=self._port, username=cl_username, password=cl_password,
+                               pkey=pkey, allow_agent=cl_allow_agent)
 
         return ssh_client
 
@@ -1172,10 +1174,11 @@ class SshSession(SshBase):
         SSH operations.  The :class:`SshSession` also holds open the SSHClient for its entire scope and ensures the SSHClient is closed and
         cleaned up properly when the :class:`SshSession` goes out of scope.
     """
-    def __init__(self, host: str, primary_credential: SshCredential, users: Optional[dict] = None, port:int=22,
+    def __init__(self, host: str, primary_credential: SshCredential, users: Optional[dict] = None, port:int=22, jump_cmd: Optional[str] = None,
                  pty_params: Optional[dict] = None, session_user=None, interactive=False, basis_session: Optional["SshSession"]=None,
                  called_id: Optional[str]=None, aspects: AspectsCmd=DEFAULT_CMD_ASPECTS):
-        SshBase.__init__(self, host, primary_credential, users=users, port=port, pty_params=pty_params, called_id=called_id, aspects=aspects)
+        SshBase.__init__(self, host, primary_credential, users=users, port=port, jump_cmd=jump_cmd,
+                         pty_params=pty_params, called_id=called_id, aspects=aspects)
 
         self._session_user = session_user
         self._interactive = interactive
@@ -1369,11 +1372,13 @@ class SshSession(SshBase):
         session = None
         if cmd_context is not None:
             bs: SshBase = cmd_context
-            session = SshSession(bs._host, bs._primary_credential, users=bs._users, port=bs._port, pty_params=pty_params,
-                             interactive=interactive, cmd_context=cmd_context, aspects=aspects)
+            session = SshSession(bs._host, bs._primary_credential, users=bs._users, port=bs._port,
+                                 jump_cmd=bs._jump_cmd, pty_params=pty_params, interactive=interactive,
+                                 cmd_context=cmd_context, aspects=aspects)
         else:
-            session = SshSession(self._host, self._primary_credential, users=self._users, port=self._port, pty_params=pty_params,
-                             interactive=interactive, cmd_context=cmd_context, aspects=aspects)
+            session = SshSession(self._host, self._primary_credential, users=self._users, port=self._port,
+                                 jump_cmd=self._jump_cmd, pty_params=pty_params, interactive=interactive,
+                                 cmd_context=cmd_context, aspects=aspects)
         return session
 
     def _create_client(self, session_user: Optional[str] = None) -> paramiko.SSHClient:
@@ -1416,9 +1421,10 @@ class SshAgent(SshBase, ProtocolExtension):
         APIs for running command and transferring files along with code that helps ensure commands are logged cleanly.  The :class:`SshAgent` also
         provides run patterning to help eliminate duplication of code associated with running SSH commands in loops.
     """
-    def __init__(self, host: str, primary_credential: SshCredential, users: Optional[dict] = None, port: int = 22,
+    def __init__(self, host: str, primary_credential: SshCredential, users: Optional[dict] = None, port: int = 22, jump_cmd: Optional[str] = None,
                  pty_params: Optional[dict] = None, called_id: Optional[str]=None, aspects: AspectsCmd = DEFAULT_CMD_ASPECTS):
-        SshBase.__init__(self, host, primary_credential, users=users, port=port, pty_params=pty_params, called_id=called_id, aspects=aspects)
+        SshBase.__init__(self, host, primary_credential, users=users, port=port, jump_cmd=jump_cmd,
+                         pty_params=pty_params, called_id=called_id, aspects=aspects)
         ProtocolExtension.__init__(self)
         return
 
@@ -1455,11 +1461,13 @@ class SshAgent(SshBase, ProtocolExtension):
         session = None
         if cmd_context is not None:
             bs: SshBase = cmd_context
-            session = SshSession(bs._host, bs._primary_credential, users=bs._users, port=bs._port, pty_params=pty_params,
-                             interactive=interactive, basis_session=cmd_context, aspects=aspects)
+            session = SshSession(bs._host, bs._primary_credential, users=bs._users, port=bs._port,
+                                 jump_cmd=bs._jump_cmd, pty_params=pty_params, interactive=interactive,
+                                 basis_session=cmd_context, aspects=aspects)
         else:
-            session = SshSession(self._host, self._primary_credential, users=self._users, port=self._port, pty_params=pty_params,
-                             interactive=interactive, basis_session=cmd_context, aspects=aspects)
+            session = SshSession(self._host, self._primary_credential, users=self._users, port=self._port,
+                                 jump_cmd=self._jump_cmd, pty_params=pty_params, interactive=interactive,
+                                 basis_session=cmd_context, aspects=aspects)
         return session
 
     def reboot(self, aspects: Optional[AspectsCmd] = None):
