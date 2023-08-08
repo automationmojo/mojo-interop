@@ -614,7 +614,8 @@ class SshBase(ICommandContext):
         for APIs between the :class:`SshSession` object and the :class:`SshAgent`.
     """
     def __init__(self, host: str, primary_credential: SshCredential, users: Optional[dict] = None,
-                 port: int = 22, pty_params: Optional[dict] = None, called_id: Optional[str]=None,
+                 port: int = 22, jump_cmd: Optional[str] = None, pty_params: Optional[dict] = None,
+                 called_id: Optional[str]=None,
                  aspects: AspectsCmd = DEFAULT_CMD_ASPECTS):
 
         self._host = host
@@ -637,6 +638,7 @@ class SshBase(ICommandContext):
 
         self._users = users
         self._port = port
+        self._jump_cmd = jump_cmd
         self._pty_params = pty_params
         self._called_id = called_id
         self._target_tag = "[{}]".format(called_id)
@@ -671,6 +673,13 @@ class SshBase(ICommandContext):
             The IP address that was found to be associated with the specified host machine.
         """
         return self._ipaddr
+
+    @property
+    def jump_cmd(self):
+        """
+            A 'ProxyCommand' jump command that can be used for Advanced Server Access.
+        """
+        return self._jump_cmd
 
     @property
     def port(self) -> int:
@@ -824,11 +833,17 @@ class SshBase(ICommandContext):
         pkey = None
         if cl_keyfile is not None:
             cl_keyfile = os.path.expanduser(os.path.expandvars(cl_keyfile))
-            pkey = paramiko.rsakey.RSAKey.from_private_key_file(cl_keyfile, password=cl_keypasswd)
+            pkey = paramiko.RSAKey.from_private_key_file(cl_keyfile, password=cl_keypasswd)
 
         ssh_client = paramiko.SSHClient()
         ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh_client.connect(self._ipaddr, port=self._port, username=cl_username, password=cl_password, pkey=pkey, allow_agent=cl_allow_agent)
+
+        if self._jump_cmd is not None:
+            proxy = paramiko.ProxyCommand(self._jump_cmd)
+            ssh_client.connect(self._ipaddr, port=self._port, username=cl_username, password=cl_password, pkey=pkey, allow_agent=cl_allow_agent, sock = proxy)
+        else:
+            ssh_client.connect(self._ipaddr, port=self._port, username=cl_username, password=cl_password, pkey=pkey, allow_agent=cl_allow_agent)
+
         return ssh_client
 
     def _directory(self, ssh_client: paramiko.SSHClient, root_dir: str) -> dict:
