@@ -34,6 +34,7 @@ from requests.exceptions import ConnectionError
 
 from mojo.xmods.exceptions import ConfigurationError, SemanticError
 from mojo.xmods.landscaping.friendlyidentifier import FriendlyIdentifier
+from mojo.xmods.xcollections.context import Context, ContextPaths
 
 from mojo.networking.constants import HTTP1_1_LINESEP, HTTP1_1_END_OF_HEADER
 from mojo.networking.interfaces import get_interface_for_ip
@@ -101,11 +102,11 @@ class UpnpCoordinator(CoordinatorBase):
     """
     # pylint: disable=attribute-defined-outside-init
 
-    UPNP_CACHE_DIR = os.path.join(AKIT_VARIABLES.AKIT_HOME_DIRECTORY, "cache", "upnp")
-
     def __init__(self, lscape: "Landscape", control_point=None, workers: int = 5):
         super(UpnpCoordinator, self).__init__(lscape, control_point=control_point, workers=workers)
 
+        context = Context()
+        self._upnp_cache_dir = context.lookup(ContextPaths.RUNTIME_HOME_DIRECTORY, default=os.path.expanduser("~/mjr"))
         self._local_udn = uuid.getnode()
 
         return
@@ -587,7 +588,7 @@ class UpnpCoordinator(CoordinatorBase):
         found_devices = {}
 
         for qdev_hint in query_devices:
-            qdev_filename = os.path.join(self.UPNP_CACHE_DIR, qdev_hint)
+            qdev_filename = os.path.join(self._upnp_cache_dir, qdev_hint)
 
             if os.path.exists(qdev_filename):
                 dev_info = None
@@ -604,12 +605,12 @@ class UpnpCoordinator(CoordinatorBase):
 
     def _device_cache_update(self, found_device: dict):
 
-        if not os.path.exists(self.UPNP_CACHE_DIR):
-            os.makedirs(self.UPNP_CACHE_DIR)
+        if not os.path.exists(self._upnp_cache_dir):
+            os.makedirs(self._upnp_cache_dir)
 
         for fdev_usn in found_device:
             fdev_info = found_device[fdev_usn]
-            fdev_filename = os.path.join(self.UPNP_CACHE_DIR, fdev_usn)
+            fdev_filename = os.path.join(self._upnp_cache_dir, fdev_usn)
             with open(fdev_filename, 'w') as dcf:
                 yaml.dump(fdev_info, dcf)
 

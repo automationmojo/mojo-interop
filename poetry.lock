@@ -558,14 +558,14 @@ files = [
 
 [[package]]
 name = "mojo-xmodules"
-version = "0.0.67"
+version = "0.0.68"
 description = "Automation Mojo X-Modules"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "mojo_xmodules-0.0.67-py3-none-any.whl", hash = "sha256:94a0ad3b11e166a9c721a87cb8c44a2dadf36d1397692544a63ed9cc3a1cd85f"},
-    {file = "mojo_xmodules-0.0.67.tar.gz", hash = "sha256:78ddb218dacf05c221495b60d10b5f5e5105206f3be70f56ea5053008390103a"},
+    {file = "mojo_xmodules-0.0.68-py3-none-any.whl", hash = "sha256:6709db514a7c3d09f1eea04b5d4ec5898dcc3a02049d634d6277cbf0afc2cc6f"},
+    {file = "mojo_xmodules-0.0.68.tar.gz", hash = "sha256:680bda26c4c7898484d542712de6bd3e247757a977b11d20a0780b812348489b"},
 ]
 
 [package.dependencies]

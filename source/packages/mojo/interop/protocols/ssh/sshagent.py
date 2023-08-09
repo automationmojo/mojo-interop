@@ -20,6 +20,7 @@ from typing import Callable, Optional, Sequence, Union, Tuple
 
 from types import TracebackType
 
+import dataclasses
 import logging
 import os
 import re
@@ -607,6 +608,12 @@ def ssh_execute_command_in_channel(ssh_channel: paramiko.Channel, command: str, 
 
     return status, stdout, stderr
 
+@dataclasses
+class SshJumpParams:
+    host: str
+    credential: SshCredential
+    port: int = 22
+
 
 class SshBase(ICommandContext):
     """
@@ -614,7 +621,7 @@ class SshBase(ICommandContext):
         for APIs between the :class:`SshSession` object and the :class:`SshAgent`.
     """
     def __init__(self, host: str, primary_credential: SshCredential, users: Optional[dict] = None,
-                 port: int = 22, jump_cmd: Optional[str] = None, pty_params: Optional[dict] = None,
+                 port: int = 22, jump: Union[str, SshJumpParams, None] = None, pty_params: Optional[dict] = None,
                  called_id: Optional[str]=None,
                  aspects: AspectsCmd = DEFAULT_CMD_ASPECTS):
 
@@ -638,7 +645,7 @@ class SshBase(ICommandContext):
 
         self._users = users
         self._port = port
-        self._jump_cmd = jump_cmd
+        self._jump = jump
         self._pty_params = pty_params
         self._called_id = called_id
         self._target_tag = "[{}]".format(called_id)
@@ -675,11 +682,11 @@ class SshBase(ICommandContext):
         return self._ipaddr
 
     @property
-    def jump_cmd(self):
+    def jump(self):
         """
             A 'ProxyCommand' jump command that can be used for Advanced Server Access.
         """
-        return self._jump_cmd
+        return self._jump
 
     @property
     def port(self) -> int:
@@ -838,8 +845,8 @@ class SshBase(ICommandContext):
         ssh_client = paramiko.SSHClient()
         ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-        if self._jump_cmd is not None:
-            proxy = paramiko.ProxyCommand(self._jump_cmd)
+        if self._jump is not None:
+            proxy = paramiko.ProxyCommand(self._jump)
             ssh_client.connect(self._ipaddr, port=self._port, username=cl_username, password=cl_password,
                                pkey=pkey, allow_agent=cl_allow_agent, sock = proxy)
         else:
@@ -1174,10 +1181,10 @@ class SshSession(SshBase):
         SSH operations.  The :class:`SshSession` also holds open the SSHClient for its entire scope and ensures the SSHClient is closed and
         cleaned up properly when the :class:`SshSession` goes out of scope.
     """
-    def __init__(self, host: str, primary_credential: SshCredential, users: Optional[dict] = None, port:int=22, jump_cmd: Optional[str] = None,
+    def __init__(self, host: str, primary_credential: SshCredential, users: Optional[dict] = None, port:int=22, jump: Union[str, SshJumpParams, None] = None,
                  pty_params: Optional[dict] = None, session_user=None, interactive=False, basis_session: Optional["SshSession"]=None,
                  called_id: Optional[str]=None, aspects: AspectsCmd=DEFAULT_CMD_ASPECTS):
-        SshBase.__init__(self, host, primary_credential, users=users, port=port, jump_cmd=jump_cmd,
+        SshBase.__init__(self, host, primary_credential, users=users, port=port, jump=jump,
                          pty_params=pty_params, called_id=called_id, aspects=aspects)
 
         self._session_user = session_user
@@ -1373,11 +1380,11 @@ class SshSession(SshBase):
         if cmd_context is not None:
             bs: SshBase = cmd_context
             session = SshSession(bs._host, bs._primary_credential, users=bs._users, port=bs._port,
-                                 jump_cmd=bs._jump_cmd, pty_params=pty_params, interactive=interactive,
+                                 jump=bs._jump, pty_params=pty_params, interactive=interactive,
                                  cmd_context=cmd_context, aspects=aspects)
         else:
             session = SshSession(self._host, self._primary_credential, users=self._users, port=self._port,
-                                 jump_cmd=self._jump_cmd, pty_params=pty_params, interactive=interactive,
+                                 jump=self._jump, pty_params=pty_params, interactive=interactive,
                                  cmd_context=cmd_context, aspects=aspects)
         return session
 
@@ -1421,9 +1428,9 @@ class SshAgent(SshBase, ProtocolExtension):
         APIs for running command and transferring files along with code that helps ensure commands are logged cleanly.  The :class:`SshAgent` also
         provides run patterning to help eliminate duplication of code associated with running SSH commands in loops.
     """
-    def __init__(self, host: str, primary_credential: SshCredential, users: Optional[dict] = None, port: int = 22, jump_cmd: Optional[str] = None,
+    def __init__(self, host: str, primary_credential: SshCredential, users: Optional[dict] = None, port: int = 22, jump: Union[str, SshJumpParams, None] = None,
                  pty_params: Optional[dict] = None, called_id: Optional[str]=None, aspects: AspectsCmd = DEFAULT_CMD_ASPECTS):
-        SshBase.__init__(self, host, primary_credential, users=users, port=port, jump_cmd=jump_cmd,
+        SshBase.__init__(self, host, primary_credential, users=users, port=port, jump=jump,
                          pty_params=pty_params, called_id=called_id, aspects=aspects)
         ProtocolExtension.__init__(self)
         return
@@ -1462,11 +1469,11 @@ class SshAgent(SshBase, ProtocolExtension):
         if cmd_context is not None:
             bs: SshBase = cmd_context
             session = SshSession(bs._host, bs._primary_credential, users=bs._users, port=bs._port,
-                                 jump_cmd=bs._jump_cmd, pty_params=pty_params, interactive=interactive,
+                                 jump=bs._jump, pty_params=pty_params, interactive=interactive,
                                  basis_session=cmd_context, aspects=aspects)
         else:
             session = SshSession(self._host, self._primary_credential, users=self._users, port=self._port,
-                                 jump_cmd=self._jump_cmd, pty_params=pty_params, interactive=interactive,
+                                 jump=self._jump, pty_params=pty_params, interactive=interactive,
                                  basis_session=cmd_context, aspects=aspects)
         return session
 

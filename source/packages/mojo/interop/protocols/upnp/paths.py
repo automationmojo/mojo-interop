@@ -19,7 +19,7 @@ __license__ = "MIT"
 
 import os
 
-from akit.environment.variables import AKIT_VARIABLES
+from mojo.xmods.xcollections.context import Context, ContextPaths
 
 DIR_UPNP = os.path.dirname(__file__)
 
@@ -38,18 +38,22 @@ DIR_UPNP_GENERATOR_STANDARD_EMBEDDEDDEVICES = os.path.join(DIR_UPNP_GENERATOR_ST
 DIR_UPNP_GENERATOR_STANDARD_ROOTDEVICES = os.path.join(DIR_UPNP_GENERATOR_STANDARD, "rootdevices")
 DIR_UPNP_GENERATOR_STANDARD_SERVICES = os.path.join(DIR_UPNP_GENERATOR_STANDARD, "services")
 
+context = Context()
+runtime_home_dir = context.lookup(ContextPaths.RUNTIME_HOME_DIRECTORY, default=os.path.expanduser("~/mjr"))
 
-DIR_UPNP_EXTENSIONS_INTEGRATION = os.path.join(AKIT_VARIABLES.AKIT_HOME_DIRECTORY, "upnp", "extensions")
-if AKIT_VARIABLES.AKIT_UPNP_EXTENSIONS_INTEGRATION_BASE is not None:
-    DIR_UPNP_EXTENSIONS_INTEGRATION = AKIT_VARIABLES.AKIT_UPNP_EXTENSIONS_INTEGRATION_BASE
+DIR_UPNP_EXTENSIONS_INTEGRATION = os.path.join(runtime_home_dir, "upnp", "extensions")
+upnp_extensions_integration_base = context.lookup("/upnp/extensions/integration/base")
+if upnp_extensions_integration_base is not None:
+    DIR_UPNP_EXTENSIONS_INTEGRATION = upnp_extensions_integration_base
 
 DIR_UPNP_EXTENSIONS_INTEGRATION_EMBEDDEDDEVICES = os.path.join(DIR_UPNP_EXTENSIONS_INTEGRATION, "embeddeddevices")
 DIR_UPNP_EXTENSIONS_INTEGRATION_ROOTDEVICES = os.path.join(DIR_UPNP_EXTENSIONS_INTEGRATION, "rootdevices")
 DIR_UPNP_EXTENSIONS_INTEGRATION_SERVICES = os.path.join(DIR_UPNP_EXTENSIONS_INTEGRATION, "services")
 
-DIR_UPNP_SCAN_INTEGRATION = os.path.join(AKIT_VARIABLES.AKIT_HOME_DIRECTORY, "upnp", "scan")
-if AKIT_VARIABLES.AKIT_UPNP_SCAN_INTEGRATION_BASE is not None:
-    DIR_UPNP_SCAN_INTEGRATION = AKIT_VARIABLES.AKIT_UPNP_SCAN_INTEGRATION_BASE
+DIR_UPNP_SCAN_INTEGRATION = os.path.join(runtime_home_dir, "upnp", "scan")
+upnp_scan_integration_base = context.lookup("/upnp/extensions/integration/base")
+if upnp_scan_integration_base is not None:
+    DIR_UPNP_SCAN_INTEGRATION = upnp_scan_integration_base
 
 DIR_UPNP_SCAN_INTEGRATION_EMBEDDEDDEVICES = os.path.join(DIR_UPNP_SCAN_INTEGRATION, "embeddeddevices")
 DIR_UPNP_SCAN_INTEGRATION_ROOTDEVICES = os.path.join(DIR_UPNP_SCAN_INTEGRATION, "rootdevices")

@@ -25,6 +25,7 @@ from mojo.xmods.extension.dynamic import (
     generate_extension_key
 )
 from mojo.xmods.ximport import import_by_name
+from mojo.xmods.xcollections.context import Context, ContextPaths
 
 from mojo.interop.protocols.upnp.devices.upnpembeddeddevice import UpnpEmbeddedDevice
 from mojo.interop.protocols.upnp.devices.upnprootdevice import UpnpRootDevice
@@ -69,12 +70,14 @@ class UpnpFactory:
             self._std_root_device_registry = {}
             self._std_service_registry = {}
 
+            gcontext = Context() 
+
             dyn_ext_module = None
-            dyn_ext_module_name = AKIT_VARIABLES.AKIT_UPNP_DYN_EXTENSIONS_MODULE
+            dyn_ext_module_name = gcontext.lookup("/upnp/extensions/dynamic/module")
             if dyn_ext_module_name is not None:
                 dyn_ext_module = import_by_name(dyn_ext_module_name)
 
-            dyn_ext_folder = AKIT_VARIABLES.AKIT_UPNP_EXTENSIONS_INTEGRATION_BASE
+            dyn_ext_folder = gcontext.lookup("/upnp/extensions/dynamic/folder")
 
             if dyn_ext_module is not None:
                 self._scan_for_device_extensions_under_code_container(dyn_ext_module, self._dyn_root_device_registry)
