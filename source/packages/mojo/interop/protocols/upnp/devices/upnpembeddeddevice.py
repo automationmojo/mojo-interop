@@ -16,7 +16,7 @@ __email__ = "myron.walker@gmail.com"
 __status__ = "Development" # Prototype, Development or Production
 __license__ = "MIT"
 
-from mojo.xmods.exceptions import SemanticError
+from mojo.errors.exceptions import SemanticError
 from mojo.interop.protocols.upnp.devices.upnpdevice import UpnpDevice
 
 class UpnpEmbeddedDevice(UpnpDevice):

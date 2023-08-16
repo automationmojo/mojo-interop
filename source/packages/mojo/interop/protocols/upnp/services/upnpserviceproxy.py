@@ -33,7 +33,7 @@ import requests
 from mojo.waiting.waitmodel import TimeoutContext
 
 from mojo.xmods.aspects import ActionPattern
-from mojo.xmods.exceptions import format_exc_lines
+from mojo.errors.exceptions import format_exc_lines
 from mojo.xmods.eventing.eventedvariablesink import EventedVariableSink
 from mojo.xmods.eventing.eventedvariable import EventedVariable
 from mojo.xmods.xcollections.context import Context, ContextPaths

@@ -33,7 +33,7 @@ import weakref
 from mojo.waiting.waitmodel import TimeoutContext
 
 from mojo.xmods.aspects import ActionPattern, AspectsCmd, LoggingPattern, DEFAULT_CMD_ASPECTS
-from mojo.xmods.exceptions import CommandError, ConfigurationError, NotOverloadedError, SemanticError
+from mojo.errors.exceptions import CommandError, ConfigurationError, NotOverloadedError, SemanticError
 from mojo.xmods.interfaces.icommandcontext import ICommandContext
 
 

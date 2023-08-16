@@ -18,7 +18,7 @@ __license__ = "MIT"
 
 from typing import Union
 
-from mojo.xmods.exceptions import SemanticError
+from mojo.errors.exceptions import SemanticError
 from mojo.xmods.extension.dynamic import (
     collect_extensions_under_code_container,
     collect_extensions_under_folder,

@@ -22,7 +22,7 @@ import pprint
 import socket
 import weakref
 
-from mojo.xmods.exceptions import ConfigurationError
+from mojo.errors.exceptions import ConfigurationError
 from mojo.xmods.landscaping.friendlyidentifier import FriendlyIdentifier
 
 from mojo.xmods.landscaping.coordinators.coordinatorbase import CoordinatorBase

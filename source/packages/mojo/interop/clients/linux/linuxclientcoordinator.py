@@ -17,7 +17,7 @@ __license__ = "MIT"
 
 from typing import Any, Dict, Optional, TYPE_CHECKING
 
-from mojo.xmods.exceptions import NotOverloadedError
+from mojo.errors.exceptions import NotOverloadedError
 
 from mojo.xmods.credentials.basecredential import BaseCredential
 from mojo.xmods.landscaping.client.clientcoordinatorbase import ClientCoordinatorBase

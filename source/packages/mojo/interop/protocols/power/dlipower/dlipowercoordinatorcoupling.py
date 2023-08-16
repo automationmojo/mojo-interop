@@ -18,7 +18,7 @@ __license__ = "MIT"
 
 from typing import Any, Dict, List, Tuple, TYPE_CHECKING
 
-from mojo.xmods.exceptions import SemanticError
+from mojo.errors.exceptions import SemanticError
 from mojo.xmods.landscaping.coupling.coordinatorcoupling import CoordinatorCoupling
 from mojo.xmods.landscaping.friendlyidentifier import FriendlyIdentifier
 from mojo.xmods.landscaping.landscape import LandscapeDevice

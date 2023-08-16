@@ -19,7 +19,7 @@ from typing import List, Optional, TYPE_CHECKING
 
 from  http import HTTPStatus
 
-from mojo.xmods.exceptions import SemanticError
+from mojo.errors.exceptions import SemanticError
 
 from mojo.interop.services.vmware.metasphere.vmguestos import VmGuestOS
 from mojo.interop.services.vmware.metasphere.vmhardware import VmHardwareVersion

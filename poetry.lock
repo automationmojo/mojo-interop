@@ -529,6 +529,18 @@ files = [
 ]
 
 [[package]]
+name = "mojo-errors"
+version = "0.0.1"
+description = "Automation Mojo Errors Module"
+category = "main"
+optional = false
+python-versions = ">=3.8,<4.0"
+files = [
+    {file = "mojo_errors-0.0.1-py3-none-any.whl", hash = "sha256:2fce119addbba21b2f59d0dff47c1267a1fc9dbc5e0788f89966a00cc35946e8"},
+    {file = "mojo_errors-0.0.1.tar.gz", hash = "sha256:9f2bf0c11ef7f334e136f5259101e56f4ba68fb7ee6023e9b0bb253019a1bdf5"},
+]
+
+[[package]]
 name = "mojo-networking"
 version = "0.0.7"
 description = "Automation Mojo Netorking Package (mojo-networking)"
@@ -1039,4 +1051,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0"
-content-hash = "365e92cffde0836d2f65ba4a767f8da2f8a450c5f988f0a3c68ace17c7c69e83"
+content-hash = "ee018dffa6dc8fff76f4b9bbbdd246ae1de8dba56f1dc4c2f532c300fea81f91"

@@ -32,7 +32,7 @@ import yaml
 
 from requests.exceptions import ConnectionError
 
-from mojo.xmods.exceptions import ConfigurationError, SemanticError
+from mojo.errors.exceptions import ConfigurationError, SemanticError
 from mojo.xmods.landscaping.friendlyidentifier import FriendlyIdentifier
 from mojo.xmods.xcollections.context import Context, ContextPaths
 

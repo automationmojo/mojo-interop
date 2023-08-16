@@ -18,7 +18,7 @@ __license__ = "MIT"
 from typing import Dict, List, Tuple, TYPE_CHECKING
 
 from mojo.xmods.xcollections.context import ContextPaths
-from mojo.xmods.exceptions import ConfigurationError, SemanticError
+from mojo.errors.exceptions import ConfigurationError, SemanticError
 from mojo.xmods.landscaping.coupling.coordinatorcoupling import CoordinatorCoupling
 
 from mojo.interop.protocols.upnp.upnpcoordinator import UpnpCoordinator

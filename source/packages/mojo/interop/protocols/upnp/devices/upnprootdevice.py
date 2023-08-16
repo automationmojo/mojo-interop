@@ -40,7 +40,7 @@ from requests.compat import urljoin
 
 from mojo.networking.exceptions import ProtocolError, HttpRequestError, NotOverloadedError
 
-from mojo.xmods.exceptions import  HttpRequestError, NotOverloadedError
+from mojo.errors.exceptions import  HttpRequestError, NotOverloadedError
 from mojo.xmods.extension.dynamic import generate_extension_key
 from mojo.xmods.fspath import normalize_name_for_path
 from mojo.xmods.landscaping.protocolextension import ProtocolExtension
