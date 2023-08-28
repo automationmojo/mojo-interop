@@ -608,7 +608,7 @@ def ssh_execute_command_in_channel(ssh_channel: paramiko.Channel, command: str, 
 
     return status, stdout, stderr
 
-@dataclasses
+@dataclasses.dataclass
 class SshJumpParams:
     host: str
     credential: SshCredential
