@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING
 from mojo.xmods.landscaping.friendlyidentifier import FriendlyIdentifier
 from mojo.xmods.landscaping.client.clientbase import ClientBase
 
+from mojo.interop.clients.linux.ext.commandsext import CommandsExt
 from mojo.interop.protocols.ssh.sshagent import SshAgent
 
 
@@ -32,9 +33,16 @@ class LinuxClient(ClientBase):
     def __init__(self, lscape: "Landscape", coordinator: "CoordinatorBase",
                  friendly_id:FriendlyIdentifier, device_type: str, device_config: dict):
         super().__init__(lscape, coordinator, friendly_id, device_type, device_config)
+
+        self._ext_commands = CommandsExt(self)
         return
+
+    @property
+    def commands(self) -> CommandsExt:
+        return self._ext_commands
 
     @property
     def ssh(self) -> SshAgent:
         sshagent = self._extensions["network/ssh"]
         return sshagent
+
