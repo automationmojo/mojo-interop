@@ -32,12 +32,11 @@ class CommandsExt:
 
         session: ISystemContext = None
         if sysctx is not None:
-            session = sysctx.open_session()
+            session = sysctx
         else:
-            self.client.
+            session = self.client.get_default_system_context()
 
         try:
-
             mparent = os.path.dirname(mpoint)
             if not session.directory_exists(mparent):
                 errmsg = f"The parent directory '{mparent}' of the specified mount point must exist. mpoint={mpoint}"
@@ -78,14 +77,18 @@ class CommandsExt:
 
         return
     
-    def nfs_mount(self, host:str, export: str, mpoint: str, extype: Type[Exception]=AssertionError):
+    def nfs_mount(self, host:str, export: str, mpoint: str, sysctx: Optional[ISystemContext]=None, extype: Type[Exception]=AssertionError):
         status, stdout, stderr = None, None, None
 
         sshclient = self.client.ssh
 
-        session: SshSession
-        with sshclient.open_session() as session:
+        session: ISystemContext = None
+        if sysctx is not None:
+            session = sysctx
+        else:
+            session = self.client.get_default_system_context()
 
+        try:
             mparent = os.path.dirname(mpoint)
             if not session.directory_exists(mparent):
                 errmsg = f"The parent directory '{mparent}' of the specified mount point must exist. mpoint={mpoint}"
@@ -104,21 +107,31 @@ class CommandsExt:
                 errmsg = format_command_result(errmsg, status, stdout, stderr, exp_status=0)
                 raise extype(errmsg)
 
+        finally:
+            session.close()
+
         return
 
-    def umount(self, mpoint: str, flags:str="", extype: Type[Exception]=AssertionError):
+    def umount(self, mpoint: str, flags:str="", sysctx: Optional[ISystemContext]=None, extype: Type[Exception]=AssertionError):
         status, stdout, stderr = None, None, None
 
         sshclient = self.client.ssh
 
-        session: SshSession
-        with sshclient.open_session() as session:
+        session: ISystemContext = None
+        if sysctx is not None:
+            session = sysctx
+        else:
+            session = self.client.get_default_system_context()
 
+        try:
             mnt_cmd = f"umount {flags} \"{mpoint}\""
             status, stderr, stdout = session.run_cmd(mnt_cmd)
             if status != 0:
                 errmsg = f"Error attempting to unmount mpoint={mpoint}."
                 errmsg = format_command_result(errmsg, status, stdout, stderr, exp_status=0)
                 raise extype(errmsg)
+
+        finally:
+            session.close()
 
         return
