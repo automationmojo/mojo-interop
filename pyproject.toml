@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "mojo-interop"
 description = "Automation Mojo Interop Extensions"
-version = "0.0.28"
+version = "0.0.29"
 authors = [
     "Myron Walker <myron.walker@gmail.com>"
 ]
@@ -22,7 +22,7 @@ repository = "https://github.com/automationmojo/mojo-interop"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<4.0"
-mojo-xmodules = ">=0.0.86 <0.1.0"
+mojo-xmodules = ">=0.0.87 <0.1.0"
 mojo-networking = ">=0.0.4 <0.1.0"
 mojo-errors = ">=0.0.1 < 0.1.0"
 
