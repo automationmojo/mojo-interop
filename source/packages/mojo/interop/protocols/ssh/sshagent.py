@@ -34,7 +34,7 @@ from mojo.waiting.waitmodel import TimeoutContext
 
 from mojo.xmods.aspects import ActionPattern, AspectsCmd, LoggingPattern, DEFAULT_CMD_ASPECTS
 from mojo.errors.exceptions import CommandError, ConfigurationError, NotOverloadedError, SemanticError
-from mojo.xmods.interfaces.icommandcontext import ICommandContext
+from mojo.xmods.interfaces.isystemcontext import ISystemContext
 
 
 from mojo.xmods.xformatting import indent_lines, format_command_result
@@ -615,7 +615,7 @@ class SshJumpParams:
     port: int = 22
 
 
-class SshBase(ICommandContext):
+class SshBase(ISystemContext):
     """
         The :class:`SshBase` object provides for the sharing of state and fuctional patterns
         for APIs between the :class:`SshSession` object and the :class:`SshAgent`.
@@ -1360,8 +1360,8 @@ class SshSession(SshBase):
 
         return
 
-    def open_session(self, primitive: bool = False, pty_params: Optional[dict] = None, interactive=False, cmd_context: Optional[ICommandContext] = None,
-                     aspects: Optional[AspectsCmd] = None) -> ICommandContext:
+    def open_session(self, primitive: bool = False, pty_params: Optional[dict] = None, interactive=False, cmd_context: Optional[ISystemContext] = None,
+                     aspects: Optional[AspectsCmd] = None, **kwargs) -> ISystemContext:
         """
             Provies a mechanism to create a :class:`SshSession` object with derived settings.  This method allows various parameters for the session
             to be overridden.  This allows for the performing of a series of SSH operations under a particular set of shared settings and or credentials.
@@ -1449,8 +1449,8 @@ class SshAgent(SshBase, ProtocolExtension):
         ProtocolExtension.initialize(self, coord_ref, basedevice_ref, extid, location, configinfo)
         return
 
-    def open_session(self, primitive: bool = False, pty_params: Optional[dict] = None, interactive=False, cmd_context: Optional[ICommandContext] = None,
-                     aspects: Optional[AspectsCmd] = None) -> ICommandContext:
+    def open_session(self, primitive: bool = False, pty_params: Optional[dict] = None, interactive=False, cmd_context: Optional[ISystemContext] = None,
+                     aspects: Optional[AspectsCmd] = None) -> ISystemContext:
         """
             Provies a mechanism to create a :class:`SshSession` object with derived settings.  This method allows various parameters for the session
             to be overridden.  This allows for the performing of a series of SSH operations under a particular set of shared settings and or credentials.
@@ -1458,7 +1458,7 @@ class SshAgent(SshBase, ProtocolExtension):
             :param primitive: Use primitive mode for FTP operations for the session.
             :param pty_params: The default pty parameters to use to request a PTY when running commands through the session.
             :param interactive: Creates an interactive session which holds open an interactive shell so commands can interact in the shell.
-            :param cmd_context: An optional ICommandContext instance to use as a session basis.  This allows re-use of sessions.
+            :param cmd_context: An optional ISystemContext instance to use as a session basis.  This allows re-use of sessions.
             :param aspects: The default run aspects to use for the operations performed by the session.
         """
 

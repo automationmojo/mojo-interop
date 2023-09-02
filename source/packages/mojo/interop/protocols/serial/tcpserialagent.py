@@ -21,7 +21,7 @@ from types import TracebackType
 import telnetlib
 
 from mojo.xmods.aspects import AspectsCmd, DEFAULT_CMD_ASPECTS
-from mojo.xmods.interfaces.icommandcontext import ICommandContext
+from mojo.xmods.interfaces.isystemcontext import ISystemContext
 from mojo.xmods.xconvert import (
     safe_as_bytes,
     safe_as_str
@@ -101,8 +101,8 @@ class TcpSerialSession(TcpSerialBase):
             self._telnet_conn.close()
         return
 
-    def open_session(self, session_basis: Optional[ICommandContext] = None,
-                     aspects: Optional[AspectsCmd] = None) -> ICommandContext: # pylint: disable=arguments-differ
+    def open_session(self, session_basis: Optional[ISystemContext] = None,
+                     aspects: Optional[AspectsCmd] = None, **kwargs) -> ISystemContext: # pylint: disable=arguments-differ
         """
             Provies a mechanism to create a :class:`TcpSerialSession` object with derived settings.  This method allows various
             parameters for the session to be overridden.  This allows for the performing of a series of TCP Serial operations under
@@ -158,8 +158,8 @@ class TcpSerialAgent(TcpSerialBase):
         super().__init__(host, port=port, aspects=aspects)
         return
 
-    def open_session(self, session_basis: Optional[ICommandContext] = None,
-                     aspects: Optional[AspectsCmd] = None) -> ICommandContext: # pylint: disable=arguments-differ
+    def open_session(self, session_basis: Optional[ISystemContext] = None,
+                     aspects: Optional[AspectsCmd] = None) -> ISystemContext: # pylint: disable=arguments-differ
         """
             Provies a mechanism to create a :class:`TcpSerialSession` object with derived settings.  This method allows various
             parameters for the session to be overridden.  This allows for the performing of a series of TCP Serial operations under
