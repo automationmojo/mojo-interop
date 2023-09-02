@@ -17,6 +17,7 @@ __license__ = "MIT"
 
 from typing import TYPE_CHECKING
 
+from mojo.xmods.interfaces.isystemcontext import ISystemContext
 from mojo.xmods.landscaping.friendlyidentifier import FriendlyIdentifier
 from mojo.xmods.landscaping.client.clientbase import ClientBase
 
@@ -45,4 +46,10 @@ class LinuxClient(ClientBase):
     def ssh(self) -> SshAgent:
         sshagent = self._extensions["network/ssh"]
         return sshagent
+    
+    def get_default_system_context(self) -> ISystemContext:
+        """
+            Called to get an ISystemContext instance that is a default system type.
+        """
+        return self.ssh
 

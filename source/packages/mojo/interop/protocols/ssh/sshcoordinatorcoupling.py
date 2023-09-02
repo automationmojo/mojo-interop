@@ -128,40 +128,6 @@ class SshCoordinatorCoupling(CoordinatorCoupling):
         return
 
     @classmethod
-    def establish_connectivity(cls, allow_missing_devices: bool=False) -> Tuple[List[str], dict]:
-        """
-            This API is called so the `IntegrationCoupling` can establish connectivity with any compute or storage
-            resources.
-
-            :returns: A tuple with a list of error messages for failed connections and dict of connectivity
-                      reports for devices devices based on the coordinator.
-        """
-
-        lscape = cls.landscape
-        layer_integ = lscape.layer_integration
-
-        device_list = layer_integ.get_devices()
-        if len(device_list) > 0:
-            ssh_device_list = [dev for dev in filter(is_ssh_device_config, device_list)]
-
-            if len(ssh_device_list) == 0:
-                raise SemanticError("We should have not been called if no SSH devices are available.")
-
-            upnp_coord = cls.landscape._internal_get_upnp_coord()
-
-            ssh_config_errors, matching_device_results, missing_device_results = cls.coordinator.attach_to_devices(
-                ssh_device_list, upnp_coord=upnp_coord)
-
-            ssh_scan_results = {
-                "ssh": {
-                    "matching_devices": matching_device_results,
-                    "missing_devices": missing_device_results
-                }
-            }
-
-        return (ssh_config_errors, ssh_scan_results)
-
-    @classmethod
     def establish_presence(cls) -> Tuple[List[str], dict]:
         """
             This API is called so the `IntegrationCoupling` can establish presence with any compute or storage
