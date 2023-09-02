@@ -6,6 +6,7 @@ import weakref
 
 from mojo.errors.exceptions import SemanticError
 
+from mojo.xmods.interfaces.isystemcontext import ISystemContext
 from mojo.xmods.xformatting import format_command_result
 
 from mojo.interop.protocols.ssh.sshagent import SshSession
@@ -25,14 +26,17 @@ class CommandsExt:
 
     def cifs_mount(self, share: str, mpoint: str, username: Optional[str]=None,
                    password: Optional[str]=None, domain: Optional[str]=None,
-                   extype: Type[Exception]=AssertionError):
+                   sysctx: Optional[ISystemContext]=None, extype: Type[Exception]=AssertionError):
 
         status, stdout, stderr = None, None, None
 
-        sshclient = self.client.ssh
+        session: ISystemContext = None
+        if sysctx is not None:
+            session = sysctx.open_session()
+        else:
+            self.client.
 
-        session: SshSession
-        with sshclient.open_session() as session:
+        try:
 
             mparent = os.path.dirname(mpoint)
             if not session.directory_exists(mparent):
@@ -69,6 +73,8 @@ class CommandsExt:
                 errmsg = f"Error attempting to mount cifs share={share} on mpoint={mpoint}."
                 errmsg = format_command_result(errmsg, status, stdout, stderr, exp_status=0)
                 raise extype(errmsg)
+        finally:
+            session.close()
 
         return
     
