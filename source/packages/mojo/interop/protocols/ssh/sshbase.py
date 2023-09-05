@@ -92,7 +92,11 @@ class SshBase(ISystemContext):
         self._jump = jump
         self._pty_params = pty_params
         self._called_id = called_id
-        self._target_tag = "[{}]".format(called_id)
+
+        self._target_tag = host
+        if self._called_id is not None:
+            self._target_tag = "[{}]".format(called_id)
+        
         self._aspects = aspects
 
         self._ipaddr = socket.gethostbyname(self._host)
