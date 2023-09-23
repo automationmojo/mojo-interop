@@ -274,7 +274,7 @@ class VSphereAgent:
 
         if container_path.find(":") >= 0:
             datacenter, folderspec = container_path.split(":")
-            dcrecord = self.DataCenter.get(datacenter)
+            dcrecord = self.DataCenter.get_by_name(datacenter)
             self._filter_state.set_working_datacenter(dcrecord)
 
         folderspec = folderspec.lstrip("/")
@@ -319,13 +319,13 @@ class VSphereAgent:
 
     def session_post(self, url: str, data=None, json=None, **kwargs) -> requests.Response:
 
-        resp = self._session.post(url, data=data, json=None, **kwargs)
+        resp = self._session.post(url, data=data, json=json, **kwargs)
 
         return resp
     
     def session_put(self, url: str, data=None, json=None, **kwargs) -> requests.Response:
 
-        resp = self._session.put(url, data=data, **kwargs)
+        resp = self._session.put(url, data=data, json=json, **kwargs)
 
         return resp
 

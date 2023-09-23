@@ -1,7 +1,7 @@
 
 from typing import List, Optional
 
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 
 from mojo.interop.services.vmware.metasphere.vmguestos import VmGuestOS
 from mojo.interop.services.vmware.metasphere.vmhardware import (
@@ -39,6 +39,11 @@ class VmHardwareSerialBackingInfo:
     no_rx_loss: Optional[str] = None
     pipe: Optional[str] = None
     proxy: Optional[str] = None
+
+    @classmethod
+    def from_dict(cls, info: dict) -> "VmHardwareSerialBackingInfo":
+        obj = VmHardwareSerialBackingInfo(**info)
+        return obj
     
 
 @dataclass
@@ -50,12 +55,22 @@ class VmHardwareSerialInfo:
     state: VmHardwareConnectionState
     yield_on_poll: bool
 
+    @classmethod
+    def from_dict(cls, info: dict) -> "VmHardwareSerialInfo":
+        info["backing"] = VmHardwareSerialBackingInfo.from_dict(info["backing"])
+        obj = VmHardwareSerialInfo(**info)
+        return obj
+
 @dataclass
 class VmHardwareBootDeviceEntry:
     type: VmHardwareBootDeviceType
     disks: List[str]
     nic: str
 
+    @classmethod
+    def from_dict(cls, info: dict) -> "VmHardwareBootDeviceEntry":
+        obj = VmHardwareBootDeviceEntry(**info)
+        return obj
 
 @dataclass
 class VmHardwareCdromBackingInfo:
@@ -65,15 +80,30 @@ class VmHardwareCdromBackingInfo:
     iso_file: str
     type: VmHardwareCdromBackingType
 
+    @classmethod
+    def from_dict(cls, info: dict) -> "VmHardwareCdromBackingInfo":
+        obj = VmHardwareCdromBackingInfo(**info)
+        return obj
+
 @dataclass
 class VmHardwareIdeAddressInfo:
     master: bool
     primary: bool
 
+    @classmethod
+    def from_dict(cls, info: dict) -> "VmHardwareIdeAddressInfo":
+        obj = VmHardwareIdeAddressInfo(**info)
+        return obj
+
 @dataclass
 class VmHardwareNvmeAddressInfo:
     bus: int
     unit: int
+
+    @classmethod
+    def from_dict(cls, info: dict) -> "VmHardwareNvmeAddressInfo":
+        obj = VmHardwareNvmeAddressInfo(**info)
+        return obj
 
 
 @dataclass
@@ -81,10 +111,20 @@ class VmHardwareSataAddressInfo:
     bus: int
     unit: int
 
+    @classmethod
+    def from_dict(cls, info: dict) -> "VmHardwareSataAddressInfo":
+        obj = VmHardwareSataAddressInfo(**info)
+        return obj
+
 @dataclass
 class VmHardwareScsiAddressInfo:
     bus: int
     unit: int
+
+    @classmethod
+    def from_dict(cls, info: dict) -> "VmHardwareScsiAddressInfo":
+        obj = VmHardwareScsiAddressInfo(**info)
+        return obj
 
 @dataclass
 class VmHardwareCdromInfo:
@@ -97,6 +137,14 @@ class VmHardwareCdromInfo:
     ide: VmHardwareIdeAddressInfo
     sata: VmHardwareSataAddressInfo
 
+    @classmethod
+    def from_dict(cls, info: dict) -> "VmHardwareCdromInfo":
+        info["backing"] = VmHardwareCdromBackingInfo.from_dict(info["backing"])
+        info["ide"] = VmHardwareIdeAddressInfo.from_dict(info["ide"])
+        info["sata"] = VmHardwareSataAddressInfo.from_dict(info["sata"])
+        obj = VmHardwareCdromInfo(**info)
+        return obj
+
 @dataclass
 class VmHardwareCpuInfo:
     cores_per_socket: int
@@ -104,10 +152,20 @@ class VmHardwareCpuInfo:
     hot_add_enabled: bool
     hot_remove_enabled: bool
 
+    @classmethod
+    def from_dict(cls, info: dict) -> "VmHardwareCpuInfo":
+        obj = VmHardwareCpuInfo(**info)
+        return obj
+
 @dataclass
 class VmHardwareDiskBackingInfo:
     type: VmHardwareDiskBackingType
     vmdk_file: str
+
+    @classmethod
+    def from_dict(cls, info: dict) -> "VmHardwareDiskBackingInfo":
+        obj = VmHardwareDiskBackingInfo(**info)
+        return obj
 
 @dataclass
 class VmHardwareDiskInfo:
@@ -120,12 +178,31 @@ class VmHardwareDiskInfo:
     scsi: Optional[VmHardwareScsiAddressInfo] = None
     capacity: Optional[int] = None
 
+    @classmethod
+    def from_dict(cls, info: dict) -> "VmHardwareCdromInfo":
+        info["backing"] = VmHardwareDiskBackingInfo.from_dict(info["backing"])
+        if "ide" in info:
+            info["ide"] = VmHardwareIdeAddressInfo.from_dict(info["ide"])
+        if "nvme" in info:
+            info["nvme"] = VmHardwareNvmeAddressInfo.from_dict(info["nvme"])
+        if "sata" in info:
+            info["sata"] = VmHardwareSataAddressInfo.from_dict(info["sata"])
+        if "scsi" in info:
+            info["scsi"] = VmHardwareScsiAddressInfo.from_dict(info["scsi"])
+        obj = VmHardwareDiskInfo(**info)
+        return obj
+
 @dataclass
 class VmHardwareFloppyBackingInfo:
     type: VmHardwareFloppyBackingType
     auto_detect: Optional[bool] = None
     host_device: Optional[str] = None
     image_file: Optional[str] = None
+
+    @classmethod
+    def from_dict(cls, info: dict) -> "VmHardwareFloppyBackingInfo":
+        obj = VmHardwareFloppyBackingInfo(**info)
+        return obj
 
 @dataclass
 class VmHardwareFloppyInfo:
@@ -134,6 +211,12 @@ class VmHardwareFloppyInfo:
     label: str
     start_connected: bool
     state: VmHardwareConnectionState
+
+    @classmethod
+    def from_dict(cls, info: dict) -> "VmHardwareFloppyInfo":
+        info["backing"] = VmHardwareFloppyBackingInfo.from_dict(info["backing"])
+        obj = VmHardwareFloppyInfo(**info)
+        return obj
 
 
 @dataclass
@@ -144,6 +227,10 @@ class VmHardwareInfo:
     upgrade_error: Optional[dict] = None
     upgrade_version: Optional[VmHardwareVersion] = None
 
+    @classmethod
+    def from_dict(cls, info: dict) -> "VmHardwareInfo":
+        obj = VmHardwareInfo(**info)
+        return obj
 
 @dataclass
 class VmHardwareAdapterScsiInfo:
@@ -152,6 +239,12 @@ class VmHardwareAdapterScsiInfo:
     sharing: VmHardwareAdapterScsiSharing
     type: VmHardwareAdapterScsiType
     pci_slot_number: int
+
+    @classmethod
+    def from_dict(cls, info: dict) -> "VmHardwareAdapterScsiInfo":
+        info["scsi"] = VmHardwareScsiAddressInfo.from_dict(info["scsi"])
+        obj = VmHardwareAdapterScsiInfo(**info)
+        return obj
 
 @dataclass
 class VmHardwareBootInfo:
@@ -163,12 +256,22 @@ class VmHardwareBootInfo:
     network_protocol: VmHardwareBootNetworkProtocol
     efi_legacy_boot: Optional[bool] = None
 
+    @classmethod
+    def from_dict(cls, info: dict) -> "VmHardwareBootInfo":
+        obj = VmHardwareBootInfo(**info)
+        return obj
+
 @dataclass
 class VmHardwareMemoryInfo:
     hot_add_enabled: bool
     size_MiB: int
     hot_add_increment_size_MiB: Optional[int] = None
     hot_add_limit_MiB: Optional[int] = None
+
+    @classmethod
+    def from_dict(cls, info: dict) -> "VmHardwareMemoryInfo":
+        obj = VmHardwareMemoryInfo(**info)
+        return obj
 
 
 @dataclass
@@ -182,6 +285,11 @@ class VmHardwareEthernetBackingInfo:
     network_name: Optional[str] = None
     opaque_network_id: Optional[str] = None
     opaque_network_type: Optional[str] = None
+
+    @classmethod
+    def from_dict(cls, info: dict) -> "VmHardwareEthernetBackingInfo":
+        obj = VmHardwareEthernetBackingInfo(**info)
+        return obj
 
 @dataclass
 class VmHardwareEthernetInfo:
@@ -197,6 +305,12 @@ class VmHardwareEthernetInfo:
     pci_slot_number: Optional[int] = None
     upt_compatibility_enabled: Optional[bool] = None
 
+    @classmethod
+    def from_dict(cls, info: dict) -> "VmHardwareEthernetInfo":
+        info["backing"] = VmHardwareEthernetBackingInfo.from_dict(info["backing"])
+        obj = VmHardwareEthernetInfo(**info)
+        return obj
+
 @dataclass
 class VmHardwareAdapterSataInfo:
     bus: int
@@ -204,12 +318,22 @@ class VmHardwareAdapterSataInfo:
     type: VmHardwareAdapterSataType
     pci_slot_number: Optional[int] = None
 
+    @classmethod
+    def from_dict(cls, info: dict) -> "VmHardwareAdapterSataInfo":
+        obj = VmHardwareAdapterSataInfo(**info)
+        return obj
+
 @dataclass
 class VmHardwareParallelBackingInfo:
     type: VmHardwareParallelBackingType
     auto_detect: Optional[bool] = None
     file: Optional[str] = None
     host_device: Optional[str] = None
+
+    @classmethod
+    def from_dict(cls, info: dict) -> "VmHardwareParallelBackingInfo":
+        obj = VmHardwareParallelBackingInfo(**info)
+        return obj
 
 @dataclass
 class VmHardwareParallelInfo:
@@ -219,17 +343,33 @@ class VmHardwareParallelInfo:
     start_connected: bool
     state: VmHardwareConnectionState
 
+    @classmethod
+    def from_dict(cls, info: dict) -> "VmHardwareParallelInfo":
+        info["backing"] = VmHardwareParallelBackingInfo.from_dict(info["backing"])
+        obj = VmHardwareParallelInfo(**info)
+        return obj
+
 @dataclass
 class VmHardwareAdapterNvmeInfo:
     bus: int
     label: str
     pci_slot_number: Optional[int] = None
 
+    @classmethod
+    def from_dict(cls, info: dict) -> "VmHardwareAdapterNvmeInfo":
+        obj = VmHardwareAdapterNvmeInfo(**info)
+        return obj
+
 @dataclass
 class VmIdentityInfo:
     bios_uuid: str
     instance_uuid: str
     name: str
+
+    @classmethod
+    def from_dict(cls, info: dict) -> "VmIdentityInfo":
+        obj = VmIdentityInfo(**info)
+        return obj
 
 @dataclass
 class VmInfo:
@@ -253,3 +393,26 @@ class VmInfo:
     identity: Optional[VmIdentityInfo] = None
     instant_clone_frozen: Optional[bool] = None
 
+    @classmethod
+    def from_dict(cls, info: dict) -> "VmHardwareAdapterNvmeInfo":
+
+        info["serial_ports"] = [VmHardwareSerialInfo.from_dict(item) for item in info["serial_ports"]]
+        info["boot_devices"] = [VmHardwareBootDeviceEntry.from_dict(item) for item in info["boot_devices"]]
+        info["cdroms"] = [VmHardwareCdromInfo.from_dict(item) for item in info["cdroms"]]
+        info["cpu"] = VmHardwareCpuInfo.from_dict(info["cpu"])
+        info["disks"] = [VmHardwareDiskInfo.from_dict(item) for item in info["disks"]]
+        info["floppies"] = [VmHardwareFloppyInfo.from_dict(item) for item in info["floppies"]]
+        info["hardware"] = VmHardwareInfo.from_dict(info["hardware"])
+        info["scsi_adapters"] = [VmHardwareAdapterScsiInfo.from_dict(item) for item in info["scsi_adapters"]]
+        info["boot"] = VmHardwareBootInfo.from_dict(info["boot"])
+        info["memory"] = VmHardwareMemoryInfo.from_dict(info["memory"])
+        info["nics"] = [VmHardwareEthernetInfo.from_dict(item) for item in info["nics"]]
+        info["sata_adapters"] = [VmHardwareAdapterSataInfo.from_dict(item) for item in info["sata_adapters"]]
+        info["parallel_ports"] = [VmHardwareParallelInfo.from_dict(item) for item in info["parallel_ports"]]
+        if "nvme_adapters" in info:
+            info["nvme_adapters"] = [VmHardwareAdapterNvmeInfo.from_dict(item) for item in info["nvme_adapters"]]
+        if "identity" in info:
+            info["identity"] = VmIdentityInfo.from_dict(info["identity"])
+
+        obj = VmHardwareAdapterNvmeInfo(**info)
+        return obj

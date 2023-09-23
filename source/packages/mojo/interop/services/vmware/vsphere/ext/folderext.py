@@ -80,10 +80,10 @@ class FolderExt(BaseExt):
 
         if parentfolders is not None:
             filter_parent_folders = [ pf.folder for pf in parentfolders ]
-            params['parent_folders'] = filter_parent_folders
+            params['folders'] = filter_parent_folders
         elif agent.filter_state.has_working_folder_filter:
             filter_parent_folders = [ agent.filter_state.working_folder.folder ]
-            params['parent_folders'] = filter_parent_folders
+            params['folders'] = filter_parent_folders
 
         resp = agent.session_get(req_url, params=params)
 

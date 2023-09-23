@@ -105,22 +105,31 @@ class VmExt(BaseExt):
         resp = agent.session_post(req_url, data=payload, action="clone")
         if resp.status_code == HTTPStatus.OK:
             vminfo_dict = resp.json()
-            vminfo = VmInfo(**vminfo_dict)
+            vminfo = VmInfo.from_dict(vminfo_dict)
         else:
             resp.raise_for_status()
 
         return vminfo
 
-    def clone(self, source: str, name: str, power_on: bool=False, customizations: Optional[dict]=None):
+    def clone(self, source: str, name: str, power_on: bool=False, customizations: Optional[dict]=None,
+              parentfolder: Optional[FolderSummary] = None) -> VmSummary:
 
         vminfo = None
 
         agent = self.agent
 
+        placement = {}
+
+        if parentfolder is not None:
+            placement["folder"] = parentfolder.folder
+        elif agent.filter_state.has_working_folder_filter:
+            placement["folder"] = agent.filter_state.working_folder.folder
+
         body = {
             "name": name,
             "source": source,
-            "power_on": power_on
+            "power_on": power_on,
+            "placement": placement
         }
 
         if customizations is not None:
@@ -128,9 +137,10 @@ class VmExt(BaseExt):
 
         req_url = agent.build_api_url(f"/vcenter/vm")
 
-        resp = agent.session_post(req_url, json=body, action="clone")
+        resp = agent.session_post(req_url, json=body, params={"action": "clone"})
         if resp.status_code == HTTPStatus.OK:
-            vminfo = resp.json()
+            vm_id = resp.json()
+            vminfo = self.get(vm_id)
         else:
             resp.raise_for_status()
 
@@ -148,7 +158,7 @@ class VmExt(BaseExt):
 
         return
 
-    def get(self, id: str):
+    def get(self, id: str) -> VmInfo:
 
         vminfo = None
 
@@ -159,40 +169,26 @@ class VmExt(BaseExt):
         resp = agent.session_get(req_url)
         if resp.status_code == HTTPStatus.OK:
             vminfo = resp.json()
+            vminfo = VmInfo.from_dict(vminfo)
 
         else:
             resp.raise_for_status()
 
         return vminfo
 
-    def instant_clone(self, source: str, name: str, placement: Optional[dict]=None, hwoptions: Optional[dict]=None):
+    def get_summary_by_name(self, name: str) -> VmSummary:
+        
+        vm_summary = None
 
-        vminfo = None
+        vm_list = self.list()
+        for vmitem in vm_list:
+            if vmitem.name == name:
+                vm_summary = vmitem
+                break
 
-        agent = self.agent
+        return vm_summary
 
-        body = {
-            "name": name,
-            "source": source,
-        }
-
-        if placement is not None:
-            body["placement"] = placement
-
-        if hwoptions is not None:
-            body.update(hwoptions)
-
-        req_url = agent.build_api_url(f"/vcenter/vm")
-
-        resp = agent.session_post(req_url, json=body, action="clone")
-        if resp.status_code == HTTPStatus.OK:
-            vminfo = resp.json()
-        else:
-            resp.raise_for_status()
-
-        return vminfo
-
-    def list(self, *, datacenters: Optional[List[DatacenterSummary]]=None, parentfolders: Optional[List[FolderSummary]]=None):
+    def list(self, *, datacenters: Optional[List[DatacenterSummary]]=None, parentfolders: Optional[List[FolderSummary]]=None) -> List[VmSummary]:
 
         vm_list = None
 
@@ -210,18 +206,16 @@ class VmExt(BaseExt):
 
         if parentfolders is not None:
             filter_parent_folders = [ pf.folder for pf in parentfolders ]
-            params['parent_folders'] = filter_parent_folders
+            params['folders'] = filter_parent_folders
         elif agent.filter_state.has_working_folder_filter:
             filter_parent_folders = [ agent.filter_state.working_folder.folder ]
-            params['parent_folders'] = filter_parent_folders
+            params['folders'] = filter_parent_folders
 
         resp = agent.session_get(req_url, params=params)
 
         if resp.status_code == HTTPStatus.OK:
             vm_json_list = resp.json()
-            for vmitem in vm_json_list:
-                vmsummary = VmSummary(**vmitem)
-                vm_list.append(vmsummary)
+            vm_list = [VmSummary(**vmitem) for vmitem in vm_json_list]
         else:
             resp.raise_for_status()
 
