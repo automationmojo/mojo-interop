@@ -12,6 +12,15 @@
             "console": "integratedTerminal",
             "justMyCode": false,
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "name": "Python: Example - Tasking Server",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/source/examples/taskingserverexample.py",
+            "args": [],
+            "console": "integratedTerminal",
+            "justMyCode": false
         }
     ]
 }

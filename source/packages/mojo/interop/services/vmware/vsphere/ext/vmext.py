@@ -112,9 +112,9 @@ class VmExt(BaseExt):
         return vminfo
 
     def clone(self, source: str, name: str, power_on: bool=False, customizations: Optional[dict]=None,
-              parentfolder: Optional[FolderSummary] = None) -> VmSummary:
+              parentfolder: Optional[FolderSummary] = None) -> str:
 
-        vminfo = None
+        vm_id = None
 
         agent = self.agent
 
@@ -140,11 +140,10 @@ class VmExt(BaseExt):
         resp = agent.session_post(req_url, json=body, params={"action": "clone"})
         if resp.status_code == HTTPStatus.OK:
             vm_id = resp.json()
-            vminfo = self.get(vm_id)
         else:
             resp.raise_for_status()
 
-        return vminfo
+        return vm_id
 
     def delete(self, id: str):
 

@@ -74,11 +74,11 @@ class VmHardwareBootDeviceEntry:
 
 @dataclass
 class VmHardwareCdromBackingInfo:
-    auto_detect: bool
-    device_access_type: VmHardwareCdromDeviceAccessType
-    host_device: str
     iso_file: str
     type: VmHardwareCdromBackingType
+    auto_detect: Optional[bool]
+    device_access_type: Optional[VmHardwareCdromDeviceAccessType]
+    host_device: Optional[str]
 
     @classmethod
     def from_dict(cls, info: dict) -> "VmHardwareCdromBackingInfo":
@@ -134,14 +134,16 @@ class VmHardwareCdromInfo:
     start_connected: bool
     state: VmHardwareConnectionState
     type: VmHardwareCdromHostBusAdapterType
-    ide: VmHardwareIdeAddressInfo
-    sata: VmHardwareSataAddressInfo
+    ide: Optional[VmHardwareIdeAddressInfo] = None
+    sata: Optional[VmHardwareSataAddressInfo] = None
 
     @classmethod
     def from_dict(cls, info: dict) -> "VmHardwareCdromInfo":
         info["backing"] = VmHardwareCdromBackingInfo.from_dict(info["backing"])
-        info["ide"] = VmHardwareIdeAddressInfo.from_dict(info["ide"])
-        info["sata"] = VmHardwareSataAddressInfo.from_dict(info["sata"])
+        if "ide" in info:
+            info["ide"] = VmHardwareIdeAddressInfo.from_dict(info["ide"])
+        if "sata" in info:
+            info["sata"] = VmHardwareSataAddressInfo.from_dict(info["sata"])
         obj = VmHardwareCdromInfo(**info)
         return obj
 
@@ -253,7 +255,7 @@ class VmHardwareBootInfo:
     retry: bool
     retry_delay: int
     type: VmHardwareBootType
-    network_protocol: VmHardwareBootNetworkProtocol
+    network_protocol: Optional[VmHardwareBootNetworkProtocol] = None
     efi_legacy_boot: Optional[bool] = None
 
     @classmethod
@@ -398,19 +400,19 @@ class VmInfo:
 
         info["serial_ports"] = [VmHardwareSerialInfo.from_dict(item) for item in info["serial_ports"]]
         info["boot_devices"] = [VmHardwareBootDeviceEntry.from_dict(item) for item in info["boot_devices"]]
-        info["cdroms"] = [VmHardwareCdromInfo.from_dict(item) for item in info["cdroms"]]
+        info["cdroms"] = { key: VmHardwareCdromInfo.from_dict(item) for key, item in info["cdroms"].items() }
         info["cpu"] = VmHardwareCpuInfo.from_dict(info["cpu"])
-        info["disks"] = [VmHardwareDiskInfo.from_dict(item) for item in info["disks"]]
-        info["floppies"] = [VmHardwareFloppyInfo.from_dict(item) for item in info["floppies"]]
+        info["disks"] = { key: VmHardwareDiskInfo.from_dict(item) for key, item in info["disks"].items() }
+        info["floppies"] = { key: VmHardwareFloppyInfo.from_dict(item) for key, item in info["floppies"].items() }
         info["hardware"] = VmHardwareInfo.from_dict(info["hardware"])
-        info["scsi_adapters"] = [VmHardwareAdapterScsiInfo.from_dict(item) for item in info["scsi_adapters"]]
+        info["scsi_adapters"] = { key: VmHardwareAdapterScsiInfo.from_dict(item) for key, item in info["scsi_adapters"].items() }
         info["boot"] = VmHardwareBootInfo.from_dict(info["boot"])
         info["memory"] = VmHardwareMemoryInfo.from_dict(info["memory"])
-        info["nics"] = [VmHardwareEthernetInfo.from_dict(item) for item in info["nics"]]
-        info["sata_adapters"] = [VmHardwareAdapterSataInfo.from_dict(item) for item in info["sata_adapters"]]
-        info["parallel_ports"] = [VmHardwareParallelInfo.from_dict(item) for item in info["parallel_ports"]]
+        info["nics"] = { key: VmHardwareEthernetInfo.from_dict(item) for key, item in info["nics"].items() }
+        info["sata_adapters"] = { key: VmHardwareAdapterSataInfo.from_dict(item) for key, item in info["sata_adapters"].items() }
+        info["parallel_ports"] = { key: VmHardwareParallelInfo.from_dict(item) for key, item in info["parallel_ports"].items() }
         if "nvme_adapters" in info:
-            info["nvme_adapters"] = [VmHardwareAdapterNvmeInfo.from_dict(item) for item in info["nvme_adapters"]]
+            info["nvme_adapters"] = { key: VmHardwareAdapterNvmeInfo.from_dict(item) for key, item in info["nvme_adapters"].items() }
         if "identity" in info:
             info["identity"] = VmIdentityInfo.from_dict(info["identity"])
 
