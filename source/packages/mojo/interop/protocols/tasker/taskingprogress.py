@@ -25,3 +25,14 @@ class TaskingProgress:
     range_max: int
     position: int
     status: str
+
+    def as_dict(self) -> dict:
+
+        rtnval = {
+            "range_min": self.range_min,
+            "range_max": self.range_max,
+            "position": self.position,
+            "status": self.status
+        }
+
+        return rtnval

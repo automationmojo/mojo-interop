@@ -28,7 +28,7 @@ from logging import Logger, getLogger
 from uuid import uuid4
 
 from mojo.errors.exceptions import NotOverloadedError
-from mojo.interop.protocols.tasker.taskingresult import TaskingResult, TaskingResultPromise
+from mojo.interop.protocols.tasker.taskingresult import TaskingStatus, TaskingResult, TaskingResultPromise
 from mojo.interop.protocols.tasker.taskingprogress import TaskingProgress
 from mojo.interop.protocols.tasker.taskeraspects import TaskerAspects
 
@@ -55,9 +55,11 @@ class Tasking:
         self._aspects = aspects
 
         self._result = None
+        self._task_status = None
         
         # Progress queue is used by the task process to push back progress and
         # results.
+        self._current_progress = None
         self._progress_queue: multiprocessing.JoinableQueue = None
 
         return
@@ -139,8 +141,12 @@ class Tasking:
 
         self.begin()
         try:
+            progress = self.generate_progress_start()
+            self.mark_progress(progress)
+
             result_code = self.perform(**kwargs)
             self._result.mark_result(result_code)
+            
             progress_queue.put_nowait(self._result)
         except Exception as err:
             result_code = -888
@@ -148,6 +154,22 @@ class Tasking:
             self.finalize(result_code)
 
         return
+
+    def generate_progress_complete(self) -> TaskingProgress:
+        proginfo = self._current_progress.as_dict()
+        proginfo["status"] = TaskingStatus.Completed
+        progress = TaskingProgress(**proginfo)
+        return progress
+    
+    def generate_progress_errored(self) -> TaskingProgress:
+        proginfo = self._current_progress.as_dict()
+        proginfo["status"] = TaskingStatus.Errored
+        progress = TaskingProgress(**proginfo)
+        return progress
+
+    def generate_progress_start(self) -> TaskingProgress:
+        self._current_progress = TaskingProgress(0, 0, 0, TaskingStatus.Running)
+        return self._current_progress
 
     def perform(self, **kwargs: dict):
         errmsg = "Tasking.perform method must be overloaded in derived types."
