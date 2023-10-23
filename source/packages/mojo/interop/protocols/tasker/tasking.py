@@ -18,12 +18,13 @@ __status__ = "Development" # Prototype, Development or Production
 __license__ = "MIT"
 
 
-from typing import Optional
+from typing import Optional, Tuple
 
 import multiprocessing
 import os
 import sys
 
+from dataclasses import dataclass
 from logging import Logger, getLogger
 from uuid import uuid4
 
@@ -31,6 +32,15 @@ from mojo.errors.exceptions import NotOverloadedError
 from mojo.interop.protocols.tasker.taskingresult import TaskingStatus, TaskingResult, TaskingResultPromise
 from mojo.interop.protocols.tasker.taskingprogress import TaskingProgress
 from mojo.interop.protocols.tasker.taskeraspects import TaskerAspects
+
+@dataclass
+class TaskingIdentity:
+    module_name: str
+    tasking_name: str
+
+    def as_tuple(self) -> Tuple[str, str]:
+        return self.module_name, self.tasking_name
+
 
 class Tasking:
     """
@@ -63,6 +73,13 @@ class Tasking:
         self._progress_queue: multiprocessing.JoinableQueue = None
 
         return
+
+    @classmethod
+    def get_identity(cls) -> TaskingIdentity:
+        module_name = cls.__module__
+        tasking_name = cls.__name__
+        identity = TaskingIdentity(module_name=module_name, tasking_name=tasking_name)
+        return identity
 
     def begin(self):
         self._result = TaskingResult(task_id=self._task_id, parent_id=self._parent_id)

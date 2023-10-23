@@ -28,7 +28,7 @@ def tasking_server_example_main():
     for node in controller.tasker_nodes:
         print(f"    ipaddr={node.ipaddr} port={node.port} ...")
 
-    controller.execute_task_on_all_nodes(module_name="__main__", tasking_name="PrintTasking", message="Hello World")
+    controller.execute_task_on_all_nodes(tasking=PrintTasking, message="Hello World")
 
     return
 

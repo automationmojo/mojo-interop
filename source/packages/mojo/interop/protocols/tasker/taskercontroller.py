@@ -17,10 +17,11 @@ __status__ = "Development" # Prototype, Development or Production
 __license__ = "MIT"
 
 
-from typing import List, Optional
+from typing import List, Optional, Type, Union
 
 from mojo.errors.exceptions import NotOverloadedError, SemanticError
 
+from mojo.interop.protocols.tasker.tasking import Tasking, TaskingIdentity
 from mojo.interop.protocols.tasker.taskernode import TaskerNode
 from mojo.interop.protocols.tasker.taskingresult import TaskingResult
 from mojo.interop.protocols.tasker.taskerservice import TaskerService
@@ -58,9 +59,13 @@ class ProcessTaskerController(TaskerController):
         self._svr_proxies: List[TaskerService] = []
         return
 
-    def execute_task_on_all_nodes(self, *, module_name: str, tasking_name: str, parent_id: str = None, **kwargs) -> List[TaskingResult]:
+    def execute_task_on_all_nodes(self, *, tasking: Union[TaskingIdentity, Type[Tasking]], parent_id: str = None, **kwargs) -> List[TaskingResult]:
 
         result_list = []
+
+        if not isinstance(tasking, TaskingIdentity):
+            tasking = tasking.get_identity()
+        module_name, tasking_name = tasking.as_tuple()
 
         for node in self._tasker_nodes:
             result = node.execute_tasking(module_name=module_name, tasking_name=tasking_name, parent_id=parent_id, **kwargs)
@@ -68,10 +73,14 @@ class ProcessTaskerController(TaskerController):
 
         return result_list
 
-    def execute_task_on_node(self, nindex: int, *, module_name: str, tasking_name: str, parent_id: str = None, **kwargs) -> TaskingResult:
+    def execute_task_on_node(self, nindex: int, *, tasking: Union[TaskingIdentity, Type[Tasking]], parent_id: str = None, **kwargs) -> TaskingResult:
 
         result = None
 
+        if not isinstance(tasking, TaskingIdentity):
+            tasking = tasking.get_identity()
+        module_name, tasking_name = tasking.as_tuple()
+        
         node_count = len(self._tasker_nodes)
         if nindex < node_count:
             node = self._tasker_nodes[nindex]
