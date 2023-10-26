@@ -32,7 +32,7 @@ import rpyc
 
 from mojo.errors.exceptions import SemanticError
 from mojo.xmods.ximport import import_by_name
-from mojo.interop.protocols.tasker.taskingresult import TaskingResult, TaskingStatus, TaskingResultPromise
+from mojo.interop.protocols.tasker.taskingresult import TaskingResult, TaskingStatus, TaskingRef
 from mojo.interop.protocols.tasker.taskeraspects import TaskerAspects
 from mojo.interop.protocols.tasker.tasking import Tasking
 
@@ -76,9 +76,9 @@ class TaskerService(rpyc.Service):
         return
 
     def exposed_execute_tasking(self, *, module_name: str, tasking_name: str, parent_id: Optional[str] = None,
-                                aspects: Optional[TaskerAspects]=None, **kwargs) -> TaskingResultPromise:
+                                aspects: Optional[TaskerAspects]=None, **kwargs) -> dict:
 
-        promise = None
+        taskref = None
 
         if aspects is None:
             aspects = self._aspects
@@ -100,8 +100,7 @@ class TaskerService(rpyc.Service):
                 
                 logger = logging.getLogger("tasker-server")
 
-            tasking_fullname = f"{module_name}@{tasking_name}"
-            promise = TaskingResultPromise(module_name, tasking_fullname, task_id, logfile)
+            taskref = TaskingRef(module_name, task_id, tasking_name, logfile)
 
             tasking: Tasking = tasking_type(task_id=task_id, parent_id=parent_id, logfile=logfile, logger=logger, aspects=aspects)
             self.taskings[task_id] = tasking
@@ -122,7 +121,7 @@ class TaskerService(rpyc.Service):
             errmsg = f"The specified tasking 'module' was not found. module={module_name} tasking={tasking_name}"
             raise ValueError(errmsg)
 
-        return promise
+        return taskref.as_dict()
 
     def exposed_get_tasking_result(self, *, task_id) -> TaskingResult:
 

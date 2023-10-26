@@ -19,7 +19,7 @@ __license__ = "MIT"
 
 import rpyc
 
-from mojo.interop.protocols.tasker.taskingresult import TaskingResult
+from mojo.interop.protocols.tasker.taskingresult import TaskingResultPromise
 
 class TaskerNode:
     """
@@ -40,15 +40,16 @@ class TaskerNode:
     def port(self):
         return self._port
 
-    def execute_tasking(self, *, module_name: str, tasking_name: str, **kwargs) -> TaskingResult:
+    def execute_tasking(self, *, module_name: str, tasking_name: str, **kwargs) -> TaskingResultPromise:
 
         if self._client is None:
             self._connect()
 
-        result = self._client.root.execute_tasking(module_name=module_name, tasking_name=tasking_name, **kwargs)
+        taskref_info = self._client.root.execute_tasking(module_name=module_name, tasking_name=tasking_name, **kwargs)
+        promise = TaskingResultPromise(taskref_info["module_name"], taskref_info["task_id"], taskref_info["task_name"], taskref_info["log_file"], self._client)
 
-        return result
+        return promise
 
     def _connect(self):
-        self._client = rpyc.connect(self._ipaddr, self._port, keepalive=True)
+        self._client = rpyc.connect(self._ipaddr, self._port, keepalive=True, config={'allow_public_attrs': True})
         return

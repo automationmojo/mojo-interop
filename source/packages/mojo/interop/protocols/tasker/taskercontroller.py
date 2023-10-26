@@ -23,7 +23,7 @@ from mojo.errors.exceptions import NotOverloadedError, SemanticError
 
 from mojo.interop.protocols.tasker.tasking import Tasking, TaskingIdentity
 from mojo.interop.protocols.tasker.taskernode import TaskerNode
-from mojo.interop.protocols.tasker.taskingresult import TaskingResult
+from mojo.interop.protocols.tasker.taskingresult import TaskingResultPromise
 from mojo.interop.protocols.tasker.taskerservice import TaskerService
 
 from mojo.interop.protocols.tasker.taskerservermanager import TaskerServerManager, spawn_tasking_server_process
@@ -59,23 +59,23 @@ class ProcessTaskerController(TaskerController):
         self._svr_proxies: List[TaskerService] = []
         return
 
-    def execute_task_on_all_nodes(self, *, tasking: Union[TaskingIdentity, Type[Tasking]], parent_id: str = None, **kwargs) -> List[TaskingResult]:
+    def execute_task_on_all_nodes(self, *, tasking: Union[TaskingIdentity, Type[Tasking]], parent_id: str = None, **kwargs) -> List[TaskingResultPromise]:
 
-        result_list = []
+        promise_list = []
 
         if not isinstance(tasking, TaskingIdentity):
             tasking = tasking.get_identity()
         module_name, tasking_name = tasking.as_tuple()
 
         for node in self._tasker_nodes:
-            result = node.execute_tasking(module_name=module_name, tasking_name=tasking_name, parent_id=parent_id, **kwargs)
-            result_list.append(result)
+            promise = node.execute_tasking(module_name=module_name, tasking_name=tasking_name, parent_id=parent_id, **kwargs)
+            promise_list.append(promise)
 
-        return result_list
+        return promise_list
 
-    def execute_task_on_node(self, nindex: int, *, tasking: Union[TaskingIdentity, Type[Tasking]], parent_id: str = None, **kwargs) -> TaskingResult:
+    def execute_task_on_node(self, nindex: int, *, tasking: Union[TaskingIdentity, Type[Tasking]], parent_id: str = None, **kwargs) -> TaskingResultPromise:
 
-        result = None
+        promise = None
 
         if not isinstance(tasking, TaskingIdentity):
             tasking = tasking.get_identity()
@@ -84,12 +84,12 @@ class ProcessTaskerController(TaskerController):
         node_count = len(self._tasker_nodes)
         if nindex < node_count:
             node = self._tasker_nodes[nindex]
-            result = node.execute_tasking(module_name=module_name, tasking_name=tasking_name, parent_id=parent_id, **kwargs)
+            promise = node.execute_tasking(module_name=module_name, tasking_name=tasking_name, parent_id=parent_id, **kwargs)
         else:
             errmsg = f"The specified node index nindex={nindex} is out of range. min=0 max={node_count}"
             raise IndexError(errmsg)
         
-        return result
+        return promise
 
     def start_task_network(self, node_count=5):
         """

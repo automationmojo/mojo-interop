@@ -16,7 +16,7 @@ __status__ = "Development" # Prototype, Development or Production
 __license__ = "MIT"
 
 
-from typing import Optional
+from typing import Any, Optional
 
 import os
 import time
@@ -26,8 +26,10 @@ from datetime import datetime
 from datetime import datetime, timedelta
 from uuid import uuid4
 
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 
+DEFAULT_WAIT_TIMEOUT = 600
+DEFAULT_WAIT_INTERVAL = 5
 
 class TaskingStatus:
     Completed = "Completed"
@@ -69,29 +71,27 @@ class TaskingResult:
         return
 
 
+@dataclass
+class TaskingRef:
+    
+    module_name: str
+    task_id: str
+    task_name: str
+    log_file: str
 
+    def as_dict(self):
+        rtnval = asdict(self)
+        return rtnval
+
+@dataclass
 class TaskingResultPromise:
+    module_name: str
+    task_id: str
+    task_name: str
+    log_file: str
+    client: Any
 
-    def __init__(self, module_name: str, task_name: str, task_id: str, logfile: str) -> None:
-        self._module_name = module_name
-        self._task_name = task_name
-        self._task_id = task_id
-        self._logfile = logfile
-        return
-    
-    @property
-    def module_name(self):
-        return self._module_name
-    
-    @property
-    def task_id(self):
-        return self._task_id
-
-    @property
-    def task_name(self):
-        return self._task_name
-
-    def wait(self, timeout: float, interval: float):
+    def wait(self, timeout: float=DEFAULT_WAIT_TIMEOUT, interval: float=DEFAULT_WAIT_INTERVAL):
 
         finished = False
 
@@ -124,4 +124,11 @@ class TaskingResultPromise:
         return
     
     def _is_task_complete(self) -> bool:
-        return
+
+        rtnval = False
+
+        status = self.client.root.get_tasking_status(task_id=self.task_id)
+        if status == TaskingStatus.Completed:
+            rtnval = True
+
+        return rtnval

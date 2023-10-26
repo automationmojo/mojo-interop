@@ -30,7 +30,7 @@ from logging import Logger, getLogger
 from uuid import uuid4
 
 from mojo.errors.exceptions import NotOverloadedError
-from mojo.interop.protocols.tasker.taskingresult import TaskingStatus, TaskingResult, TaskingResultPromise
+from mojo.interop.protocols.tasker.taskingresult import TaskingStatus, TaskingResult
 from mojo.interop.protocols.tasker.taskingprogress import TaskingProgress
 from mojo.interop.protocols.tasker.taskeraspects import TaskerAspects
 
@@ -114,7 +114,7 @@ class Tasking:
         self._kwparams = kwparams
         return
 
-    def execute(self, kwparams: dict, aspects: Optional[TaskerAspects] = None) -> TaskingResultPromise:
+    def execute(self, kwparams: dict, aspects: Optional[TaskerAspects] = None):
         """
             The `execute` method is called by the tasking service in order to trigger the execution
             of the task.
