@@ -112,7 +112,6 @@ class Tasking:
             and to create the result container.
         """
         self._kwparams = kwparams
-        self._result = TaskingResult(task_id=self._task_id, parent_id=self._parent_id)
         return
 
     def execute(self, kwparams: dict, aspects: Optional[TaskerAspects] = None) -> TaskingResultPromise:
@@ -132,8 +131,7 @@ class Tasking:
             The `evaluate_results` method is called in order to process information to
             create a final status code for the given tasking.
         """
-        errmsg = "Tasking.evaluate_results method must be overloaded in derived types."
-        raise NotOverloadedError(errmsg)
+        return 0
 
     def finalize(self):
         """
@@ -352,8 +350,10 @@ class Tasking:
 
         self._running = True
 
-        threading.Thread(target=self._effect_dispatcher_entry, name="effect-dispatcher", daemon=True)
+        eth = threading.Thread(target=self._effect_dispatcher_entry, name="effect-dispatcher", daemon=True)
+        eth.start()
 
+        self._result = TaskingResult(task_id=self._task_id, parent_id=self._parent_id)
         self.begin(kwparams)
         self._task_status = TaskingStatus.Running
 
