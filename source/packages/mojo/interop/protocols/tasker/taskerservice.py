@@ -53,6 +53,8 @@ class TaskerService(rpyc.Service):
         self._aspects = None
         self._logging_directory = None
         self._tasking_log_directory = None
+        self._notify_url = None
+        self._notify_headers = None
         return
 
     def exposed_dispose_tasking(self, *, task_id):
@@ -80,9 +82,6 @@ class TaskerService(rpyc.Service):
 
         taskref = None
 
-        if aspects is None:
-            aspects = self._aspects
-
         module = import_by_name(module_name)
 
         if hasattr(module, tasking_name):
@@ -102,7 +101,9 @@ class TaskerService(rpyc.Service):
 
             taskref = TaskingRef(module_name, task_id, tasking_name, logfile)
 
-            tasking: Tasking = tasking_type(task_id=task_id, parent_id=parent_id, logfile=logfile, logger=logger, aspects=aspects)
+            tasking: Tasking = tasking_type(task_id=task_id, parent_id=parent_id, notify_url=self._notify_url,
+                                            notify_headers=self._notify_headers, logfile=logfile, logger=logger,
+                                            aspects=aspects)
             self.taskings[task_id] = tasking
 
             sgate = threading.Event()
@@ -158,8 +159,9 @@ class TaskerService(rpyc.Service):
 
         return tstatus
 
-    def exposed_set_default_aspects(self, *, aspects: TaskerAspects):
-        self._aspects = aspects
+    def exposed_set_notify_parameters(self, *, notify_url: str, notify_headers: dict):
+        self._notify_url = notify_url
+        self._notify_headers = notify_headers
         return
     
     def dispatch_task(self, sgate: threading.Event, tasking: Tasking, aspects: Union[TaskerAspects, None], kwparams: dict):

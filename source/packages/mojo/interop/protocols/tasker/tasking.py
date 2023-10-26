@@ -216,7 +216,11 @@ class Tasking:
 
             body = progress.as_dict()
 
-            requests.post(self._notify_url, json=body, headers=headers)
+            try:
+                requests.post(self._notify_url, json=body, headers=headers)
+            except Exception as xcpt:
+                print(xcpt)
+                self._logger.error(f"Failure during notification to url='{self._notify_url}'")
 
         return
 

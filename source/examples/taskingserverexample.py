@@ -2,6 +2,7 @@
 import os
 import tempfile
 import time
+import threading
 
 from logging import Logger
 
@@ -11,6 +12,23 @@ from mojo.interop.protocols.tasker.taskercontroller import ProcessTaskerControll
 from mojo.interop.protocols.tasker.taskingprogress import TaskingProgress
 from mojo.interop.protocols.tasker.taskingresult import TaskingStatus
 from mojo.interop.protocols.tasker.tasking import Tasking
+
+from http.server import HTTPServer, BaseHTTPRequestHandler
+
+class NotifyRequestHandler(BaseHTTPRequestHandler):
+
+    def do_POST(self):
+
+        content_length = self.headers['content-length']
+        length = int(content_length) if content_length else 0
+
+        print("------------- Processing Notification-------------")
+        print(self.rfile.read(length).decode())
+        print("--------------------------------------------------")
+        print("")
+
+        return
+
 
 
 class PrintTasking(Tasking):
@@ -23,6 +41,7 @@ class PrintTasking(Tasking):
         }
         
         time.sleep(5)
+
         return
 
     def mark_progress_start(self):
@@ -42,24 +61,34 @@ class PrintTasking(Tasking):
 
         return morework
 
-    def notify_progress(self, progress: TaskingProgress):
-        
-        position = progress.position
-        data = progress.data
 
-        message = data["message"]
-        pid = data["pid"]
+def notify_server_main(sgate: threading.Event, notify_addr: str, notify_port: int):
 
-        print(f"{message} #{position} from {pid}")
-        return
+    notify_server = HTTPServer((notify_addr, notify_port), NotifyRequestHandler)
 
+    sgate.set()
+
+    notify_server.serve_forever()
+    return
 
 def tasking_server_example_main():
+
+    notify_addr = ""
+    notify_port = 8686
+
+    nsgate = threading.Event()
+    nsgate.clear()
+
+    notifyth = threading.Thread(target=notify_server_main, name="notify-svr", args=(nsgate, notify_addr, notify_port), daemon=True)
+    notifyth.start()
+
+    # Wait for the notify server to spin up before continuing
+    nsgate.wait()
 
     logging_directory = tempfile.mkdtemp(prefix="taskings-")
 
     controller = ProcessTaskerController(logging_directory=logging_directory)
-    controller.start_task_network()
+    controller.start_task_network(notify_url=f'http://localhost:{notify_port}/')
 
     print("=============== Tasker Nodes ===============")
     for node in controller.tasker_nodes:

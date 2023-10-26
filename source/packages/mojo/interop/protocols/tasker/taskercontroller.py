@@ -21,6 +21,7 @@ from typing import List, Optional, Type, Union
 
 from mojo.errors.exceptions import NotOverloadedError, SemanticError
 
+from mojo.interop.protocols.tasker.taskeraspects import TaskerAspects
 from mojo.interop.protocols.tasker.tasking import Tasking, TaskingIdentity
 from mojo.interop.protocols.tasker.taskernode import TaskerNode
 from mojo.interop.protocols.tasker.taskingresult import TaskingResultPromise
@@ -34,8 +35,9 @@ class TaskerController:
         a collection of clients.
     """
 
-    def __init__(self, logging_directory: Optional[str] = None):
+    def __init__(self, logging_directory: Optional[str] = None, aspects: Optional[TaskerAspects] = None):
         self._logging_directory = logging_directory
+        self._aspects = aspects
 
         self._tasker_nodes: List[TaskerNode] = []
         self._network_started = False
@@ -53,13 +55,16 @@ class TaskerController:
 
 class ProcessTaskerController(TaskerController):
 
-    def __init__(self, logging_directory: Optional[str] = None):
-        super().__init__(logging_directory=logging_directory)
+    def __init__(self, logging_directory: Optional[str] = None, aspects: Optional[TaskerAspects] = None):
+        super().__init__(logging_directory=logging_directory, aspects=aspects)
         self._svr_manager: List[TaskerServerManager] = []
         self._svr_proxies: List[TaskerService] = []
         return
 
-    def execute_task_on_all_nodes(self, *, tasking: Union[TaskingIdentity, Type[Tasking]], parent_id: str = None, **kwargs) -> List[TaskingResultPromise]:
+    def execute_task_on_all_nodes(self, *, tasking: Union[TaskingIdentity, Type[Tasking]], parent_id: str = None, aspects: Optional[TaskerAspects] = None, **kwargs) -> List[TaskingResultPromise]:
+
+        if aspects is None:
+            aspects = self._aspects
 
         promise_list = []
 
@@ -68,12 +73,15 @@ class ProcessTaskerController(TaskerController):
         module_name, tasking_name = tasking.as_tuple()
 
         for node in self._tasker_nodes:
-            promise = node.execute_tasking(module_name=module_name, tasking_name=tasking_name, parent_id=parent_id, **kwargs)
+            promise = node.execute_tasking(module_name=module_name, tasking_name=tasking_name, parent_id=parent_id, aspects=aspects, **kwargs)
             promise_list.append(promise)
 
         return promise_list
 
-    def execute_task_on_node(self, nindex: int, *, tasking: Union[TaskingIdentity, Type[Tasking]], parent_id: str = None, **kwargs) -> TaskingResultPromise:
+    def execute_task_on_node(self, nindex: int, *, tasking: Union[TaskingIdentity, Type[Tasking]], parent_id: str = None, aspects: Optional[TaskerAspects] = None, **kwargs) -> TaskingResultPromise:
+
+        if aspects is None:
+            aspects = self._aspects
 
         promise = None
 
@@ -84,14 +92,14 @@ class ProcessTaskerController(TaskerController):
         node_count = len(self._tasker_nodes)
         if nindex < node_count:
             node = self._tasker_nodes[nindex]
-            promise = node.execute_tasking(module_name=module_name, tasking_name=tasking_name, parent_id=parent_id, **kwargs)
+            promise = node.execute_tasking(module_name=module_name, tasking_name=tasking_name, parent_id=parent_id, aspects=aspects, **kwargs)
         else:
             errmsg = f"The specified node index nindex={nindex} is out of range. min=0 max={node_count}"
             raise IndexError(errmsg)
         
         return promise
 
-    def start_task_network(self, node_count=5):
+    def start_task_network(self, node_count=5, notify_url: Optional[str] = None, notify_headers: Optional[dict] = None):
         """
         """
 
@@ -112,6 +120,10 @@ class ProcessTaskerController(TaskerController):
             ipaddr, port = tasking_svr_proxy.get_service_endpoint()
 
             node = TaskerNode(ipaddr=ipaddr, port=port)
+            
+            if notify_url is not None:
+                node.set_notify_parameters(notify_url=notify_url, notify_headers=notify_headers)
+
             self._tasker_nodes.append(node)
 
         return

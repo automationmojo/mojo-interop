@@ -50,6 +50,14 @@ class TaskerNode:
 
         return promise
 
+    def set_notify_parameters(self, *, notify_url: str, notify_headers: dict):
+        
+        if self._client is None:
+            self._connect()
+        
+        self._client.root.set_notify_parameters(notify_url=notify_url, notify_headers=notify_headers)
+        return
+
     def _connect(self):
         self._client = rpyc.connect(self._ipaddr, self._port, keepalive=True, config={'allow_public_attrs': True})
         return
