@@ -15,8 +15,9 @@ __email__ = "myron.walker@gmail.com"
 __status__ = "Development" # Prototype, Development or Production
 __license__ = "MIT"
 
+from typing import Optional
 
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 
 @dataclass
 class TaskingProgress:
@@ -25,14 +26,8 @@ class TaskingProgress:
     range_max: int
     position: int
     status: str
+    data: Optional[dict] = None
 
     def as_dict(self) -> dict:
-
-        rtnval = {
-            "range_min": self.range_min,
-            "range_max": self.range_max,
-            "position": self.position,
-            "status": self.status,
-        }
-
+        rtnval = asdict(self)
         return rtnval

@@ -83,13 +83,32 @@ class TaskingRef:
         rtnval = asdict(self)
         return rtnval
 
-@dataclass
+
 class TaskingResultPromise:
-    module_name: str
-    task_id: str
-    task_name: str
-    log_file: str
-    client: Any
+
+    def __init__(self, module_name: str, task_id: str, task_name: str, log_file: str, client: Any):
+        self._module_name = module_name
+        self._task_id = task_id
+        self._task_name = task_name
+        self._log_file = log_file
+        self._client = client
+        return
+
+    @property
+    def log_file(self):
+        return self._log_file
+
+    @property
+    def module_name(self):
+        return self._module_name
+    
+    @property
+    def task_id(self):
+        return self._task_id
+    
+    @property
+    def task_name(self):
+        return self._task_name
 
     def wait(self, timeout: float=DEFAULT_WAIT_TIMEOUT, interval: float=DEFAULT_WAIT_INTERVAL):
 
@@ -127,7 +146,7 @@ class TaskingResultPromise:
 
         rtnval = False
 
-        status = self.client.root.get_tasking_status(task_id=self.task_id)
+        status = self._client.root.get_tasking_status(task_id=self._task_id)
         if status == TaskingStatus.Completed:
             rtnval = True
 
