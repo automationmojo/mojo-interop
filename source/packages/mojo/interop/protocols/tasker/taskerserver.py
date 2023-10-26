@@ -30,14 +30,16 @@ from logging.handlers import WatchedFileHandler
 
 import rpyc
 
-from rpyc.utils.server import ThreadedServer
+from rpyc.utils.server import ThreadPoolServer
 
 from mojo.interop.protocols.tasker.taskerservice import TaskerService
 
-class TaskerServer(ThreadedServer):
-    #
-    # ... you service's implementation
-    #
+
+class TaskerServer(ThreadPoolServer):
+    """
+        The :class:`TaskerServer` starts an RPyC server in an internal thread that is capable of handling
+        requests for tasking. 
+    """
     
     def __init__(self, hostname=None, ipv6=False, port=0,
                  backlog=socket.SOMAXCONN, reuse_addr=True, authenticator=None, registrar=None,

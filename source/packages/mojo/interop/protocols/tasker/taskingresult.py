@@ -47,20 +47,24 @@ class TaskingResult:
     stop: Optional[datetime] = None
     result_code: Optional[int] = None
     parent_id: Optional[str] = None
+    exception: Optional[Exception] = None
 
-    def mark_result(self, result_code: int):
+    def mark_result(self, result_code: int, exception: Optional[Exception] = None):
 
-        if self._stop is None:
-            self._stop = datetime.now()
+        if self.stop is None:
+            self.stop = datetime.now()
 
         # It is possible for us to have a chain of result codes being set if errors are being
         # encountered in teardown methods.
-        if self._result_code is None:
-            self._result_code = result_code
-        elif isinstance(self._result_code, list):
-            self._result_code.append(result_code)
+        if self.result_code is None:
+            self.result_code = result_code
+        elif isinstance(self.result_code, list):
+            self.result_code.append(result_code)
         else:
-            self._result_code = [self._result_code, result_code]
+            self.result_code = [self.result_code, result_code]
+
+        if exception is not None:
+            self.exception = exception
 
         return
 

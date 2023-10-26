@@ -18,10 +18,11 @@ __status__ = "Development" # Prototype, Development or Production
 __license__ = "MIT"
 
 
-from typing import Optional
+from typing import Any, Optional, Type, Union
 
 import logging
 import os
+import threading
 
 from logging.handlers import WatchedFileHandler
 from collections import OrderedDict
@@ -29,15 +30,19 @@ from uuid import uuid4
 
 import rpyc
 
+from mojo.errors.exceptions import SemanticError
 from mojo.xmods.ximport import import_by_name
-from mojo.interop.protocols.tasker.taskingresult import TaskingResult, TaskingResultPromise
+from mojo.interop.protocols.tasker.taskingresult import TaskingResult, TaskingStatus, TaskingResultPromise
 from mojo.interop.protocols.tasker.taskeraspects import TaskerAspects
+from mojo.interop.protocols.tasker.tasking import Tasking
 
 class TaskerService(rpyc.Service):
     """
         The :class:`TaskerService` is an rpyc service that handles the spawning of tasks
         on a node.
     """
+
+    service_lock = threading.Lock()
 
     taskings = OrderedDict()
     logging_directory = None
@@ -48,6 +53,26 @@ class TaskerService(rpyc.Service):
         self._aspects = None
         self._logging_directory = None
         self._tasking_log_directory = None
+        return
+
+    def exposed_dispose_tasking(self, *, task_id):
+
+        self.service_lock.acquire()
+        try:
+            if task_id in self.taskings:
+
+                task: Tasking = self.taskings[task_id]
+                del self.taskings[task_id]
+
+                self.service_lock.release()
+                try:
+                    task.effect_shutdown()
+                finally:
+                    self.service_lock.acquire()
+
+        finally:
+            self.service_lock.release()
+
         return
 
     def exposed_execute_tasking(self, *, module_name: str, tasking_name: str, parent_id: Optional[str] = None,
@@ -75,23 +100,75 @@ class TaskerService(rpyc.Service):
                 
                 logger = logging.getLogger("tasker-server")
 
-            tasking = tasking_type(task_id=task_id, parent_id=parent_id, logfile=logfile, logger=logger, aspects=aspects)
+            tasking_fullname = f"{module_name}@{tasking_name}"
+            promise = TaskingResultPromise(module_name, tasking_fullname, task_id, logfile)
+
+            tasking: Tasking = tasking_type(task_id=task_id, parent_id=parent_id, logfile=logfile, logger=logger, aspects=aspects)
             self.taskings[task_id] = tasking
 
-            promise = tasking.execute(**kwargs)
+            sgate = threading.Event()
+            sgate.clear()
+
+            dargs = (sgate, tasking, aspects, kwargs)
+
+            # We have to dispatch the task with a thread, because we need to leave a local thread running
+            # to monitor the progress of the task.
+            taskthread = threading.Thread(target=self.dispatch_task, args=dargs, daemon=True)
+            taskthread.start()
+    
+            sgate.wait()
 
         else:
-            errmsg = f"The specified tasking was not found. module={module_name} tasking={tasking_name}"
+            errmsg = f"The specified tasking 'module' was not found. module={module_name} tasking={tasking_name}"
             raise ValueError(errmsg)
 
         return promise
 
     def exposed_get_tasking_result(self, *, task_id) -> TaskingResult:
-        return
+
+        result = None
+
+        self.service_lock.acquire()
+        try:
+            if task_id in self.taskings:
+                task: Tasking = self.taskings[task_id]
+
+                if task.task_status == TaskingStatus.Completed or task.task_status == TaskingStatus.Errored:
+                    result = task.result
+                else:
+                    errmsg = f"The task '{task.task_status}' is not in a completed state. Result not yet available"
+                    raise SemanticError(errmsg)
+        finally:
+            self.service_lock.release()
+
+
+        return result
     
     def exposed_get_tasking_status(self, *, task_id):
-        return
+
+        tstatus = None
+
+        self.service_lock.acquire()
+        try:
+            if task_id in self.taskings:
+                task: Tasking = self.taskings[task_id]
+
+                tstatus = task.task_status
+        finally:
+            self.service_lock.release()
+
+        return tstatus
 
     def exposed_set_default_aspects(self, *, aspects: TaskerAspects):
         self._aspects = aspects
+        return
+    
+    def dispatch_task(self, sgate: threading.Event, tasking: Tasking, aspects: Union[TaskerAspects, None], kwparams: dict):
+
+        # Notify the thread starting us that we have started.
+        sgate.set()
+        del sgate
+
+        promise = tasking.execute(kwparams, aspects=aspects)
+        
         return

@@ -70,15 +70,21 @@ class Tasking:
         self._aspects = aspects
         self._kwparams: dict = None
 
+        self._task_status = TaskingStatus.NotStarted
+        self._running = False
+        self._shutdown = False
+        self._pause_gate = threading.Event()
+        
+        # The following variables are shared between process but must be updated in the parent process
+        # when progress or state comes back from the child process
         self._result = None
         self._exception = None
 
-        self._task_status = TaskingStatus.NotStarted
-        self._running = False
-        self._pause_gate = threading.Event()
-        
-        # Progress queue is used by the task process to push back progress and
-        # results.
+        # The following variables are shared between process and must be updated in the child when it is
+        # spawned so it gets the local end of the object
+        self._command_queue: multiprocessing.Queue = None
+
+        # The following variables are used by the task process state
         self._current_progress = None
         self._progress_queue: multiprocessing.JoinableQueue = None
 
@@ -91,6 +97,15 @@ class Tasking:
         identity = TaskingIdentity(module_name=module_name, tasking_name=tasking_name)
         return identity
 
+    @property
+    def result(self):
+        return self._result
+    
+
+    @property
+    def task_status(self):
+        return self._task_status
+
     def begin(self, kwparams: dict):
         """
             The `begin` method is called in order to stash the `kwparams` on the tasking instance
@@ -100,7 +115,7 @@ class Tasking:
         self._result = TaskingResult(task_id=self._task_id, parent_id=self._parent_id)
         return
 
-    def execute(self, aspects: Optional[TaskerAspects] = None, **kwargs) -> TaskingResultPromise:
+    def execute(self, kwparams: dict, aspects: Optional[TaskerAspects] = None) -> TaskingResultPromise:
         """
             The `execute` method is called by the tasking service in order to trigger the execution
             of the task.
@@ -108,9 +123,9 @@ class Tasking:
         if aspects is not None:
             self._aspects = aspects
 
-        promise = self._monitor_scope(kwargs = kwargs)
+        self._monitor_scope(kwparams = kwparams)
 
-        return promise
+        return
 
     def evaluate_results(self) -> int:
         """
@@ -133,49 +148,56 @@ class Tasking:
         """
         return self.perform()
 
-    def generate_progress_complete(self) -> TaskingProgress:
+    def mark_progress_complete(self):
         """
-            The `generate_progress_complete` method is called to generate a :class:`TaskingProgress` completed.
+            The `mark_progress_complete` method is called to generate a :class:`TaskingProgress` completed.
         """
         self._current_progress.status = TaskingStatus.Completed
-        return self._current_progress
-    
-    def generate_progress_errored(self) -> TaskingProgress:
+        return
+
+    def mark_progress_errored(self):
         """
-            The `generate_progress_errored` method is called to generate a :class:`TaskingProgress` errored.
+            The `mark_progress_errored` method is called to generate a :class:`TaskingProgress` errored.
         """
         self._current_progress.status = TaskingStatus.Errored
-        return self._current_progress
+        return
     
-    def generate_progress_paused(self) -> TaskingProgress:
+    def mark_progress_paused(self):
         """
-            The `generate_progress_paused` method is called to generate a :class:`TaskingProgress` paused.
+            The `mark_progress_paused` method is called to generate a :class:`TaskingProgress` paused.
         """
         self._current_progress.status = TaskingStatus.Paused
-        return self._current_progress
-
-    def generate_progress_start(self) -> TaskingProgress:
+        return
+    
+    def mark_progress_running(self):
         """
-            The `generate_progress_start` method that is called to generate a :class:`TaskingProgress` running.
+            The `mark_progress_running` method is called to generate a :class:`TaskingProgress` running.
+        """
+        self._current_progress.status = TaskingStatus.Running
+        return
+
+    def mark_progress_start(self):
+        """
+            The `mark_progress_start` method that is called to generate a :class:`TaskingProgress` running.
         """
         self._current_progress = TaskingProgress(0, 0, 0, TaskingStatus.Running)
-        return self._current_progress
+        return
 
     def mark_errored(self):
         """
             Marks the tasking as having errored.  This indicates to the TaskingServer that shutdown of the
             tasking has begun.
         """
-        progress = self.generate_progress_errored()
-        self._progress_queue.put_nowait(progress)
+        self.mark_progress_errored()
+        self._progress_queue.put_nowait(self._current_progress)
         return
 
-    def mark_progress(self, progress: TaskingProgress):
+    def submit_progress(self):
         """
-            Marks the tasking as having made progress on some activity so the TaskingServer 'hang' detection
+            Submits that the tasking as having made progress on some activity so the TaskingServer 'hang' detection
             does not trigger an inactivity timeout shutdown of the tasking.
         """
-        self._progress_queue.put_nowait(progress)
+        self._progress_queue.put_nowait(self._current_progress)
         return
 
     def notify_progress(self, progress: TaskingProgress):
@@ -200,11 +222,48 @@ class Tasking:
 
         return
 
-    def pause(self):
+    def effect_pause(self):
         """
-            Pauses the tasking loop
+            Sends a Pause command to the remote tasking
         """
+        self._command_queue.put("pause")
+        return
+    
+    def effect_resume(self):
+        """
+            Resumes the tasking loop
+        """
+        self._command_queue.put("resume")
+        return
+
+    def effect_shutdown(self):
+        """
+            Sends a Shutdown command to the remote tasking
+        """
+        self._command_queue.put("shutdown")
+        return
+    
+    def handle_pause(self):
+        """
+            Sends a Pause command to the remote tasking
+        """
+        self._task_status = TaskingStatus.Paused
         self._pause_gate.clear()
+        return
+    
+    def handle_resume(self):
+        """
+            Resumes the tasking loop
+        """
+        self._task_status = TaskingStatus.Running
+        self._pause_gate.set()
+        return
+    
+    def handle_shutdown(self):
+        """
+            Sends a Shutdown command to the remote tasking
+        """
+        self._running = False
         return
 
     def perform(self) -> bool:
@@ -218,21 +277,7 @@ class Tasking:
         errmsg = "Tasking.perform method must be overloaded in derived types."
         raise NotOverloadedError(errmsg)
 
-    def result(self):
-        """
-            Resumes the tasking loop
-        """
-        self._pause_gate.set()
-        return
-
-    def _monitor_scope(self, kwargs: dict):
-
-        this_type = type(self)
-
-        module_name = this_type.__module__
-        task_name = this_type.__name__
-
-        promise = None
+    def _monitor_scope(self, kwparams: dict):
 
         id_tail = self._task_id[len(self._task_id) - 8:]
         task_proc_name = f'task-{id_tail}'
@@ -240,22 +285,33 @@ class Tasking:
         try:
 
             mpctx = multiprocessing.get_context('fork')
+
+            self._command_queue = mpctx.Queue()
             progress_queue = mpctx.JoinableQueue()
             
             result_timeout = None
             if self._aspects is not None and self._aspects.completion_timeout is not None:
                 result_timeout = self._aspects.completion_interval
 
-            promise = TaskingResultPromise(module_name, task_name, self._task_id, self._logfile)
-
-            task_proc = mpctx.Process(target=self._sequence_scope, name=task_proc_name, args=(progress_queue, kwargs), daemon=True)
+            task_proc = mpctx.Process(target=self._sequence_scope, name=task_proc_name, args=(self._command_queue, progress_queue, kwparams), daemon=True)
             task_proc.start()
 
             while(True):
-                progress = progress_queue.get(block=True, timeout=result_timeout)
+                progress: TaskingProgress = progress_queue.get(block=True, timeout=result_timeout)
                 if isinstance(progress, TaskingResult):
-                    self._result = progress
+                    result: TaskingResult = progress
+                    
+                    self._exception = result.exception
+                    self._result = result
+
+                    if self._exception is not None:
+                        self._task_status = TaskingStatus.Errored
+                    else:
+                        self._task_status = TaskingStatus.Completed
+                    
                     break
+
+                self._task_status = progress.status
 
                 self.notify_progress(progress)
 
@@ -268,13 +324,35 @@ class Tasking:
             exc_info = sys.exc_info()
             self._logger.exception("Exception while executing task.", exc_info=exc_info)
 
-        return promise
+        return
 
-    def _sequence_scope(self, progress_queue: multiprocessing.JoinableQueue, kwparams: dict):
+    def _effect_dispatcher_entry(self):
 
+        while self._running:
+
+            cmd = self._command_queue.get()
+
+            if cmd == "pause":
+                self.handle_pause()
+            elif cmd == "resume":
+                self.handle_resume()
+            elif cmd == "shutdown":
+                self.handle_shutdown()
+                break
+
+        return
+
+    def _sequence_scope(self, command_queue: multiprocessing.Queue, progress_queue: multiprocessing.JoinableQueue, kwparams: dict):
+
+        # Update our local in process copy of these queues, because we have forked
+        self._command_queue = command_queue
         self._progress_queue = progress_queue
 
         self._result_code = None
+
+        self._running = True
+
+        threading.Thread(target=self._effect_dispatcher_entry, name="effect-dispatcher", daemon=True)
 
         self.begin(kwparams)
         self._task_status = TaskingStatus.Running
@@ -284,23 +362,36 @@ class Tasking:
             try:
 
                 try:
-                    progress = self.generate_progress_start()
-                    self.mark_progress(progress)
+                    self.mark_progress_start()
+                    self.submit_progress()
 
-                    while self._task_status == TaskingStatus.Running or self._task_status == TaskingStatus.Paused:
+                    while self._running:
 
                         if self._task_status == TaskingStatus.Paused:
-                            progress = self.generate_progress_paused()
-                            self.mark_progress(progress)
+                            self.mark_progress_paused()
+                            self.submit_progress()
 
                             self._pause_gate.wait()
 
+                            if not self._running:
+                                break
+
+                            self.mark_progress_running()
+                            self.submit_progress()
+
                         cont = self.fire_perform()
+                        
+                        self.submit_progress()
+
                         if not cont:
                             break
                     
-                    progress = self.generate_progress_complete()
-                    self.mark_progress(progress)
+                    if self._shutdown:
+                        self.submit_progress()
+                    else:
+                        self.mark_progress_complete()
+
+                    self.submit_progress()
 
                 except Exception as innererr:
                     self._exception = innererr
@@ -323,8 +414,6 @@ class Tasking:
                     self._exception = evalerr
 
                 self.mark_errored()
-            
-            self._result.mark_result(self._result_code)
 
             # We still need to attempt to cleanup
             self.finalize()
@@ -332,7 +421,6 @@ class Tasking:
         except Exception as finalerr:
             if self._result_code is None:
                     self._result_code = -888
-                    self._result.mark_result(self._result_code)
 
             if self._exception is not None:
                 try:
@@ -345,6 +433,8 @@ class Tasking:
             self.mark_errored()
 
         finally:
+            self._result.mark_result(self._result_code, self._exception)
+
             # Pushing the result to the progress queue indicates to the
             # monitoring thread or process that this tasking is complete
             # and shutting down.
