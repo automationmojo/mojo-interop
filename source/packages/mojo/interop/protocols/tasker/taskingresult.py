@@ -30,10 +30,12 @@ from dataclasses import dataclass
 
 
 class TaskingStatus:
-    Running = "running"
-    Errored = "errored"
-    Completed = "completed"
-
+    Completed = "Completed"
+    Errored = "Errored"
+    NotStarted = "NotStarted"
+    Paused = "Paused"
+    Running = "Running"
+    
 
 @dataclass
 class TaskingResult:
@@ -47,8 +49,19 @@ class TaskingResult:
     parent_id: Optional[str] = None
 
     def mark_result(self, result_code: int):
-        self._stop = datetime.now()
-        self._result_code = result_code
+
+        if self._stop is None:
+            self._stop = datetime.now()
+
+        # It is possible for us to have a chain of result codes being set if errors are being
+        # encountered in teardown methods.
+        if self._result_code is None:
+            self._result_code = result_code
+        elif isinstance(self._result_code, list):
+            self._result_code.append(result_code)
+        else:
+            self._result_code = [self._result_code, result_code]
+
         return
 
 

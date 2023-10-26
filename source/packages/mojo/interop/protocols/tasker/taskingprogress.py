@@ -32,7 +32,7 @@ class TaskingProgress:
             "range_min": self.range_min,
             "range_max": self.range_max,
             "position": self.position,
-            "status": self.status
+            "status": self.status,
         }
 
         return rtnval
