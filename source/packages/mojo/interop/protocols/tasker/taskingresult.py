@@ -31,13 +31,8 @@ from dataclasses import dataclass, asdict
 DEFAULT_WAIT_TIMEOUT = 600
 DEFAULT_WAIT_INTERVAL = 5
 
-class TaskingStatus:
-    Completed = "Completed"
-    Errored = "Errored"
-    NotStarted = "NotStarted"
-    Paused = "Paused"
-    Running = "Running"
-    
+
+from mojo.results.model.progresscode import ProgressCode
 
 @dataclass
 class TaskingResult:
@@ -147,7 +142,11 @@ class TaskingResultPromise:
         rtnval = False
 
         status = self._client.root.get_tasking_status(task_id=self._task_id)
-        if status == TaskingStatus.Completed:
+        if status == ProgressCode.Completed:
             rtnval = True
+        elif status == ProgressCode.Errored:
+            rtnval = True
+        else:
+            print(f"task_id={self._task_id} status={status}")
 
         return rtnval

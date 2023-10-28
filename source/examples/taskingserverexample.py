@@ -4,13 +4,12 @@ import tempfile
 import time
 import threading
 
-from logging import Logger
 
 from mojo.interop.protocols.tasker.taskeraspects import TaskerAspects
 from mojo.interop.protocols.tasker.taskercontroller import ProcessTaskerController
 
-from mojo.interop.protocols.tasker.taskingprogress import TaskingProgress
-from mojo.interop.protocols.tasker.taskingresult import TaskingStatus
+from mojo.results.model.progressinfo import ProgressInfo, ProgressType, ProgressCode
+
 from mojo.interop.protocols.tasker.tasking import Tasking
 
 from http.server import HTTPServer, BaseHTTPRequestHandler
@@ -26,6 +25,10 @@ class NotifyRequestHandler(BaseHTTPRequestHandler):
         print(self.rfile.read(length).decode())
         print("--------------------------------------------------")
         print("")
+
+        self.send_response(200, message=None)
+        self.send_header("Content-Type", "application/type")
+        self.end_headers()
 
         return
 
@@ -45,7 +48,8 @@ class PrintTasking(Tasking):
         return
 
     def mark_progress_start(self):
-        self._current_progress = TaskingProgress(0, 5, 0, TaskingStatus.Running, self._data)
+        self._current_progress = ProgressInfo(self._task_id, ProgressType.NumericRange, self.full_name, ProgressType.NumericRange,
+                                              0, 5, 0, ProgressCode.Running, self._data)
         return
 
     def perform(self):

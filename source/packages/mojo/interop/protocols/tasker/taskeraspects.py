@@ -38,3 +38,5 @@ class TaskerAspects:
         self.inactivity_timeout = inactivity_timeout
         self.inactivity_interval = inactivity_interval
         return
+
+DEFAULT_TASKER_ASPECTS = TaskerAspects()

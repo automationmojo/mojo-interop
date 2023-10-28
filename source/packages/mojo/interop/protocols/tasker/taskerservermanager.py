@@ -25,9 +25,9 @@ import multiprocessing.managers
 
 from mojo.interop.protocols.tasker.taskerserver import TaskerServer
 
-class TaskerServerManager(multiprocessing.managers.BaseManager):
+class TaskerServerManager(multiprocessing.managers.SyncManager):
     """
-        This is a process manager used for creating a :class:`SimpleWebServer`
+        This is a process manager used for creating a :class:`TaskerServerManager`
         in a remote process that can be communicated with via a proxy.
     """
 
