@@ -23,12 +23,10 @@ from typing import Optional,  Tuple
 import os
 import socket
 import tempfile
+import logging
 import threading
 
-import logging
 from logging.handlers import WatchedFileHandler
-
-import rpyc
 
 from rpyc.utils.server import ThreadPoolServer
 
@@ -43,8 +41,8 @@ class TaskerServer(ThreadPoolServer):
     
     def __init__(self, hostname=None, ipv6=False, port=0,
                  backlog=socket.SOMAXCONN, reuse_addr=True, authenticator=None, registrar=None,
-                 auto_register=None, protocol_config=None, logging_directory: Optional[str]=None, listener_timeout=0.5,
-                 socket_path=None):
+                 auto_register=None, protocol_config=None, logging_directory: Optional[str]=None,
+                 listener_timeout=0.5, socket_path=None):
         
         if logging_directory is None:
             logging_directory = tempfile.mkdtemp(prefix="taskserver-")

@@ -26,6 +26,7 @@ DEFAULT_COMPLETION_INTERVAL = 10
 DEFAULT_INACTIVITY_TIMEOUT = 600
 DEFAULT_INACTIVITY_INTERVAL = .5
 
+
 class TaskerAspects:
 
     def __init__(self, completion_timeout: Optional[float] = None,

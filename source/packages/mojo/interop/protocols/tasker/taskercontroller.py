@@ -26,7 +26,6 @@ from mojo.interop.protocols.tasker.tasking import Tasking, TaskingIdentity
 from mojo.interop.protocols.tasker.taskernode import TaskerNode
 from mojo.interop.protocols.tasker.taskingresult import TaskingResultPromise
 from mojo.interop.protocols.tasker.taskerservice import TaskerService
-
 from mojo.interop.protocols.tasker.taskerservermanager import TaskerServerManager, spawn_tasking_server_process
 
 class TaskerController:

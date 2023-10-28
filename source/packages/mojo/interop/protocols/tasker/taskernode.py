@@ -17,10 +17,15 @@ __status__ = "Development" # Prototype, Development or Production
 __license__ = "MIT"
 
 
+from typing import Optional
+
+
 import rpyc
 import pickle
 
+
 from mojo.interop.protocols.tasker.taskingresult import TaskingResult, TaskingResultPromise
+
 
 class TaskerNode:
     """
@@ -60,12 +65,25 @@ class TaskerNode:
 
         return promise
 
+    def reinitialize_logging(self, *, logging_directory: str, logging_level: int,
+                                       taskings_log_directory: Optional[str] = None,
+                                       taskings_log_level: Optional[int] = None):
+        
+        if self._client is None:
+            self._connect()
+        
+        self._client.root.set_logging_parameters(logging_directory=logging_directory, logging_level=logging_level,
+                taskings_log_directory=taskings_log_directory, taskings_log_level=taskings_log_level)
+
+        return
+
     def set_notify_parameters(self, *, notify_url: str, notify_headers: dict):
         
         if self._client is None:
             self._connect()
         
         self._client.root.set_notify_parameters(notify_url=notify_url, notify_headers=notify_headers)
+
         return
 
     def _connect(self):

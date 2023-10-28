@@ -23,13 +23,13 @@ from typing import Dict, Optional, Tuple, Type
 import multiprocessing
 import multiprocessing.managers
 
-import os
+import logging
 import requests
-import sys
 import threading
 
 from dataclasses import dataclass
-from logging import Logger, getLogger
+from logging.handlers import WatchedFileHandler
+
 from uuid import uuid4
 
 from mojo.errors.exceptions import NotOverloadedError
@@ -44,7 +44,7 @@ from mojo.interop.protocols.tasker.taskeraspects import TaskerAspects, DEFAULT_T
 
 
 def instantiate_tasking(module_name: str, tasking_name: str, task_id: str, parent_id: str, logfile: str,
-                        logdir: str, notify_url: Optional[str], notify_headers: Optional[Dict[str, str]],
+                        logdir: str, log_level: int, notify_url: Optional[str], notify_headers: Optional[Dict[str, str]],
                         aspects: Optional[TaskerAspects] = DEFAULT_TASKER_ASPECTS):
 
     logger = None
@@ -53,6 +53,12 @@ def instantiate_tasking(module_name: str, tasking_name: str, task_id: str, paren
     module = import_by_name(module_name)
 
     if hasattr(module, tasking_name):
+
+        log_handler = WatchedFileHandler(logfile)
+        logging.basicConfig(format=logging.BASIC_FORMAT, level=log_level, handlers=[log_handler])
+
+        logger = logging.getLogger("tasker-server")
+
         tasking_type: Type[Tasking] = getattr(module, tasking_name)
 
         tasking = tasking_type(task_id=task_id, parent_id=parent_id, logdir=logdir, logfile=logfile, logger=logger,
@@ -83,7 +89,7 @@ class Tasking:
     """
     """
 
-    def __init__(self, task_id: str, parent_id: str, logdir: str, logfile: str, logger: Logger, 
+    def __init__(self, task_id: str, parent_id: str, logdir: str, logfile: str, logger: logging.Logger, 
                  notify_url: Optional[str] = None, notify_headers: Optional[dict] = None,
                  aspects: Optional[TaskerAspects] = DEFAULT_TASKER_ASPECTS):
 

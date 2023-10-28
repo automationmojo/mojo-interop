@@ -27,10 +27,10 @@ import os
 import pickle
 import threading
 
-from logging.handlers import WatchedFileHandler
-from multiprocessing.context import SpawnContext
+
 from collections import OrderedDict
 from uuid import uuid4
+
 
 import rpyc
 
@@ -38,13 +38,14 @@ from mojo.errors.exceptions import SemanticError
 
 
 from mojo.results.model.progresscode import ProgressCode
-from mojo.results.model.progressinfo import ProgressInfo, ProgressType
+from mojo.results.model.progressinfo import ProgressInfo
 
 from mojo.xmods.ximport import import_by_name
 
 from mojo.interop.protocols.tasker.taskingresult import TaskingResult, TaskingRef
 from mojo.interop.protocols.tasker.taskeraspects import TaskerAspects, DEFAULT_TASKER_ASPECTS
 from mojo.interop.protocols.tasker.tasking import Tasking, TaskingManager
+
 
 class TaskerService(rpyc.Service):
     """
@@ -60,8 +61,13 @@ class TaskerService(rpyc.Service):
     statuses = OrderedDict()
 
     aspects = DEFAULT_TASKER_ASPECTS
+    
     logging_directory = None
+    logging_level = logging.DEBUG
+
     taskings_log_directory = None
+    taskings_log_level = logging.DEBUG
+
     notify_url = None
     notify_headers = None
 
@@ -122,7 +128,8 @@ class TaskerService(rpyc.Service):
             tasking_manager.start()
 
             tasking = tasking_manager.instantiate_tasking(module_name, tasking_name, task_id, parent_id, logfile,
-                this_type.taskings_log_directory, this_type.notify_url, this_type.notify_headers, aspects=aspects)
+                this_type.taskings_log_level, this_type.taskings_log_directory, this_type.notify_url,
+                this_type.notify_headers, aspects=aspects)
 
             this_type.service_lock.acquire()
             try:
@@ -189,6 +196,28 @@ class TaskerService(rpyc.Service):
             this_type.service_lock.release()
 
         return tstatus
+
+    def exposed_reinitialize_logging(self, *, logging_directory: str, logging_level: int,
+                                       taskings_log_directory: Optional[str] = None, taskings_log_level: Optional[int] = None):
+
+        if taskings_log_directory is None:
+            taskings_log_directory = logging_directory
+        if taskings_log_level is None:
+            taskings_log_level = logging_level
+
+        this_type = type(self)
+
+        this_type.service_lock.acquire()
+        try:
+
+            this_type.logging_directory = logging_directory
+            this_type.logging_level = logging_level
+            this_type.taskings_log_directory = taskings_log_directory
+            this_type.taskings_log_level = taskings_log_level
+        finally:
+            this_type.service_lock.release()
+        
+        return
 
     def exposed_set_notify_parameters(self, *, notify_url: str, notify_headers: dict):
 
