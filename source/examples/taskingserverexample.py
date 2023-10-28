@@ -11,6 +11,7 @@ from mojo.interop.protocols.tasker.taskercontroller import ProcessTaskerControll
 from mojo.results.model.progressinfo import ProgressInfo, ProgressType, ProgressCode
 
 from mojo.interop.protocols.tasker.tasking import Tasking
+from mojo.interop.protocols.tasker.taskingresult import TaskingResult
 
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
@@ -102,6 +103,18 @@ def tasking_server_example_main():
 
     for promise in promise_list:
         promise.wait()
+
+    for promise in promise_list:
+        result: TaskingResult = promise.get_result()
+        print(f"RESULT - {promise.task_name}")
+        print(f"    id: {promise.task_id}")
+        print(f"    parent: {result.parent_id}")
+        print(f"    start: {result.start}")
+        print(f"    stop: {result.stop}")
+        print(f"    result_code: {result.result_code}")
+        print(f"    exception: {result.exception}")
+        print("")
+
 
     return
 

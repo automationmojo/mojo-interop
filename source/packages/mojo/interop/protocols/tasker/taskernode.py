@@ -18,8 +18,9 @@ __license__ = "MIT"
 
 
 import rpyc
+import pickle
 
-from mojo.interop.protocols.tasker.taskingresult import TaskingResultPromise
+from mojo.interop.protocols.tasker.taskingresult import TaskingResult, TaskingResultPromise
 
 class TaskerNode:
     """
@@ -40,13 +41,22 @@ class TaskerNode:
     def port(self):
         return self._port
 
+    def get_tasking_status(self, *, task_id: str) -> str:
+        tstatus = self._client.root.get_tasking_status(task_id=task_id)
+        return tstatus
+    
+    def get_tasking_result(self, *, task_id: str) -> TaskingResult:
+        tresult_str = self._client.root.get_tasking_result(task_id=task_id)
+        tresult = pickle.loads(tresult_str)
+        return tresult
+
     def execute_tasking(self, *, module_name: str, tasking_name: str, **kwargs) -> TaskingResultPromise:
 
         if self._client is None:
             self._connect()
 
         taskref_info = self._client.root.execute_tasking(module_name=module_name, tasking_name=tasking_name, **kwargs)
-        promise = TaskingResultPromise(taskref_info["module_name"], taskref_info["task_id"], taskref_info["task_name"], taskref_info["log_file"], self._client)
+        promise = TaskingResultPromise(taskref_info["module_name"], taskref_info["task_id"], taskref_info["task_name"], taskref_info["log_file"], self)
 
         return promise
 

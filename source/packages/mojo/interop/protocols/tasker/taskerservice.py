@@ -24,6 +24,7 @@ import logging
 import multiprocessing
 import multiprocessing.context
 import os
+import pickle
 import threading
 
 from logging.handlers import WatchedFileHandler
@@ -155,19 +156,24 @@ class TaskerService(rpyc.Service):
 
         this_type.service_lock.acquire()
         try:
-            if task_id in this_type.taskings:
-                task: Tasking = this_type.taskings[task_id]
-
-                if task.task_status == ProgressCode.Completed or task.task_status == ProgressCode.Errored:
-                    result = task.result
+            if task_id in this_type.results:
+                result = this_type.results[task_id]
+            else:
+                if task_id in this_type.taskings:
+                    tstatus = this_type.statuses[task_id]
+                    
+                    if not (tstatus == ProgressCode.Completed or tstatus == ProgressCode.Errored):
+                        errmsg = f"The task for task_id='{task_id}' is not in a completed state. The results are not yet available."
+                        raise SemanticError(errmsg)
                 else:
-                    errmsg = f"The task '{task.task_status}' is not in a completed state. Result not yet available"
-                    raise SemanticError(errmsg)
+                    errmsg = f"The specified tasking task_id={task_id} is not known to this TaskerService instance."
+                    raise ValueError(errmsg)
         finally:
             this_type.service_lock.release()
 
+        result_str = pickle.dumps(result)
 
-        return result
+        return result_str
     
     def exposed_get_tasking_status(self, *, task_id):
 

@@ -81,12 +81,12 @@ class TaskingRef:
 
 class TaskingResultPromise:
 
-    def __init__(self, module_name: str, task_id: str, task_name: str, log_file: str, client: Any):
+    def __init__(self, module_name: str, task_id: str, task_name: str, log_file: str, node: Any):
         self._module_name = module_name
         self._task_id = task_id
         self._task_name = task_name
         self._log_file = log_file
-        self._client = client
+        self._node = node
         return
 
     @property
@@ -104,6 +104,10 @@ class TaskingResultPromise:
     @property
     def task_name(self):
         return self._task_name
+
+    def get_result(self):
+        rtnval = self._node.get_tasking_result(task_id=self._task_id)
+        return rtnval
 
     def wait(self, timeout: float=DEFAULT_WAIT_TIMEOUT, interval: float=DEFAULT_WAIT_INTERVAL):
 
@@ -141,7 +145,7 @@ class TaskingResultPromise:
 
         rtnval = False
 
-        status = self._client.root.get_tasking_status(task_id=self._task_id)
+        status = self._node.get_tasking_status(task_id=self._task_id)
         if status == ProgressCode.Completed:
             rtnval = True
         elif status == ProgressCode.Errored:
