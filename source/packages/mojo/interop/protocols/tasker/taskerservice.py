@@ -53,7 +53,6 @@ class TaskerService(rpyc.Service):
         on a node.
     """
 
-
     service_lock = threading.Lock()
 
     taskings = OrderedDict()
@@ -128,7 +127,7 @@ class TaskerService(rpyc.Service):
             tasking_manager.start()
 
             tasking = tasking_manager.instantiate_tasking(module_name, tasking_name, task_id, parent_id, logfile,
-                this_type.taskings_log_level, this_type.taskings_log_directory, this_type.notify_url,
+                this_type.taskings_log_directory, this_type.taskings_log_level, this_type.notify_url,
                 this_type.notify_headers, aspects=aspects)
 
             this_type.service_lock.acquire()
