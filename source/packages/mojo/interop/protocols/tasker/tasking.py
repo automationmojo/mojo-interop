@@ -28,6 +28,9 @@ import logging
 import os
 import requests
 import threading
+import traceback
+
+from pprint import pformat
 
 from dataclasses import dataclass
 from logging.handlers import WatchedFileHandler
@@ -39,6 +42,7 @@ from mojo.errors.exceptions import NotOverloadedError
 from mojo.results.model.progressinfo import ProgressInfo, ProgressType
 from mojo.results.model.progresscode import ProgressCode
 
+from mojo.xmods.xformatting import indent_lines
 from mojo.xmods.ximport import import_by_name
 from mojo.xmods.jsos import CHAR_RECORD_SEPERATOR
 
@@ -209,29 +213,103 @@ class Tasking:
         return self.perform()
 
     def format_begin_message(self, kwparams: dict):
-        begin_msg_lines = []
+        """
+            Formats the tasking 'BEGIN' log message.
+        """
+        
+        begin_msg_lines = [
+            f"------------------------------- TASKING BEGUN -------------------------------",
+            f"  TASK_NAME: {self._result.task_name}",
+            f"    TASK_ID: {self._result.task_id}",
+            f"  PARENT_ID: {self._result.parent_id}",
+            f"      START: {self._result.start}"
+        ]
+
+        kwparams_lines = pformat(kwparams, indent=4, width=200).splitlines(False)
+        kwparams_lines = indent_lines(kwparams_lines, indent=10)
+
+        begin_msg_lines.append("  KWPARAMS:")
+        begin_msg_lines.extend(kwparams_lines)
 
         begin_msg = os.linesep.join(begin_msg_lines)
+
         return begin_msg
 
     def format_finalize_message(self):
-        finalize_msg_lines = []
+        """
+            Formats the tasking 'FINALIZE' log message.
+        """
+
+        finalize_msg_lines = [
+            "------------------------------- TASKING FINALIZED -------------------------------"
+            f"    TASK_NAME: {self._result.task_name}",
+            f"      TASK_ID: {self._result.task_id}",
+            f"    PARENT_ID: {self._result.parent_id}",
+            f"        START: {self._result.start}",
+            f"         STOP: {self._result.stop}",
+            f"  RESULT_CODE: {self._result.result_code}",
+        ]
+
+        if self._result.exception is None:
+            finalize_msg_lines.append(f"    EXCEPTION: None")
+        else:
+            finalize_msg_lines.append(f"    EXCEPTION: ")
+
+            xcpt_lines = traceback.format_exception(self._result.exception)
+            xcpt_lines = indent_lines(xcpt_lines, indent=10)
+            finalize_msg_lines.extend(xcpt_lines)
 
         finalize_msg = os.linesep.join(finalize_msg_lines)
+
         return finalize_msg
     
     def format_progress_message(self, progress: dict):
-        prog_msg_lines = []
+        """
+            Formats a tasking 'PROGRESS' log message.
+        """
+        prog_msg_lines = ["PROGRESS"]
+
+        progress_lines = pformat(progress, indent=4, width=200).splitlines(False)
+        progress_lines = indent_lines(progress, indent=4)
+
+        prog_msg_lines.extend(progress_lines)
 
         prog_msg = os.linesep.join(prog_msg_lines)
+
         return prog_msg
 
     def initialize_metrics(self):
+        """
+            Called in order to initialize any metrics data contains needed by the tasking and also
+            to initialize the full path to the summary file.
+        """
+        
         self._metrics_file = os.path.join(self._logdir, "task-metrics.jsos")
+        
+        return
 
     def initialize_summary(self):
+        """
+            Called in order to initialize the Summary info dictionary that is used to write summary
+            information to the summary file and also to initialize the full path to the summary file.
+        """
+        
+        this_type = type(self)
+
         self._summary_file = os.path.join(self._logdir, "task-summary.json")
-        self._summary = {}
+        self._summary = {
+            "name": self.full_name,
+            "type": this_type.__name__,
+            "module": this_type.__module__,
+            "id": self._result.task_id,
+            "parent": self._result.parent_id,
+            "start": self._result.start,
+            "stop": None,
+            "status": str(ProgressCode.Running.value),
+            "result_code": None,
+            "exception" : None
+        }
+
         return
 
     def mark_progress_complete(self):
@@ -367,7 +445,7 @@ class Tasking:
         # Update our local in process copy of these queues, because we have forked
         self._progress_queue = progress_queue
 
-        self._result = TaskingResult(task_id=self._task_id, parent_id=self._parent_id)
+        self._result = TaskingResult(self.full_name, task_id=self._task_id, parent_id=self._parent_id)
         self._running = True
 
         self.initialize_summary()
