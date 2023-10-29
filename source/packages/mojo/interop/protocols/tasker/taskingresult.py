@@ -39,6 +39,7 @@ class TaskingResult:
     """
     """
 
+    task_name: str
     task_id: str
     start: datetime = datetime.now()
     stop: Optional[datetime] = None

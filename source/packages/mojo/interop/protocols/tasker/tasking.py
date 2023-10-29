@@ -37,7 +37,7 @@ from logging.handlers import WatchedFileHandler
 
 from uuid import uuid4
 
-from mojo.errors.exceptions import NotOverloadedError
+from mojo.errors.exceptions import NotOverloadedError, SemanticError
 
 from mojo.results.model.progressinfo import ProgressInfo, ProgressType
 from mojo.results.model.progresscode import ProgressCode
@@ -84,6 +84,13 @@ TaskingManager.register("instantiate_tasking", instantiate_tasking)
 
 
 @dataclass
+class StreamInfo:
+    name: str
+    type: str
+    filename: str
+
+
+@dataclass
 class TaskingIdentity:
     module_name: str
     tasking_name: str
@@ -124,7 +131,7 @@ class Tasking:
         self._summary_file = None
         self._summary_indent = 4
 
-        self._metrics_file = None
+        self._metrics_streams = {}
         self._metrics_indent = None
 
         self._pause_gate = threading.Event()
@@ -161,6 +168,18 @@ class Tasking:
     def task_status(self):
         return self._task_status
 
+    def add_metrics_stream(self, stream_name: str, stream_type: str):
+        """
+            Adds a new metrics stream
+        """
+
+        stream_filename = os.path.join(self._logdir, f"{stream_name}.jsos")
+
+        stream_info = StreamInfo(stream_name, stream_type, stream_filename)
+        self._metrics_streams[stream_name] = stream_info
+
+        return
+
     def begin(self, kwparams: dict):
         """
             The `begin` method is called in order to stash the `kwparams` on the tasking instance
@@ -170,6 +189,7 @@ class Tasking:
 
         begin_msg = self.format_begin_message(kwparams)
         self._logger.info(begin_msg)
+
         return
 
     def execute(self, progress_queue: multiprocessing.JoinableQueue, kwparams: dict):
@@ -194,6 +214,8 @@ class Tasking:
         """
             The `evaluate_results` method is called in order to process information to
             create a final status code for the given tasking.
+
+            :returns: Returns the 'result_code' that is written into the tasking result.
         """
         return 0
 
@@ -283,9 +305,6 @@ class Tasking:
             Called in order to initialize any metrics data contains needed by the tasking and also
             to initialize the full path to the summary file.
         """
-        
-        self._metrics_file = os.path.join(self._logdir, "task-metrics.jsos")
-        
         return
 
     def initialize_summary(self):
@@ -306,10 +325,20 @@ class Tasking:
             "start": self._result.start,
             "stop": None,
             "status": str(ProgressCode.Running.value),
+            "metrics": self._metrics_streams,
             "result_code": None,
             "exception" : None
         }
 
+        return
+
+    def mark_errored(self):
+        """
+            Marks the tasking as having errored.  This indicates to the TaskingServer that shutdown of the
+            tasking has begun.
+        """
+        self.mark_progress_errored()
+        self._progress_queue.put_nowait(self._current_progress)
         return
 
     def mark_progress_complete(self):
@@ -352,33 +381,6 @@ class Tasking:
         self._current_progress = ProgressInfo(self._task_id, ProgressType.NumericRange, self.full_name, 0, 0, 0, ProgressCode.Running, {})
         return
 
-    def mark_errored(self):
-        """
-            Marks the tasking as having errored.  This indicates to the TaskingServer that shutdown of the
-            tasking has begun.
-        """
-        self.mark_progress_errored()
-        self._progress_queue.put_nowait(self._current_progress)
-        return
-
-    def submit_progress(self):
-        """
-            Submits that the tasking as having made progress on some activity so the TaskingServer 'hang' detection
-            does not trigger an inactivity timeout shutdown of the tasking.
-        """
-        prog_dict = self._current_progress.as_dict()
-
-        prog_msg = self.format_progress_message(prog_dict)
-        self._logger.info(prog_msg)
-
-        self._summary["progress"] = prog_dict
-        self.write_summary()
-
-        self._progress_queue.put_nowait(self._current_progress)
-        
-        self.notify_progress(self._current_progress)
-        return
-
     def notify_progress(self, progress: ProgressInfo):
         """
             The `notify_progress` method is called in order to send a progress notification to a
@@ -409,8 +411,10 @@ class Tasking:
         """
             Sends a Pause command to the remote tasking
         """
+
         self._task_status = ProgressCode.Paused
         self._pause_gate.clear()
+        
         return
     
     def perform(self) -> bool:
@@ -428,16 +432,69 @@ class Tasking:
         """
             Resumes the tasking loop
         """
+
         self._task_status = ProgressCode.Running
         self._pause_gate.set()
+        
         return
     
     def shutdown(self):
         """
             Sends a Shutdown command to the remote tasking
         """
+
         self._running = False
         self._shutdown = True
+        
+        return
+
+    def submit_progress(self):
+        """
+            Submits that the tasking as having made progress on some activity so the TaskingServer 'hang' detection
+            does not trigger an inactivity timeout shutdown of the tasking.
+        """
+
+        prog_dict = self._current_progress.as_dict()
+
+        prog_msg = self.format_progress_message(prog_dict)
+        self._logger.info(prog_msg)
+
+        self._summary["progress"] = prog_dict
+        self.write_summary()
+
+        self._progress_queue.put_nowait(self._current_progress)
+        
+        self.notify_progress(self._current_progress)
+
+        return
+
+    def write_summary(self):
+        """
+            Writes an update of the tasking summary to the summary file.
+        """
+        
+        with open(self._summary_file, 'w+') as sf:
+            json.dump(self._summary, sf, indent=self._summary_indent)
+
+        return
+    
+    def write_metrics(self, stream_name:str, metrics: dict):
+        """
+            Called in order to write a metrics payload to the taskings associated metrics stream file.
+        """
+
+        if stream_name in self._metrics_streams:
+
+            stream_info: StreamInfo = self._metrics_streams[stream_name]
+
+            with open(stream_info.filename, 'a+') as mf:
+                json.dump(metrics, mf, indent=self._metrics_indent)
+                mf.write(CHAR_RECORD_SEPERATOR)
+
+        else:
+            errmsg = "You must call `add_metrics_stream` to add a stream to the tasking before attempting to write to the stream."
+            raise SemanticError(errmsg)
+
         return
 
     def _task_thread_entry(self, sgate: threading.Event, progress_queue: multiprocessing.JoinableQueue, kwparams: dict):
@@ -539,23 +596,5 @@ class Tasking:
             # monitoring thread or process that this tasking is complete
             # and shutting down.
             progress_queue.put(self._result)
-
-        return
-
-    def write_summary(self):
-
-        with open(self._summary_file, 'w+') as sf:
-            json.dump(self._summary, sf, indent=self._summary_indent)
-
-        return
-    
-    def write_metrics(self, metrics: dict):
-        """
-            Called in order to write a metrics payload to the taskings associated metrics stream file.
-        """
-        
-        with open(self._metrics_file, 'a+') as mf:
-            json.dump(metrics, mf, indent=self._metrics_indent)
-            mf.write(CHAR_RECORD_SEPERATOR)
 
         return
