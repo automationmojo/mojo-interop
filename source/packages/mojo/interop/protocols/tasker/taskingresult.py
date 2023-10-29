@@ -72,7 +72,7 @@ class TaskingRef:
     module_name: str
     task_id: str
     task_name: str
-    log_file: str
+    log_dir: str
 
     def as_dict(self):
         rtnval = asdict(self)

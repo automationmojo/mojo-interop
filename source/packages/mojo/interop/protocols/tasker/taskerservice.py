@@ -31,7 +31,6 @@ import threading
 from collections import OrderedDict
 from uuid import uuid4
 
-
 import rpyc
 
 from mojo.errors.exceptions import SemanticError
@@ -55,12 +54,15 @@ class TaskerService(rpyc.Service):
 
     service_lock = threading.Lock()
 
+    initialized = False
+
     taskings = OrderedDict()
     results = OrderedDict()
     statuses = OrderedDict()
 
     aspects = DEFAULT_TASKER_ASPECTS
     
+    logger = logging.getLogger()
     logging_directory = None
     logging_level = logging.DEBUG
 
@@ -114,11 +116,24 @@ class TaskerService(rpyc.Service):
 
             task_id = str(uuid4())
 
-            logfile = None
-            if this_type.taskings_log_directory is not None:
-                logfile = os.path.join(this_type.taskings_log_directory, f"tasking-{task_id}.log")
+            log_dir = None
+            log_file = None
+            log_level = this_type.taskings_log_level
 
-            taskref = TaskingRef(module_name, task_id, tasking_name, logfile)
+            if this_type.taskings_log_directory is not None:
+
+                taskings_log_directory = this_type.taskings_log_directory
+                if not os.path.exists(taskings_log_directory):
+                    os.makedirs(taskings_log_directory)
+
+                log_dir = os.path.join(taskings_log_directory, f"tasking-{task_id}")
+                if not os.path.exists(log_dir):
+                    os.makedirs(log_dir)
+
+                log_file = os.path.join(log_dir, f"tasking-{task_id}.log")
+
+
+            taskref = TaskingRef(module_name, task_id, tasking_name, log_dir)
 
             # Create an instance of a TaskingManager to manage the remote process, we will manage the scope
             # if this instance by delegating it to a thread that will execute the task and monitor its lifespan
@@ -126,9 +141,8 @@ class TaskerService(rpyc.Service):
             tasking_manager = TaskingManager(ctx=mpctx)
             tasking_manager.start()
 
-            tasking = tasking_manager.instantiate_tasking(module_name, tasking_name, task_id, parent_id, logfile,
-                this_type.taskings_log_directory, this_type.taskings_log_level, this_type.notify_url,
-                this_type.notify_headers, aspects=aspects)
+            tasking = tasking_manager.instantiate_tasking(module_name, tasking_name, task_id, parent_id, log_dir,
+                log_file, log_level, this_type.notify_url, this_type.notify_headers, aspects=aspects)
 
             this_type.service_lock.acquire()
             try:

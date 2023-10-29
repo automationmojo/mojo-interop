@@ -98,7 +98,7 @@ class ProcessTaskerController(TaskerController):
         
         return promise
 
-    def start_task_network(self, node_count=5, notify_url: Optional[str] = None, notify_headers: Optional[dict] = None):
+    def start_tasker_network(self, node_count=5, notify_url: Optional[str] = None, notify_headers: Optional[dict] = None):
         """
         """
 

@@ -23,7 +23,9 @@ from typing import Dict, Optional, Tuple, Type
 import multiprocessing
 import multiprocessing.managers
 
+import json
 import logging
+import os
 import requests
 import threading
 
@@ -38,13 +40,14 @@ from mojo.results.model.progressinfo import ProgressInfo, ProgressType
 from mojo.results.model.progresscode import ProgressCode
 
 from mojo.xmods.ximport import import_by_name
+from mojo.xmods.jsos import CHAR_RECORD_SEPERATOR
 
 from mojo.interop.protocols.tasker.taskingresult import TaskingResult
 from mojo.interop.protocols.tasker.taskeraspects import TaskerAspects, DEFAULT_TASKER_ASPECTS
 
 
-def instantiate_tasking(module_name: str, tasking_name: str, task_id: str, parent_id: str, logfile: str,
-                        logdir: str, log_level: int, notify_url: Optional[str], notify_headers: Optional[Dict[str, str]],
+def instantiate_tasking(module_name: str, tasking_name: str, task_id: str, parent_id: str, logdir: str, logfile: str,
+                        log_level: int, notify_url: Optional[str], notify_headers: Optional[Dict[str, str]],
                         aspects: Optional[TaskerAspects] = DEFAULT_TASKER_ASPECTS):
 
     logger = None
@@ -112,6 +115,14 @@ class Tasking:
 
         self._running = False
         self._shutdown = False
+
+        self._summary = {}
+        self._summary_file = None
+        self._summary_indent = 4
+
+        self._metrics_file = None
+        self._metrics_indent = None
+
         self._pause_gate = threading.Event()
         
         # The following variables are shared between process but must be updated in the parent process
@@ -152,6 +163,9 @@ class Tasking:
             and to create the result container.
         """
         self._kwparams = kwparams
+
+        begin_msg = self.format_begin_message(kwparams)
+        self._logger.info(begin_msg)
         return
 
     def execute(self, progress_queue: multiprocessing.JoinableQueue, kwparams: dict):
@@ -184,6 +198,8 @@ class Tasking:
             The `finalize` method is called in order to provide an opportunity for a tasking
             to finalize execution and cleanup resources as required.
         """
+        finalize_msg = self.format_finalize_message()
+        self._logger.info(finalize_msg)
         return
     
     def fire_perform(self):
@@ -191,6 +207,32 @@ class Tasking:
             The `fire_peform` allows for modification of the calling of the perform method.
         """
         return self.perform()
+
+    def format_begin_message(self, kwparams: dict):
+        begin_msg_lines = []
+
+        begin_msg = os.linesep.join(begin_msg_lines)
+        return begin_msg
+
+    def format_finalize_message(self):
+        finalize_msg_lines = []
+
+        finalize_msg = os.linesep.join(finalize_msg_lines)
+        return finalize_msg
+    
+    def format_progress_message(self, progress: dict):
+        prog_msg_lines = []
+
+        prog_msg = os.linesep.join(prog_msg_lines)
+        return prog_msg
+
+    def initialize_metrics(self):
+        self._metrics_file = os.path.join(self._logdir, "task-metrics.jsos")
+
+    def initialize_summary(self):
+        self._summary_file = os.path.join(self._logdir, "task-summary.json")
+        self._summary = {}
+        return
 
     def mark_progress_complete(self):
         """
@@ -246,7 +288,16 @@ class Tasking:
             Submits that the tasking as having made progress on some activity so the TaskingServer 'hang' detection
             does not trigger an inactivity timeout shutdown of the tasking.
         """
+        prog_dict = self._current_progress.as_dict()
+
+        prog_msg = self.format_progress_message(prog_dict)
+        self._logger.info(prog_msg)
+
+        self._summary["progress"] = prog_dict
+        self.write_summary()
+
         self._progress_queue.put_nowait(self._current_progress)
+        
         self.notify_progress(self._current_progress)
         return
 
@@ -284,6 +335,17 @@ class Tasking:
         self._pause_gate.clear()
         return
     
+    def perform(self) -> bool:
+        """
+            The `perform` method is overloaded by derived tasking types in order to implement
+            the performance of a unit of work.
+
+            :returns: Returns a bool indicating if 'perform' should be called again in order
+                      to complete more work.
+        """
+        errmsg = "Tasking.perform method must be overloaded in derived types."
+        raise NotOverloadedError(errmsg)
+    
     def resume(self):
         """
             Resumes the tasking loop
@@ -300,17 +362,6 @@ class Tasking:
         self._shutdown = True
         return
 
-    def perform(self) -> bool:
-        """
-            The `perform` method is overloaded by derived tasking types in order to implement
-            the performance of a unit of work.
-
-            :returns: Returns a bool indicating if 'perform' should be called again in order
-                      to complete more work.
-        """
-        errmsg = "Tasking.perform method must be overloaded in derived types."
-        raise NotOverloadedError(errmsg)
-
     def _task_thread_entry(self, sgate: threading.Event, progress_queue: multiprocessing.JoinableQueue, kwparams: dict):
 
         # Update our local in process copy of these queues, because we have forked
@@ -318,6 +369,9 @@ class Tasking:
 
         self._result = TaskingResult(task_id=self._task_id, parent_id=self._parent_id)
         self._running = True
+
+        self.initialize_summary()
+        self.initialize_metrics()
 
         sgate.set()
 
@@ -407,5 +461,23 @@ class Tasking:
             # monitoring thread or process that this tasking is complete
             # and shutting down.
             progress_queue.put(self._result)
+
+        return
+
+    def write_summary(self):
+
+        with open(self._summary_file, 'w+') as sf:
+            json.dump(self._summary, sf, indent=self._summary_indent)
+
+        return
+    
+    def write_metrics(self, metrics: dict):
+        """
+            Called in order to write a metrics payload to the taskings associated metrics stream file.
+        """
+        
+        with open(self._metrics_file, 'a+') as mf:
+            json.dump(metrics, mf, indent=self._metrics_indent)
+            mf.write(CHAR_RECORD_SEPERATOR)
 
         return
