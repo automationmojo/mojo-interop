@@ -25,6 +25,7 @@ import multiprocessing
 import multiprocessing.context
 import os
 import pickle
+import tempfile
 import threading
 
 
@@ -63,10 +64,10 @@ class TaskerService(rpyc.Service):
     aspects = DEFAULT_TASKER_ASPECTS
     
     logger = logging.getLogger()
-    logging_directory = None
+    logging_directory = tempfile.mkdtemp()
     logging_level = logging.DEBUG
 
-    taskings_log_directory = None
+    taskings_log_directory = os.path.join(logging_directory, "taskings")
     taskings_log_level = logging.DEBUG
 
     notify_url = None
@@ -211,7 +212,8 @@ class TaskerService(rpyc.Service):
         return tstatus
 
     def exposed_reinitialize_logging(self, *, logging_directory: str, logging_level: int,
-                                       taskings_log_directory: Optional[str] = None, taskings_log_level: Optional[int] = None):
+                                     taskings_log_directory: Optional[str] = None,
+                                     taskings_log_level: Optional[int] = logging.DEBUG):
 
         if taskings_log_directory is None:
             taskings_log_directory = logging_directory
