@@ -90,7 +90,7 @@ def tasking_server_example_main():
     # Wait for the notify server to spin up before continuing
     nsgate.wait()
 
-    logging_directory = tempfile.mkdtemp(prefix="taskings-")
+    logging_directory = tempfile.mkdtemp(prefix="taskerrun-")
 
     controller = ProcessTaskerController(logging_directory=logging_directory)
     controller.start_tasker_network(notify_url=f'http://localhost:{notify_port}/')

@@ -82,17 +82,17 @@ class TaskingRef:
 
 class TaskingResultPromise:
 
-    def __init__(self, module_name: str, task_id: str, task_name: str, log_file: str, node: Any):
+    def __init__(self, module_name: str, task_id: str, task_name: str, log_dir: str, node: Any):
         self._module_name = module_name
         self._task_id = task_id
         self._task_name = task_name
-        self._log_file = log_file
+        self._log_dir = log_dir
         self._node = node
         return
 
     @property
-    def log_file(self):
-        return self._log_file
+    def log_dir(self):
+        return self._log_dir
 
     @property
     def module_name(self):
@@ -135,7 +135,7 @@ class TaskingResultPromise:
             task_label = f"{self.module_name}.{self._task_name}"
             errmsg_lines = [
                 f"Timeout waiting for task={task_label} id={self._task_id} start={start_time} end={end_time} now={now} diff={diff}",
-                f"    LOGFILE: {self._logfile}"
+                f"    LOGDIR: {self._logdir}"
             ]
             errmsg = os.linesep.join(errmsg_lines)
             raise TimeoutError(errmsg)

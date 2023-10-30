@@ -192,6 +192,12 @@ class Tasking:
 
         return
 
+    def cleanup(self):
+        """
+            Called to allow the tasking to cleanup any created resources.
+        """
+        return
+
     def execute(self, progress_queue: multiprocessing.JoinableQueue, kwparams: dict):
         """
             The `execute` method is called by the tasking service in order to trigger the execution
@@ -247,11 +253,11 @@ class Tasking:
             f"      START: {self._result.start}"
         ]
 
-        kwparams_lines = pformat(kwparams, indent=4, width=200).splitlines(False)
-        kwparams_lines = indent_lines(kwparams_lines, indent=10)
+        kwparams_lines = pformat(kwparams, indent=4, width=200)
+        kwparams_lines = indent_lines(kwparams_lines, level=1, indent=10)
 
         begin_msg_lines.append("  KWPARAMS:")
-        begin_msg_lines.extend(kwparams_lines)
+        begin_msg_lines.append(kwparams_lines)
 
         begin_msg = os.linesep.join(begin_msg_lines)
 
@@ -278,8 +284,8 @@ class Tasking:
             finalize_msg_lines.append(f"    EXCEPTION: ")
 
             xcpt_lines = traceback.format_exception(self._result.exception)
-            xcpt_lines = indent_lines(xcpt_lines, indent=10)
-            finalize_msg_lines.extend(xcpt_lines)
+            xcpt_lines = indent_lines(xcpt_lines, level=1, indent=10)
+            finalize_msg_lines.append(xcpt_lines)
 
         finalize_msg = os.linesep.join(finalize_msg_lines)
 
@@ -291,10 +297,10 @@ class Tasking:
         """
         prog_msg_lines = ["PROGRESS"]
 
-        progress_lines = pformat(progress, indent=4, width=200).splitlines(False)
-        progress_lines = indent_lines(progress, indent=4)
+        progress_lines = pformat(progress, indent=4, width=200)
+        progress_lines = indent_lines(progress_lines, level=1, indent=4)
 
-        prog_msg_lines.extend(progress_lines)
+        prog_msg_lines.append(progress_lines)
 
         prog_msg = os.linesep.join(prog_msg_lines)
 
@@ -474,7 +480,7 @@ class Tasking:
         """
         
         with open(self._summary_file, 'w+') as sf:
-            json.dump(self._summary, sf, indent=self._summary_indent)
+            json.dump(self._summary, sf, indent=self._summary_indent, default=str)
 
         return
     
@@ -488,7 +494,7 @@ class Tasking:
             stream_info: StreamInfo = self._metrics_streams[stream_name]
 
             with open(stream_info.filename, 'a+') as mf:
-                json.dump(metrics, mf, indent=self._metrics_indent)
+                json.dump(metrics, mf, indent=self._metrics_indent, default=str)
                 mf.write(CHAR_RECORD_SEPERATOR)
 
         else:
@@ -571,7 +577,7 @@ class Tasking:
                 self.mark_errored()
 
             # We still need to attempt to cleanup
-            self.finalize()
+            self.cleanup()
 
         except Exception as finalerr:
             if self._result_code is None:
@@ -589,6 +595,13 @@ class Tasking:
 
         finally:
             self._result.mark_result(self._result_code, self._exception)
+            self._summary["stop"] = self._result.stop
+
+            try:
+                self.finalize()
+            except Exception as xcpt:
+                errmsg = traceback.format_exception(xcpt)
+                self._logger.error(errmsg)
 
             self._running = False
 

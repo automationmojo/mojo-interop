@@ -45,7 +45,10 @@ class TaskerServer(ThreadPoolServer):
                  listener_timeout=0.5, socket_path=None):
         
         if logging_directory is None:
-            logging_directory = tempfile.mkdtemp(prefix="taskserver-")
+            logging_directory = tempfile.mkdtemp(prefix=f"taskerserver-{os.getpid()}-")
+
+        TaskerService.logging_directory = logging_directory
+        TaskerService.taskings_log_directory = os.path.join(logging_directory, f"taskings")
 
         if not os.path.exists(logging_directory):
             os.makedirs(logging_directory)
@@ -61,12 +64,6 @@ class TaskerServer(ThreadPoolServer):
                          protocol_config=protocol_config, logger=logger, listener_timeout=listener_timeout,
                          socket_path=socket_path)
         
-        taskings_log_directory = os.path.join(logging_directory, "taskings")
-        self.service.taskings_log_directory = taskings_log_directory
-
-        if not os.path.exists(taskings_log_directory):
-            os.makedirs(taskings_log_directory)
-
         self._server_thread = None
         return
 

@@ -64,10 +64,10 @@ class TaskerService(rpyc.Service):
     aspects = DEFAULT_TASKER_ASPECTS
     
     logger = logging.getLogger()
-    logging_directory = tempfile.mkdtemp()
+    logging_directory = None
     logging_level = logging.DEBUG
 
-    taskings_log_directory = os.path.join(logging_directory, "taskings")
+    taskings_log_directory = None
     taskings_log_level = logging.DEBUG
 
     notify_url = None
