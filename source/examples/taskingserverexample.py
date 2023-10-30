@@ -110,6 +110,7 @@ def tasking_server_example_main():
         print(f"    id: {promise.task_id}")
         print(f"    parent: {result.parent_id}")
         print(f"    start: {result.start}")
+        print(f"   logdir: {result.logdir}")
         print(f"    stop: {result.stop}")
         print(f"    result_code: {result.result_code}")
         print(f"    exception: {result.exception}")

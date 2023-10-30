@@ -250,6 +250,7 @@ class Tasking:
             f"  TASK_NAME: {self._result.task_name}",
             f"    TASK_ID: {self._result.task_id}",
             f"  PARENT_ID: {self._result.parent_id}",
+            f"     LOGDIR: {self._logdir}",
             f"      START: {self._result.start}"
         ]
 
@@ -273,6 +274,7 @@ class Tasking:
             f"    TASK_NAME: {self._result.task_name}",
             f"      TASK_ID: {self._result.task_id}",
             f"    PARENT_ID: {self._result.parent_id}",
+            f"       LOGDIR: {self._logdir}",
             f"        START: {self._result.start}",
             f"         STOP: {self._result.stop}",
             f"  RESULT_CODE: {self._result.result_code}",
@@ -508,7 +510,7 @@ class Tasking:
         # Update our local in process copy of these queues, because we have forked
         self._progress_queue = progress_queue
 
-        self._result = TaskingResult(self.full_name, task_id=self._task_id, parent_id=self._parent_id)
+        self._result = TaskingResult(self.full_name, self._task_id, self._logdir, parent_id=self._parent_id)
         self._running = True
 
         self.initialize_summary()

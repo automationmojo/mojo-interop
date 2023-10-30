@@ -41,6 +41,7 @@ class TaskingResult:
 
     task_name: str
     task_id: str
+    logdir: str
     start: datetime = datetime.now()
     stop: Optional[datetime] = None
     result_code: Optional[int] = None
