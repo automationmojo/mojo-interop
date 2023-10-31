@@ -33,6 +33,7 @@ import traceback
 from pprint import pformat
 
 from dataclasses import dataclass
+from datetime import datetime
 from logging.handlers import WatchedFileHandler
 
 from uuid import uuid4
@@ -354,6 +355,7 @@ class Tasking:
             The `mark_progress_complete` method is called to generate a :class:`ProgressInfo` completed.
         """
         self._task_status = ProgressCode.Completed
+        self._current_progress.when = datetime.now()
         self._current_progress.status = ProgressCode.Completed
         return
 
@@ -362,6 +364,7 @@ class Tasking:
             The `mark_progress_errored` method is called to generate a :class:`ProgressInfo` errored.
         """
         self._task_status = ProgressCode.Errored
+        self._current_progress.when = datetime.now()
         self._current_progress.status = ProgressCode.Errored
         return
     
@@ -370,6 +373,7 @@ class Tasking:
             The `mark_progress_paused` method is called to generate a :class:`ProgressInfo` paused.
         """
         self._task_status = ProgressCode.Paused
+        self._current_progress.when = datetime.now()
         self._current_progress.status = ProgressCode.Paused
         return
     
@@ -378,6 +382,7 @@ class Tasking:
             The `mark_progress_running` method is called to generate a :class:`ProgressInfo` running.
         """
         self._task_status = ProgressCode.Running
+        self._current_progress.when = datetime.now()
         self._current_progress.status = ProgressCode.Running
         return
 
@@ -386,7 +391,8 @@ class Tasking:
             The `mark_progress_start` method that is called to generate a :class:`ProgressInfo` running.
         """
         self._task_status = ProgressCode.Running
-        self._current_progress = ProgressInfo(self._task_id, ProgressType.NumericRange, self.full_name, 0, 0, 0, ProgressCode.Running, {})
+        self._current_progress = ProgressInfo(self._task_id, ProgressType.NumericRange, self.full_name,
+                                              0, 0, 0, ProgressCode.Running, datetime.now(), {})
         return
 
     def notify_progress(self, progress: ProgressInfo):
@@ -462,6 +468,7 @@ class Tasking:
             does not trigger an inactivity timeout shutdown of the tasking.
         """
 
+        self._current_progress.when = datetime.now()
         prog_dict = self._current_progress.as_dict()
 
         prog_msg = self.format_progress_message(prog_dict)
