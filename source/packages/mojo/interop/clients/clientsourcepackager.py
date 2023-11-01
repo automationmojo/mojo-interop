@@ -118,6 +118,16 @@ class ClientSourcePackager:
                 errmsg = "Error attempting to create the destination directory."
                 raise RuntimeError(errmsg)
 
+            ensure_unzip_cmd = f"which unzip"
+            status, stdout, stderr = session.run_cmd(ensure_unzip_cmd)
+            if status != 0:
+                # If the 'zip' package is not found, install it.
+                install_zip_cmd = "sudo DEBIAN_FRONTEND=noninteractive apt -yq install zip"
+                status, stdout, stderr = session.run_cmd(install_zip_cmd)
+                if status != 0:
+                    errmsg = "Unable to install 'zip' apt package dependency."
+                    raise RuntimeError(errmsg)
+
             unzip_command = f"unzip -od {destination} {rmt_filename}"
             status, stdout, stderr = session.run_cmd(unzip_command)
             if status != 0:
@@ -127,6 +137,16 @@ class ClientSourcePackager:
                 ]
                 errmsg = os.linesep.join(errmsg_lines)
                 raise RuntimeError(errmsg)
+
+            ensure_poetry_cmd = f"PATH=\"/home/pi/.local/bin:$PATH\" which poetry"
+            status, stdout, stderr = session.run_cmd(ensure_poetry_cmd)
+            if status != 0:
+                # If the 'zip' package is not found, install it.
+                install_poetry_cmd = "curl -sSL https://install.python-poetry.org | python3 -"
+                status, stdout, stderr = session.run_cmd(install_poetry_cmd)
+                if status != 0:
+                    errmsg = "Unable to install 'poetry' package manager."
+                    raise RuntimeError(errmsg)
 
             setup_command = f"cd {destination}; PATH=\"/home/pi/.local/bin:$PATH\" {destination}/development/setup-environment reset"
             status, stdout, stderr = session.run_cmd(setup_command)
