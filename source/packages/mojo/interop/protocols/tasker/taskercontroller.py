@@ -28,6 +28,11 @@ from mojo.interop.protocols.tasker.taskingresult import TaskingResultPromise
 from mojo.interop.protocols.tasker.taskerservice import TaskerService
 from mojo.interop.protocols.tasker.taskerservermanager import TaskerServerManager, spawn_tasking_server_process
 
+from mojo.xmods.landscaping.client.clientbase import ClientBase
+
+
+TASKER_PORT = 8686
+
 class TaskerController:
     """
         The :class:`TaskerController` object lets you startup and control task processing across
@@ -45,20 +50,6 @@ class TaskerController:
     @property
     def tasker_nodes(self):
         return self._tasker_nodes
-
-    def start_task_network(self):
-        """
-        """
-        raise NotOverloadedError("The 'start_task_network' method must be overloaded.")
-
-
-class ProcessTaskerController(TaskerController):
-
-    def __init__(self, logging_directory: Optional[str] = None, aspects: Optional[TaskerAspects] = None):
-        super().__init__(logging_directory=logging_directory, aspects=aspects)
-        self._svr_manager: List[TaskerServerManager] = []
-        self._svr_proxies: List[TaskerService] = []
-        return
 
     def execute_task_on_all_nodes(self, *, tasking: Union[TaskingIdentity, Type[Tasking]], parent_id: str = None, aspects: Optional[TaskerAspects] = None, **kwargs) -> List[TaskingResultPromise]:
 
@@ -98,6 +89,21 @@ class ProcessTaskerController(TaskerController):
         
         return promise
 
+    def start_task_network(self):
+        """
+        """
+        raise NotOverloadedError("The 'start_task_network' method must be overloaded.")
+
+
+class ProcessTaskerController(TaskerController):
+
+    def __init__(self, logging_directory: Optional[str] = None, aspects: Optional[TaskerAspects] = None):
+        super().__init__(logging_directory=logging_directory, aspects=aspects)
+
+        self._svr_manager: List[TaskerServerManager] = []
+        self._svr_proxies: List[TaskerService] = []
+        return
+
     def start_tasker_network(self, node_count=5, notify_url: Optional[str] = None, notify_headers: Optional[dict] = None):
         """
         """
@@ -127,3 +133,30 @@ class ProcessTaskerController(TaskerController):
 
         return
 
+
+class ClientTaskerController(TaskerController):
+
+    def __init__(self, logging_directory: Optional[str] = None, aspects: Optional[TaskerAspects] = None):
+        super().__init__(logging_directory=logging_directory, aspects=aspects)
+        return
+
+    def start_tasker_network(self, clients: List[ClientBase], notify_url: Optional[str] = None, notify_headers: Optional[dict] = None):
+        """
+        """
+
+        if self._network_started:
+            errmsg = "A task network has already been started."
+            raise SemanticError(errmsg)
+
+        self._network_started = True
+
+        for cl in clients:
+
+            node = TaskerNode(ipaddr=cl.ipaddr, port=TASKER_PORT)
+            
+            if notify_url is not None:
+                node.set_notify_parameters(notify_url=notify_url, notify_headers=notify_headers)
+
+            self._tasker_nodes.append(node)
+
+        return
