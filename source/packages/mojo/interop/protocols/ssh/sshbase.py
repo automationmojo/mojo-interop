@@ -316,15 +316,13 @@ class SshBase(ISystemContext):
 
         if not self._primitive:
             transport = ssh_client.get_transport()
+    
+            sftp = paramiko.SFTPClient.from_transport(transport)
             try:
-
-                sftp = paramiko.SFTPClient.from_transport(transport)
-                try:
-                    dir_info = sftp_list_directory(sftp, root_dir, self.lookup_user_by_uid, self.lookup_group_by_uid)
-                finally:
-                    sftp.close()
+                dir_info = sftp_list_directory(sftp, root_dir, self.lookup_user_by_uid, self.lookup_group_by_uid)
             finally:
-                transport.close()
+                sftp.close()
+            
         else:
             dir_info = primitive_list_directory(ssh_client, root_dir)
 
@@ -337,17 +335,17 @@ class SshBase(ISystemContext):
         exists = False
 
         if not self._primitive:
+
             transport = ssh_client.get_transport()
+        
+            sftp = paramiko.SFTPClient.from_transport(transport)
             try:
-                sftp = paramiko.SFTPClient.from_transport(transport)
-                try:
-                    fsresult = sftp.stat(remotedir)
-                    if fsresult.st_mode | stat.S_IFDIR:
-                        exists = True
-                finally:
-                    sftp.close()
+                fsresult = sftp.stat(remotedir)
+                if fsresult.st_mode | stat.S_IFDIR:
+                    exists = True
             finally:
-                transport.close()
+                sftp.close()
+
         else:
             primitive_directory_exists(ssh_client, remotedir)
 
@@ -367,15 +365,13 @@ class SshBase(ISystemContext):
 
         if not self._primitive:
             transport = ssh_client.get_transport()
-            try:
 
-                sftp = paramiko.SFTPClient.from_transport(transport)
-                try:
-                    dir_info = sftp_list_tree(sftp, root_dir, self.lookup_user_by_uid, self.lookup_group_by_uid, max_depth=depth)
-                finally:
-                    sftp.close()
+            sftp = paramiko.SFTPClient.from_transport(transport)
+            try:
+                dir_info = sftp_list_tree(sftp, root_dir, self.lookup_user_by_uid, self.lookup_group_by_uid, max_depth=depth)
             finally:
-                transport.close()
+                sftp.close()
+
         else:
             dir_info = primitive_list_tree(ssh_client, root_dir, max_depth=depth)
 
@@ -553,16 +549,14 @@ class SshBase(ISystemContext):
 
         if not self._primitive:
             transport = ssh_client.get_transport()
+
+            sftp = paramiko.SFTPClient.from_transport(transport)
             try:
-                sftp = paramiko.SFTPClient.from_transport(transport)
-                try:
-                    fsresult = sftp.stat(remotepath)
-                    if not (fsresult.st_mode | stat.S_IFDIR):
-                        exists = True
-                finally:
-                    sftp.close()
+                fsresult = sftp.stat(remotepath)
+                if not (fsresult.st_mode | stat.S_IFDIR):
+                    exists = True
             finally:
-                transport.close()
+                sftp.close()
         else:
             exists = primitive_file_exists(ssh_client, remotepath)
 
@@ -574,14 +568,13 @@ class SshBase(ISystemContext):
         """
         if not self._primitive:
             transport = ssh_client.get_transport()
+            
+            sftp = paramiko.SFTPClient.from_transport(transport)
             try:
-                sftp = paramiko.SFTPClient.from_transport(transport)
-                try:
-                    sftp.get(remotepath, localpath)
-                finally:
-                    sftp.close()
+                sftp.get(remotepath, localpath)
             finally:
-                transport.close()
+                sftp.close()
+
         else:
             primitive_file_pull(ssh_client, remotepath, localpath)
 
@@ -593,14 +586,13 @@ class SshBase(ISystemContext):
         """
         if not self._primitive:
             transport = ssh_client.get_transport()
+            
+            sftp = paramiko.SFTPClient.from_transport(transport)
             try:
-                sftp = paramiko.SFTPClient.from_transport(transport)
-                try:
-                    sftp.put(localpath, remotepath)
-                finally:
-                    sftp.close()
+                sftp.put(localpath, remotepath)
             finally:
-                transport.close()
+                sftp.close()
+            
         else:
             primitive_file_push(ssh_client, localpath, remotepath)
 
