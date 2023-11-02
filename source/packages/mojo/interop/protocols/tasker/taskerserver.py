@@ -20,8 +20,10 @@ __license__ = "MIT"
 
 from typing import Optional,  Tuple
 
+import configparser
 import os
 import socket
+import sys
 import tempfile
 import logging
 import threading
@@ -39,7 +41,9 @@ class TaskerServer(ThreadPoolServer):
         requests for tasking. 
     """
     
-    def __init__(self, hostname=None, ipv6=False, port=0,
+    TASKER_SERVICE_PORT = 8686
+
+    def __init__(self, hostname=None, ipv6=False, port=TASKER_SERVICE_PORT,
                  backlog=socket.SOMAXCONN, reuse_addr=True, authenticator=None, registrar=None,
                  auto_register=None, protocol_config=None, logging_directory: Optional[str]=None,
                  listener_timeout=0.5, socket_path=None):
@@ -87,10 +91,23 @@ class TaskerServer(ThreadPoolServer):
         start_gate.wait()
 
         return
-    
-    def _service_thread_entry(self, start_gate: threading.Event):
+
+    def serve_forever(self):
+        """
+            Called when the taskerserver is run from the main thread of a service instance.
+        """
         
-        start_gate.set()
+        self._service_thread_entry()
+
+        return
+
+    def _service_thread_entry(self, start_gate: Optional[threading.Event] = None):
+        
+        # If we were passed a start_gate, it means a thread is waiting for
+        # us to kick off.  Set the start_gate to indicate we are running in
+        # a new thread
+        if start_gate is not None:
+            start_gate.set()
 
         self._listen()
         self._register()
@@ -109,3 +126,35 @@ class TaskerServer(ThreadPoolServer):
             self.close()
 
         return
+
+
+SERVER_CONFIG_PATH = "/etc/tasker.conf"
+
+def tasker_server_main():
+    
+    try:
+        logging_directory = "/var/log"
+
+        if os.path.exists(SERVER_CONFIG_PATH):
+            config = configparser.ConfigParser()
+            config.read(SERVER_CONFIG_PATH)
+
+            if "DEFAULT" in config:
+                default_cfg = config["DEFAULT"]
+
+                if "logdir" in default_cfg:
+                    logging_directory = config["DEFAULT"]["logdir"]
+
+        server = TaskerServer(hostname="0.0.0.0", logging_directory=logging_directory)
+
+        server.serve_forever()
+
+    except Exception as xcpt:
+        errmsg = "Error attempting to load configuration for the 'tasker' service."
+        print(errmsg, file=sys.stderr)
+
+    return
+
+if __name__ == "__main__":
+
+    tasker_server_main()

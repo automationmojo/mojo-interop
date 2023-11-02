@@ -25,7 +25,6 @@ import multiprocessing
 import multiprocessing.context
 import os
 import pickle
-import tempfile
 import threading
 
 

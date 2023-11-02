@@ -6,7 +6,7 @@ from mojo.interop.clients.clientsourcepackager import ClientSourcePackager
 
 def tasker_server_deploy():
 
-    sshcred = SshCredential(identifier="pi-user", categories=["ssh"], role="taskerserver", username="pi", password="")
+    sshcred = SshCredential(identifier="pi-user", categories=["ssh"], role="taskerserver", username="pi", password="Skate4Fun!!")
 
     client_addr = "192.168.1.175"
 

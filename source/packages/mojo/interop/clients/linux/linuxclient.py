@@ -22,6 +22,8 @@ from mojo.xmods.landscaping.friendlyidentifier import FriendlyIdentifier
 from mojo.xmods.landscaping.client.clientbase import ClientBase
 
 from mojo.interop.clients.linux.ext.commandsext import CommandsExt
+from mojo.interop.clients.linux.ext.configureext import ConfigureExt
+
 from mojo.interop.protocols.ssh.sshagent import SshAgent
 
 
@@ -36,11 +38,16 @@ class LinuxClient(ClientBase):
         super().__init__(lscape, coordinator, friendly_id, device_type, device_config)
 
         self._ext_commands = CommandsExt(self)
+        self._ext_configure = ConfigureExt(self)
         return
 
     @property
     def commands(self) -> CommandsExt:
         return self._ext_commands
+    
+    @property
+    def configure(self) -> ConfigureExt:
+        return self._ext_configure
 
     @property
     def ssh(self) -> SshAgent:
