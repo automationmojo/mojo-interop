@@ -3,9 +3,9 @@ import os
 
 from mojo.xmods.landscaping.landscapeparameters import LandscapeActivationParams
 from mojo.xmods.landscaping.landscape import startup_landscape
-from mojo.xmods.wellknown.singletons import LandscapeSingleton
 
-from mojo.xmods.xcollections.context import Context, ContextPaths
+from mojo.collections.context import Context
+from mojo.collections.contextpaths import ContextPaths
 
 def landscape_example_main():
 

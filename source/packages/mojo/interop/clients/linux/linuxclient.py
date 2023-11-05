@@ -53,7 +53,7 @@ class LinuxClient(ClientBase):
     def ssh(self) -> SshAgent:
         sshagent = self._extensions["network/ssh"]
         return sshagent
-    
+
     def get_default_system_context(self) -> ISystemContext:
         """
             Called to get an ISystemContext instance that is a default system type.

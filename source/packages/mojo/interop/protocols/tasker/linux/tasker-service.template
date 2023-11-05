@@ -1,0 +1,16 @@
+[Unit]
+Description=The Tasker RPyC base tasking service
+After=syslog.target network-online.target remote-fs.target nss-lookup.target
+Wants=network-online.target
+
+[Service]
+User={username}
+Group={group}
+Type=forking
+PIDFile=/var/run/tasker/tasker.pid
+ExecStart={tasker-binary} start
+ExecStop={tasker-binary} stop
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

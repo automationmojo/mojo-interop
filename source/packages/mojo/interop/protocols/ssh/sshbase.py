@@ -555,6 +555,8 @@ class SshBase(ISystemContext):
                 fsresult = sftp.stat(remotepath)
                 if not (fsresult.st_mode | stat.S_IFDIR):
                     exists = True
+            except FileNotFoundError as ferr:
+                exists = False
             finally:
                 sftp.close()
         else:

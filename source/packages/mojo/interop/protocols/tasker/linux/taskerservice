@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+VENV_DIR="$( dirname $THIS_DIR )"
+REPOSITORY_DIR="$( dirname $VENV_DIR )"
+
+REPOSITORY_ENV_FILE="$REPOSITORY_DIR/.env"
+REPOSITORY_CONFIG_FILE="$REPOSITORY_DIR/repository-setup/repository-config.ini"
+
+
+set -a
+
+source "$REPOSITORY_ENV_FILE"
+source <( grep --color=never -E '^[\s]*[A-Za-z_]+[A-Za-z_0-9]*=' "$REPOSITORY_CONFIG_FILE" )
+
+set +a
+
+
+TASKER_DIR="$( $THIS_DIR/python3 -c 'import mojo.interop.protocols.tasker as tasker; print(tasker.__file__[:-12])' )"
+
+echo "THIS_DIR=$THIS_DIR"
+echo "VENV_DIR=$VENV_DIR"
+echo "REPOSITORY_DIR=$REPOSITORY_DIR"
+echo "REPOSITORY_ENV_FILE=$REPOSITORY_ENV_FILE"
+echo "REPOSITORY_CONFIG_FILE=$REPOSITORY_CONFIG_FILE"
+echo "TASKER_DIR=$TASKER_DIR"
+
+$THIS_DIR/python3 $TASKER_DIR/taskerdaemon.py "$@"
+

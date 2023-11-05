@@ -14,11 +14,32 @@
             "envFile": "${workspaceFolder}/.env"
         },
         {
-            "name": "Python: Example - Tasking Server",
+            "name": "Python: Example - Tasking Run Tasks",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/source/examples/taskingserverexample.py",
             "args": [],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "Python: Example - Tasking Server Deploy",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/source/examples/taskerserverdeploy.py",
+            "args": [],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "Python: Tasker Daemon",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/source/packages/mojo/interop/protocols/tasker/taskerdaemon.py",
+            "args": [
+                "--debug",
+                "start"
+            ],
             "console": "integratedTerminal",
             "justMyCode": false
         }

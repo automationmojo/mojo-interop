@@ -201,7 +201,7 @@ class SshSession(SshBase):
 
             :returns: A boolean value indicating if the remote file exists.
         """
-        exists = self._file_pull(self._ssh_client, remotepath)
+        exists = self._file_exists(self._ssh_client, remotepath)
 
         return exists
 
@@ -227,7 +227,7 @@ class SshSession(SshBase):
 
         return
 
-    def open_session(self, primitive: bool = False, pty_params: Optional[dict] = None, interactive=False, cmd_context: Optional[ISystemContext] = None,
+    def open_session(self, primitive: bool = False, pty_params: Optional[dict] = None, interactive=False, sys_context: Optional[ISystemContext] = None,
                      aspects: Optional[AspectsCmd] = None, **kwargs) -> ISystemContext:
         """
             Provies a mechanism to create a :class:`SshSession` object with derived settings.  This method allows various parameters for the session
@@ -244,15 +244,15 @@ class SshSession(SshBase):
             aspects = self._aspects
 
         session = None
-        if cmd_context is not None:
-            bs: SshBase = cmd_context
+        if sys_context is not None:
+            bs: SshBase = sys_context
             session = SshSession(bs._host, bs._primary_credential, users=bs._users, port=bs._port,
                                  jump=bs._jump, pty_params=pty_params, interactive=interactive,
-                                 cmd_context=cmd_context, aspects=aspects)
+                                 sys_context=sys_context, aspects=aspects)
         else:
             session = SshSession(self._host, self._primary_credential, users=self._users, port=self._port,
                                  jump=self._jump, pty_params=pty_params, interactive=interactive,
-                                 cmd_context=cmd_context, aspects=aspects)
+                                 sys_context=sys_context, aspects=aspects)
         return session
 
     def _create_client(self, session_user: Optional[str] = None) -> paramiko.SSHClient:

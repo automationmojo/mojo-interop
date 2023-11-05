@@ -29,6 +29,7 @@ fi
 INITIALIZED_FILE="$CACHE_DIR/initialized"
 VIRTUAL_ENV_DIR="$REPOSITORY_DIR/.venv"
 VIRTUAL_ENV_BIN_DIR="$VIRTUAL_ENV_DIR/bin"
+ACTIVATE_SCRIPT="$VIRTUAL_ENV_DIR/bin/activate"
 
 ENV_FILE="$REPOSITORY_DIR/.env"
 if [ ! -f $ENV_FILE ]; then
@@ -45,8 +46,10 @@ PROJECT_NAME=""
 PYTHON_VERSION=""
 
 source $ENV_FILE
-source <(grep --color=never -E "^[\s]*[A-Za-z_]+[A-Za-z_0-9]*=" "$REPOSITORY_CONFIG_FILE")
 
+set -a
+source <( grep --color=never -E '^[\s]*[A-Za-z_]+[A-Za-z_0-9]*=' "$REPOSITORY_CONFIG_FILE" )
+set +a
 
 # The PYTHON_VERSION can be pinned in the development environment config
 if [ -z "$PYTHON_VERSION" ]

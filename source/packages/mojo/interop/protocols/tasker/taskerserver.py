@@ -20,17 +20,15 @@ __license__ = "MIT"
 
 from typing import Optional,  Tuple
 
-import configparser
 import os
 import socket
-import sys
 import tempfile
 import logging
 import threading
 
 from logging.handlers import WatchedFileHandler
-
 from rpyc.utils.server import ThreadPoolServer
+
 
 from mojo.interop.protocols.tasker.taskerservice import TaskerService
 
@@ -42,6 +40,7 @@ class TaskerServer(ThreadPoolServer):
     """
     
     TASKER_SERVICE_PORT = 8686
+
 
     def __init__(self, hostname=None, ipv6=False, port=TASKER_SERVICE_PORT,
                  backlog=socket.SOMAXCONN, reuse_addr=True, authenticator=None, registrar=None,
@@ -69,11 +68,14 @@ class TaskerServer(ThreadPoolServer):
                          socket_path=socket_path)
         
         self._server_thread = None
+
         return
+
 
     def get_service_endpoint(self) -> Tuple[str, int]:
         ipaddr, port = self.listener.getsockname()
         return ipaddr, port
+
 
     def start(self):
         """
@@ -92,6 +94,7 @@ class TaskerServer(ThreadPoolServer):
 
         return
 
+
     def serve_forever(self):
         """
             Called when the taskerserver is run from the main thread of a service instance.
@@ -101,6 +104,7 @@ class TaskerServer(ThreadPoolServer):
 
         return
 
+
     def _service_thread_entry(self, start_gate: Optional[threading.Event] = None):
         
         # If we were passed a start_gate, it means a thread is waiting for
@@ -108,6 +112,8 @@ class TaskerServer(ThreadPoolServer):
         # a new thread
         if start_gate is not None:
             start_gate.set()
+
+        self.logger.info("Service thread starting ...")
 
         self._listen()
         self._register()
@@ -120,41 +126,10 @@ class TaskerServer(ThreadPoolServer):
             pass  # server closed by another thread
         except KeyboardInterrupt:
             print("")
-            self.logger.warn("keyboard interrupt!")
+            self.logger.info("keyboard interrupt!")
         finally:
-            self.logger.info("server has terminated")
+            self.logger.info("Service thread terminating ...")
             self.close()
 
         return
 
-
-SERVER_CONFIG_PATH = "/etc/tasker.conf"
-
-def tasker_server_main():
-    
-    try:
-        logging_directory = "/var/log"
-
-        if os.path.exists(SERVER_CONFIG_PATH):
-            config = configparser.ConfigParser()
-            config.read(SERVER_CONFIG_PATH)
-
-            if "DEFAULT" in config:
-                default_cfg = config["DEFAULT"]
-
-                if "logdir" in default_cfg:
-                    logging_directory = config["DEFAULT"]["logdir"]
-
-        server = TaskerServer(hostname="0.0.0.0", logging_directory=logging_directory)
-
-        server.serve_forever()
-
-    except Exception as xcpt:
-        errmsg = "Error attempting to load configuration for the 'tasker' service."
-        print(errmsg, file=sys.stderr)
-
-    return
-
-if __name__ == "__main__":
-
-    tasker_server_main()
