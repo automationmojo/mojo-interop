@@ -148,8 +148,10 @@ class ConfigureExt:
 
         with client.ssh.open_session(sys_context=sys_context) as session:
 
-            if not session.file_exists(user_cfg_file):
-
+            sudo_file_exists_cmd = f"sudo bash -c \"[[ -f {user_cfg_file} ]] && echo 0 || echo 1\""
+            status, stdout, stderr = session.run_cmd(sudo_file_exists_cmd)
+            if int(stdout.strip()) == 1:
+                
                 sudo_grp_cmd = f"echo '{sudo_password}' | sudo -S usermod -aG sudo {sudo_username}"
                 status, stdout, stderr = session.run_cmd(sudo_grp_cmd)
                 if status != 0:
