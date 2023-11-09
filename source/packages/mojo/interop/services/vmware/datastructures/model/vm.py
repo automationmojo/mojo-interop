@@ -76,9 +76,9 @@ class VmHardwareBootDeviceEntry:
 class VmHardwareCdromBackingInfo:
     iso_file: str
     type: VmHardwareCdromBackingType
-    auto_detect: Optional[bool]
-    device_access_type: Optional[VmHardwareCdromDeviceAccessType]
-    host_device: Optional[str]
+    auto_detect: Optional[bool] = None
+    device_access_type: Optional[VmHardwareCdromDeviceAccessType] = None
+    host_device: Optional[str] = None
 
     @classmethod
     def from_dict(cls, info: dict) -> "VmHardwareCdromBackingInfo":
