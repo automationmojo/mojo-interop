@@ -101,7 +101,7 @@ class ConfigureExt:
         return
 
     def deploy_source_package(self, source_root: str, package_name: str, remote_source_root: str, cache_dir: Optional[str] = None,
-                              sys_context: Optional[ISystemContext] = None):
+                              force_update: Optional[bool]=False, sys_context: Optional[ISystemContext] = None):
 
         client = self.client
 
@@ -151,7 +151,7 @@ class ConfigureExt:
             sudo_file_exists_cmd = f"sudo bash -c \"[[ -f {user_cfg_file} ]] && echo 0 || echo 1\""
             status, stdout, stderr = session.run_cmd(sudo_file_exists_cmd)
             if int(stdout.strip()) == 1:
-                
+
                 sudo_grp_cmd = f"echo '{sudo_password}' | sudo -S usermod -aG sudo {sudo_username}"
                 status, stdout, stderr = session.run_cmd(sudo_grp_cmd)
                 if status != 0:

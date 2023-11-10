@@ -57,7 +57,15 @@ class ClientSourcePackager:
 
         if os.path.exists(zipfilename) and os.path.exists(digestfilename):
             print(f"Package {zipfilename} already exists.")
-            return
+
+            if not skip_if_exists:
+                return
+            
+        if os.path.exists(zipfilename):
+            os.remove(zipfilename)
+
+        if os.path.exists(digestfilename):
+            os.remove(digestfilename)
 
         with zipfile.ZipFile(zipfilename, mode='w', compression=zipfile.ZIP_DEFLATED, compresslevel=compresslevel) as zf:
 
@@ -93,7 +101,8 @@ class ClientSourcePackager:
 
         return
     
-    def deploy_zip_package_via_ssh(self, session: ISystemContext, package_name: str, package_env: Dict[str, str], destination: str):
+    def deploy_zip_package_via_ssh(self, session: ISystemContext, package_name: str, package_env: Dict[str, str], destination: str,
+                                   force_update: bool = False):
 
         package_name = package_name.strip()
         if not package_name.endswith(".zip"):
@@ -112,6 +121,19 @@ class ClientSourcePackager:
 
         lcl_filename = os.path.join(self._cache_dir, package_name)
         rmt_filename = os.path.join(rmt_home, package_name)
+
+        if force_update:
+            rm_pkg_cmd = f"sudo rm -f {rmt_filename}"
+            status, stdout, stderr = session.run_cmd(rm_service_cmd)
+            if status != 0:
+                errmsg = "Unable to remove remote package. file={rmt_filename}."
+                raise RuntimeError(errmsg)
+            
+            rm_source_cmd = f"sudo rm -fr {destination}"
+            status, stdout, stderr = session.run_cmd(rm_source_cmd)
+            if status != 0:
+                errmsg = "Unable to remove remote source directory. file={destination}."
+                raise RuntimeError(errmsg)
 
         session.file_push(lcl_filename, rmt_filename)
 
