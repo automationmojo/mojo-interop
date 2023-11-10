@@ -89,6 +89,25 @@ class TaskerController:
         
         return promise
 
+    def reinitialize_logging_on_nodes(self, *, logging_directory: Optional[str] = None,
+                                      logging_level: Optional[int] = None,
+                                      taskings_log_directory: Optional[str] = None,
+                                      taskings_log_level: Optional[int] = None):
+
+        for node in self._tasker_nodes:
+            node.reinitialize_logging(logging_directory=logging_directory, logging_level=logging_level,
+                                      taskings_log_directory=taskings_log_directory, taskings_log_level=taskings_log_level)
+
+        return
+
+    def set_notify_parameters_on_nodes(self, *, notify_url: str, notify_headers: dict):
+
+        for node in self._tasker_nodes:
+            node.set_notify_parameters(notify_url=notify_url, notify_headers=notify_headers)
+
+        return
+
+
     def start_task_network(self):
         """
         """

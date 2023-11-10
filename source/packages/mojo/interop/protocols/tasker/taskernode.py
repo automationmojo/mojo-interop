@@ -65,9 +65,10 @@ class TaskerNode:
 
         return promise
 
-    def reinitialize_logging(self, *, logging_directory: str, logging_level: int,
-                                       taskings_log_directory: Optional[str] = None,
-                                       taskings_log_level: Optional[int] = None):
+    def reinitialize_logging(self, *, logging_directory: Optional[str] = None,
+                                      logging_level: Optional[int] = None,
+                                      taskings_log_directory: Optional[str] = None,
+                                      taskings_log_level: Optional[int] = None):
         
         if self._client is None:
             self._connect()

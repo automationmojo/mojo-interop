@@ -210,7 +210,8 @@ class TaskerService(rpyc.Service):
 
         return tstatus
 
-    def exposed_reinitialize_logging(self, *, logging_directory: str, logging_level: int,
+    def exposed_reinitialize_logging(self, *, logging_directory: Optional[str] = None,
+                                     logging_level: Optional[int] = None,
                                      taskings_log_directory: Optional[str] = None,
                                      taskings_log_level: Optional[int] = logging.DEBUG):
 
@@ -223,11 +224,15 @@ class TaskerService(rpyc.Service):
 
         this_type.service_lock.acquire()
         try:
+            if logging_directory is not None:
+                this_type.logging_directory = logging_directory
+            if logging_level is not None:
+                this_type.logging_level = logging_level
 
-            this_type.logging_directory = logging_directory
-            this_type.logging_level = logging_level
-            this_type.taskings_log_directory = taskings_log_directory
-            this_type.taskings_log_level = taskings_log_level
+            if taskings_log_directory is not None:
+                this_type.taskings_log_directory = taskings_log_directory
+            if taskings_log_level is not None:
+                this_type.taskings_log_level = taskings_log_level
         finally:
             this_type.service_lock.release()
         
