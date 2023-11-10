@@ -101,7 +101,7 @@ class ConfigureExt:
         return
 
     def deploy_source_package(self, source_root: str, package_name: str, remote_source_root: str, cache_dir: Optional[str] = None,
-                              force_update: Optional[bool]=False, sys_context: Optional[ISystemContext] = None):
+                              force_repackage: Optional[bool]=False, force_deploy: Optional[bool]=False, sys_context: Optional[ISystemContext] = None):
 
         client = self.client
 
@@ -110,7 +110,7 @@ class ConfigureExt:
         
         packager = ClientSourcePackager(source_root, cache_dir)
 
-        skip_if_exists = not force_update
+        skip_if_exists = not force_repackage
 
         packager.create_zip_package(package_name, skip_if_exists=skip_if_exists)
 
@@ -130,7 +130,7 @@ class ConfigureExt:
             install_env["PYTHON_VERSION"] = python_version
             install_env["PYTHONPATH"] = python_path
 
-            packager.deploy_zip_package_via_ssh(session, package_name, install_env, remote_source_root)
+            packager.deploy_zip_package_via_ssh(session, package_name, install_env, remote_source_root, force_update=force_deploy)
 
         return
 

@@ -124,7 +124,7 @@ class ClientSourcePackager:
 
         if force_update:
             rm_pkg_cmd = f"sudo rm -f {rmt_filename}"
-            status, stdout, stderr = session.run_cmd(rm_service_cmd)
+            status, stdout, stderr = session.run_cmd(rm_pkg_cmd)
             if status != 0:
                 errmsg = "Unable to remove remote package. file={rmt_filename}."
                 raise RuntimeError(errmsg)
