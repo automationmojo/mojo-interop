@@ -264,7 +264,11 @@ class TaskerServerDaemon(object):
 
         from mojo.xmods.xdebugger import DebugPyAssistant, PORT_DEBUGPY_ASSISTANT
 
-        self._debug_assistant = DebugPyAssistant("TaskerRmtDebugger", ("0.0.0.0", PORT_DEBUGPY_ASSISTANT))
+        endpoint = ("0.0.0.0", PORT_DEBUGPY_ASSISTANT)
+
+        self._debug_assistant = DebugPyAssistant("TaskerRmtDebugger", endpoint=endpoint)
+
+        write_trace(self._daemon_logfile, f"Tasker debug assistant start on {endpoint} ...")
 
         return
 

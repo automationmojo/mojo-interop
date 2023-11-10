@@ -56,12 +56,14 @@ class ClientSourcePackager:
         digestfilename = os.path.join(self._cache_dir, package_digest_name)
 
         if os.path.exists(zipfilename) and os.path.exists(digestfilename):
-            print(f"Package {zipfilename} already exists.")
 
-            if not skip_if_exists:
+            if skip_if_exists:
+                print(f"Using pre-existing cached package {zipfilename}.")
                 return
             
         if os.path.exists(zipfilename):
+
+            print(f"Removing pre-existing cached package {zipfilename}.")
             os.remove(zipfilename)
 
         if os.path.exists(digestfilename):
@@ -143,6 +145,12 @@ class ClientSourcePackager:
             errmsg = "Error attempting to create the destination directory."
             raise RuntimeError(errmsg)
 
+        apt_update_cmd = f"sudo apt update"
+        status, stdout, stderr = session.run_cmd(apt_update_cmd)
+        if status != 0:
+            errmsg = "Error attempting to the apt package list."
+            raise RuntimeError(errmsg)
+
         ensure_cmd = f"apt list --installed | grep -E '^[b]uild-essential/[a-z]+'"
         status, stdout, stderr = session.run_cmd(ensure_cmd)
         if status != 0:
@@ -193,6 +201,17 @@ class ClientSourcePackager:
             if status != 0:
                 errmsg = "Unable to install 'poetry' package manager."
                 raise RuntimeError(errmsg)
+
+        poetry_clr_cache_cmd = "bash -l -c \" poetry cache clear --no-interaction --all .\""
+        status, stdout, stderr = session.run_cmd(poetry_clr_cache_cmd)
+        if status != 0:
+            errmsg_lines = [
+                "Failed to clear the poetry cache.",
+                f"STDERR: {stderr}"
+            ]
+            errmsg = os.linesep.join(errmsg_lines)
+            raise RuntimeError(errmsg)
+        
 
         setup_command = f"bash -l -c \"cd {destination}; {destination}/development/setup-environment reset\""
         status, stdout, stderr = session.run_cmd(setup_command)
