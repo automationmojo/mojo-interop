@@ -230,17 +230,17 @@ class TaskerServerDaemon(object):
         start_debugger = False
 
         if os.path.exists(self.SERVER_CONFIG_PATH):
-            cp = configparser.ConfigParser()
-            cp.read(self.SERVER_CONFIG_PATH)
-            if "DEFAULT" in cp:
-                defsect = cp["DEFAULT"]
+            config = configparser.ConfigParser()
+            config.read(self.SERVER_CONFIG_PATH)
+            if "EXTRA" in config:
+                defsect = config["EXTRA"]
                 if "Debugger" in defsect:
                     dbgval = defsect["Debugger"].strip()
                     if dbgval == "yes":
                         start_debugger = True
 
         if start_debugger:
-            self.run_debugger()
+            self.run_debug_assistant()
 
         logging_directory = os.path.dirname(self._daemon_logfile)
 
@@ -249,11 +249,12 @@ class TaskerServerDaemon(object):
 
         return
 
-    def run_debugger(self):
+    def run_debug_assistant(self):
 
         from mojo.xmods.xdebugger import DebugPyAssistant, PORT_DEBUGPY_ASSISTANT
 
         self._debug_assistant = DebugPyAssistant("TaskerRmtDebugger", ("0.0.0.0", PORT_DEBUGPY_ASSISTANT))
+
         return
 
     def start(self):

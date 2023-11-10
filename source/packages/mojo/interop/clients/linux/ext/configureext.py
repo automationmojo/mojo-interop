@@ -38,7 +38,7 @@ class ConfigureExt:
         return self._client_ref()
 
     def configure_tasker_service(self, remote_source_root: str, sudo_username: Optional[str] = None, sudo_password: Optional[str] = None,
-                                 sys_context: Optional[ISystemContext] = None):
+                                 extra_conf: Optional[dict] = None, sys_context: Optional[ISystemContext] = None):
 
         client = self.client
 
@@ -87,6 +87,23 @@ class ConfigureExt:
                 ts_cfg_template_content = tscfg.read()
 
             tasker_server_cfg_content = ts_cfg_template_content.format(**tasker_server_cfg_fill_dict)
+
+
+            if extra_conf is not None:
+                extra_config_content_lines = [
+                    "",
+                    "[EXTRA]",
+                ]
+
+                for key, val in extra_conf.items():
+                    extra_config_content_lines.append(f"{key} = {val}")
+
+                extra_config_content_lines.append("")
+
+                extra_config_content = os.linesep.join(extra_config_content_lines)
+
+                tasker_server_cfg_content = tasker_server_cfg_content + extra_config_content
+
 
             tasker_server_cfg_local = tempfile.mktemp()
             try:
