@@ -17,7 +17,7 @@
             "name": "Python: Example - Tasking Run Tasks",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/source/examples/taskingserverexample.py",
+            "program": "${workspaceFolder}/source/examples/taskerserverexample.py",
             "args": [],
             "console": "integratedTerminal",
             "justMyCode": false

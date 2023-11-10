@@ -45,6 +45,8 @@ def tasker_server_deploy():
 
     dev: LinuxClient = None
 
+    force_repackage = True
+
     for dev in all_devices:
 
         with dev.ssh.open_session() as session:
@@ -54,7 +56,9 @@ def tasker_server_deploy():
             dev.configure.enabled_no_password_sudo(sys_context=session)
 
             print(f"Deploying source package to device ({dev.ipaddr})")
-            dev.configure.deploy_source_package(source_root, package_name, deploy_to, sys_context=session, force_update=True)
+            dev.configure.deploy_source_package(source_root, package_name, deploy_to, sys_context=session,
+                                                force_repackage=force_repackage, force_deploy=True)
+            force_repackage = False
 
             print(f"Configuring tasker service on device ({dev.ipaddr})")
             dev.configure.configure_tasker_service(deploy_to, sys_context=session)
