@@ -26,6 +26,7 @@ import multiprocessing.context
 import os
 import pickle
 import threading
+import traceback
 
 
 from collections import OrderedDict
@@ -103,68 +104,75 @@ class TaskerService(rpyc.Service):
 
         this_type = type(self)
 
-        taskref = None
+        this_type.logger.info("Exposed method 'exposed_execute_tasking' called.")
 
-        if aspects is None:
-            aspects = this_type.aspects
+        try:
+            taskref = None
 
-        # Make sure the requested "Tasking" actually exists before we attempt to instantiate one in a remote
-        # process.
-        module = import_by_name(module_name)
+            if aspects is None:
+                aspects = this_type.aspects
 
-        if hasattr(module, tasking_name):
+            # Make sure the requested "Tasking" actually exists before we attempt to instantiate one in a remote
+            # process.
+            module = import_by_name(module_name)
 
-            task_id = str(uuid4())
+            if hasattr(module, tasking_name):
 
-            log_dir = None
-            log_file = None
-            log_level = this_type.taskings_log_level
+                task_id = str(uuid4())
 
-            if this_type.taskings_log_directory is not None:
+                log_dir = None
+                log_file = None
+                log_level = this_type.taskings_log_level
 
-                taskings_log_directory = this_type.taskings_log_directory
-                if not os.path.exists(taskings_log_directory):
-                    os.makedirs(taskings_log_directory)
+                if this_type.taskings_log_directory is not None:
 
-                log_dir = os.path.join(taskings_log_directory, f"tasking-{task_id}")
-                if not os.path.exists(log_dir):
-                    os.makedirs(log_dir)
+                    taskings_log_directory = this_type.taskings_log_directory
+                    if not os.path.exists(taskings_log_directory):
+                        os.makedirs(taskings_log_directory)
 
-                log_file = os.path.join(log_dir, f"tasking-{task_id}.log")
+                    log_dir = os.path.join(taskings_log_directory, f"tasking-{task_id}")
+                    if not os.path.exists(log_dir):
+                        os.makedirs(log_dir)
+
+                    log_file = os.path.join(log_dir, f"tasking-{task_id}.log")
 
 
-            taskref = TaskingRef(module_name, task_id, tasking_name, log_dir)
+                taskref = TaskingRef(module_name, task_id, tasking_name, log_dir)
 
-            # Create an instance of a TaskingManager to manage the remote process, we will manage the scope
-            # if this instance by delegating it to a thread that will execute the task and monitor its lifespan
-            mpctx = multiprocessing.get_context("spawn")
-            tasking_manager = TaskingManager(ctx=mpctx)
-            tasking_manager.start()
+                # Create an instance of a TaskingManager to manage the remote process, we will manage the scope
+                # if this instance by delegating it to a thread that will execute the task and monitor its lifespan
+                mpctx = multiprocessing.get_context("spawn")
+                tasking_manager = TaskingManager(ctx=mpctx)
+                tasking_manager.start()
 
-            tasking = tasking_manager.instantiate_tasking(module_name, tasking_name, task_id, parent_id, log_dir,
-                log_file, log_level, this_type.notify_url, this_type.notify_headers, aspects=aspects)
+                tasking = tasking_manager.instantiate_tasking(module_name, tasking_name, task_id, parent_id, log_dir,
+                    log_file, log_level, this_type.notify_url, this_type.notify_headers, aspects=aspects)
 
-            this_type.service_lock.acquire()
-            try:
-                this_type.taskings[task_id] = tasking
-            finally:
-                this_type.service_lock.release()
+                this_type.service_lock.acquire()
+                try:
+                    this_type.taskings[task_id] = tasking
+                finally:
+                    this_type.service_lock.release()
 
-            sgate = threading.Event()
-            sgate.clear()
+                sgate = threading.Event()
+                sgate.clear()
 
-            dargs = (sgate, tasking_manager, tasking, task_id, kwargs, aspects)
+                dargs = (sgate, tasking_manager, tasking, task_id, kwargs, aspects)
 
-            # We have to dispatch the task with a thread, because we need to leave a local thread running
-            # to monitor the progress of the task.
-            taskthread = threading.Thread(target=self.dispatch_task, args=dargs, daemon=True)
-            taskthread.start()
-    
-            sgate.wait()
+                # We have to dispatch the task with a thread, because we need to leave a local thread running
+                # to monitor the progress of the task.
+                taskthread = threading.Thread(target=self.dispatch_task, args=dargs, daemon=True)
+                taskthread.start()
+        
+                sgate.wait()
 
-        else:
-            errmsg = f"The specified tasking 'module' was not found. module={module_name} tasking={tasking_name}"
-            raise ValueError(errmsg)
+            else:
+                errmsg = f"The specified tasking 'module' was not found. module={module_name} tasking={tasking_name}"
+                raise ValueError(errmsg)
+        except:
+            errmsg = traceback.format_exc()
+            this_type.logger.error(errmsg)
+            raise
 
         return taskref.as_dict()
 

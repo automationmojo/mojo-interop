@@ -73,7 +73,7 @@ class TaskerNode:
         if self._client is None:
             self._connect()
         
-        self._client.root.set_logging_parameters(logging_directory=logging_directory, logging_level=logging_level,
+        self._client.root.reinitialize_logging(logging_directory=logging_directory, logging_level=logging_level,
                 taskings_log_directory=taskings_log_directory, taskings_log_level=taskings_log_level)
 
         return

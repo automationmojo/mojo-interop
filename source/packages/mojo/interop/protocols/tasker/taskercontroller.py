@@ -108,7 +108,7 @@ class TaskerController:
         return
 
 
-    def start_task_network(self):
+    def start_tasker_network(self):
         """
         """
         raise NotOverloadedError("The 'start_task_network' method must be overloaded.")
