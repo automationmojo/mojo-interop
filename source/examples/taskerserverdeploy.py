@@ -54,7 +54,7 @@ def tasker_server_deploy():
             dev.configure.enabled_no_password_sudo(sys_context=session)
 
             print(f"Deploying source package to device ({dev.ipaddr})")
-            dev.configure.deploy_source_package(source_root, package_name, deploy_to, sys_context=session)
+            dev.configure.deploy_source_package(source_root, package_name, deploy_to, sys_context=session, force_update=True)
 
             print(f"Configuring tasker service on device ({dev.ipaddr})")
             dev.configure.configure_tasker_service(deploy_to, sys_context=session)

@@ -110,7 +110,9 @@ class ConfigureExt:
         
         packager = ClientSourcePackager(source_root, cache_dir)
 
-        packager.create_zip_package(package_name)
+        skip_if_exists = not force_update
+
+        packager.create_zip_package(package_name, skip_if_exists=skip_if_exists)
 
         source_env = packager.get_environment()
 
