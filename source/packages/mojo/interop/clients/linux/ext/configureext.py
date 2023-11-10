@@ -1,7 +1,8 @@
 
-from typing import TYPE_CHECKING, Optional
+from typing import Dict, Optional, TYPE_CHECKING
 
 import os
+import shutil
 import tempfile
 import weakref
 
@@ -38,7 +39,7 @@ class ConfigureExt:
         return self._client_ref()
 
     def configure_tasker_service(self, remote_source_root: str, sudo_username: Optional[str] = None, sudo_password: Optional[str] = None,
-                                 extra_conf: Optional[dict] = None, sys_context: Optional[ISystemContext] = None):
+                                 config: Optional[Dict[str, Dict[str, str]]] = None, sys_context: Optional[ISystemContext] = None):
 
         client = self.client
 
@@ -88,32 +89,45 @@ class ConfigureExt:
 
             tasker_server_cfg_content = ts_cfg_template_content.format(**tasker_server_cfg_fill_dict)
 
-
-            if extra_conf is not None:
-                extra_config_content_lines = [
+            config_content = None
+            if config is not None:
+                config_content_lines = [
                     "",
-                    "[EXTRA]",
                 ]
 
-                for key, val in extra_conf.items():
-                    extra_config_content_lines.append(f"{key} = {val}")
+                sec_info: dict
+                for sec_name, sec_info in config.items():
+                    config_content_lines.append(f"[{sec_name}]")
+                    
+                    for key, val in sec_info.items():
+                        config_content_lines.append(f"{key} = {val}")
 
-                extra_config_content_lines.append("")
+                    config_content_lines.append("")
 
-                extra_config_content = os.linesep.join(extra_config_content_lines)
-
-                tasker_server_cfg_content = tasker_server_cfg_content + extra_config_content
-
+                config_content = os.linesep.join(config_content_lines)
 
             tasker_server_cfg_local = tempfile.mktemp()
+            runtime_config_file = None
+            runtime_config_dir = None
             try:
                 with open(tasker_server_cfg_local, 'w+') as tscf:
                     tscf.write(tasker_server_cfg_content)
-                
+
+                if config_content is not None:
+                    runtime_config_dir = tempfile.mkdtemp()
+                    runtime_config_file = os.path.join(runtime_config_dir, "tasker.conf")
+
+                    with open(runtime_config_file, 'w+') as ccf:
+                        ccf.write(config_content)
+
+
                 self.install_systemd_service("tasker", sudo_username, tasker_server_cfg_local, pidfolder=f"/var/run/tasker",
-                                             optfolder="/opt/tasker", sys_context=session)
+                                             optfolder="/opt/tasker", runtime_config_file=runtime_config_file, sys_context=session)
             finally:
                 os.remove(tasker_server_cfg_local)
+
+                if runtime_config_dir is not None:
+                    shutil.rmtree(runtime_config_dir, ignore_errors=True)
 
         return
 
@@ -207,7 +221,7 @@ class ConfigureExt:
         return python_version
 
     def install_systemd_service(self, svcname: str, svcuser: str, source_svc_config_file: str, pidfolder: Optional[str] =  None,
-                                optfolder: Optional[str] =  None, sys_context: Optional[ISystemContext] = None):
+                                optfolder: Optional[str] =  None, runtime_config_file: Optional[str] = None, sys_context: Optional[ISystemContext] = None):
 
         client = self.client
 
@@ -230,6 +244,13 @@ class ConfigureExt:
                     errmsg = format_command_result(f"Error while attempting to change the ownership of the opt folder for `{svcname}`.",
                                                 status, stdout, stderr, exp_status=[0], target=client.ipaddr)
                     raise CommandError(errmsg, status, stdout, stderr)
+                
+                if runtime_config_file is not None:
+
+                    dest_base_name = os.path.basename(runtime_config_file)
+                    dest_runtime_config_file = os.path.join(optfolder, dest_base_name)
+
+                    session.file_push(runtime_config_file, dest_runtime_config_file)
 
             if pidfolder is not None:
                 mkdir_cmd = f"sudo mkdir -p {pidfolder}"

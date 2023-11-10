@@ -230,21 +230,32 @@ class TaskerServerDaemon(object):
         start_debugger = False
 
         if os.path.exists(self.SERVER_CONFIG_PATH):
+            write_trace(self._daemon_logfile, f"Found tasker daemon configuration file ...")
+            
             config = configparser.ConfigParser()
             config.read(self.SERVER_CONFIG_PATH)
-            if "EXTRA" in config:
-                defsect = config["EXTRA"]
+
+            write_trace(self._daemon_logfile, f"Processing tasker daemon configuration file ...")
+
+            if "DEFAULT" in config:
+                write_trace(self._daemon_logfile, f"Found configuration 'DEFAULT' section ...")
+                defsect = config["DEFAULT"]
                 if "Debugger" in defsect:
                     dbgval = defsect["Debugger"].strip()
                     if dbgval == "yes":
                         start_debugger = True
 
         if start_debugger:
+            write_trace(self._daemon_logfile, f"Tasker starting debug assistant ...")
             self.run_debug_assistant()
+
+        write_trace(self._daemon_logfile, f"Tasker creating tasker server instance ...")
 
         logging_directory = os.path.dirname(self._daemon_logfile)
 
         server = TaskerServer(hostname="0.0.0.0", logging_directory=logging_directory)
+
+        write_trace(self._daemon_logfile, f"Tasker calling tasker server serve_forever ...")
         server.serve_forever()
 
         return

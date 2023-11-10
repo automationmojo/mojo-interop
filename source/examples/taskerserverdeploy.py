@@ -9,15 +9,11 @@ from mojo.collections.contextpaths import ContextPaths
 
 from mojo.config.variables import resolve_configuration_variables
 from mojo.config.configurationmaps import resolve_configuration_maps
-from mojo.config.optionoverrides import MOJO_CONFIG_OPTION_OVERRIDES
 
-from mojo.xmods.credentials.sshcredential import SshCredential
 from mojo.xmods.landscaping.landscapeparameters import LandscapeActivationParams
 from mojo.xmods.landscaping.landscape import startup_landscape
 
-from mojo.interop.protocols.ssh.sshagent import SshAgent
 from mojo.interop.clients.linux.linuxclient import LinuxClient
-from mojo.interop.clients.clientsourcepackager import ClientSourcePackager
 
 def tasker_server_deploy():
 
@@ -47,6 +43,14 @@ def tasker_server_deploy():
 
     force_repackage = True
 
+    default_section = {
+        "Debugger": "yes"
+    }
+
+    config = {
+        "DEFAULT": default_section
+    }
+
     for dev in all_devices:
 
         with dev.ssh.open_session() as session:
@@ -61,7 +65,7 @@ def tasker_server_deploy():
             force_repackage = False
 
             print(f"Configuring tasker service on device ({dev.ipaddr})")
-            dev.configure.configure_tasker_service(deploy_to, sys_context=session)
+            dev.configure.configure_tasker_service(deploy_to, sys_context=session, config=config)
 
             print(f"Finishing configuration for device ({dev.ipaddr})")
 
