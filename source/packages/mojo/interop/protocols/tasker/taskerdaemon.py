@@ -21,6 +21,7 @@ __license__ = "MIT"
 
 import argparse
 import atexit
+import configparser
 import os
 import psutil
 import signal
@@ -89,6 +90,8 @@ class TaskerServerDaemon(object):
         self._pre_daemon_logfile = os.path.join(self.SERVER_LOGDIR, "tasker-service-pre-daemon.log")
         self._daemon_logfile = os.path.join(self.SERVER_LOGDIR, "tasker-service-daemon.log")
         self._daemon_error_logfile = os.path.join(self.SERVER_LOGDIR, "tasker-error-daemon.log")
+
+        self._debug_assistant = None
         return
 
 
@@ -224,6 +227,21 @@ class TaskerServerDaemon(object):
             to handle the Bluetooth integration for the service.
         """
         
+        start_debugger = False
+
+        if os.path.exists(self.SERVER_CONFIG_PATH):
+            cp = configparser.ConfigParser()
+            cp.read(self.SERVER_CONFIG_PATH)
+            if "DEFAULT" in cp:
+                defsect = cp["DEFAULT"]
+                if "Debugger" in defsect:
+                    dbgval = defsect["Debugger"].strip()
+                    if dbgval == "yes":
+                        start_debugger = True
+
+        if start_debugger:
+            self.run_debugger()
+
         logging_directory = os.path.dirname(self._daemon_logfile)
 
         server = TaskerServer(hostname="0.0.0.0", logging_directory=logging_directory)
@@ -231,6 +249,12 @@ class TaskerServerDaemon(object):
 
         return
 
+    def run_debugger(self):
+
+        from mojo.xmods.xdebugger import DebugPyAssistant, PORT_DEBUGPY_ASSISTANT
+
+        self._debug_assistant = DebugPyAssistant("TaskerRmtDebugger", ("0.0.0.0", PORT_DEBUGPY_ASSISTANT))
+        return
 
     def start(self):
         """
