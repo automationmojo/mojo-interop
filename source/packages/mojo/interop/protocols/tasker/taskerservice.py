@@ -25,11 +25,13 @@ import multiprocessing
 import multiprocessing.context
 import os
 import pickle
+import tempfile
 import threading
 import traceback
 
 
 from collections import OrderedDict
+from logging.handlers import RotatingFileHandler
 from uuid import uuid4
 
 import rpyc
@@ -63,8 +65,8 @@ class TaskerService(rpyc.Service):
 
     aspects = DEFAULT_TASKER_ASPECTS
     
-    logger = logging.getLogger()
-    logging_directory = None
+    logger = None
+    logging_directory = "/opt/tasker/logs"
     logging_level = logging.DEBUG
 
     taskings_log_directory = None
@@ -75,11 +77,23 @@ class TaskerService(rpyc.Service):
 
     def __init__(self) -> None:
         super().__init__()
+
+        this_type = type(self)
+
+        this_type.service_lock.acquire()
+        try:
+            if this_type.logger is None:
+                self._reinitialize_service_logging()
+        finally:
+            this_type.service_lock.release()
+
         return
 
     def exposed_dispose_tasking(self, *, task_id):
 
         this_type = type(self)
+
+        this_type.logger.info("Method 'exposed_dispose_tasking' was called.")
 
         this_type.service_lock.acquire()
         try:
@@ -104,7 +118,7 @@ class TaskerService(rpyc.Service):
 
         this_type = type(self)
 
-        this_type.logger.info("Exposed method 'exposed_execute_tasking' called.")
+        this_type.logger.info("Method 'exposed_execute_tasking' was called.")
 
         try:
             taskref = None
@@ -180,6 +194,8 @@ class TaskerService(rpyc.Service):
 
         this_type = type(self)
 
+        this_type.logger.info("Method 'exposed_get_tasking_result' was called.")
+
         result = None
 
         this_type.service_lock.acquire()
@@ -207,6 +223,8 @@ class TaskerService(rpyc.Service):
 
         this_type = type(self)
 
+        this_type.logger.info("Method 'exposed_get_tasking_status' was called.")
+
         tstatus = None
 
         this_type.service_lock.acquire()
@@ -230,12 +248,22 @@ class TaskerService(rpyc.Service):
 
         this_type = type(self)
 
+        this_type.logger.info("Method 'exposed_reinitialize_logging' was called.")
+
         this_type.service_lock.acquire()
         try:
+            reinitialize_service_logging = False
+
             if logging_directory is not None:
                 this_type.logging_directory = logging_directory
+                reinitialize_service_logging = True
+
             if logging_level is not None:
                 this_type.logging_level = logging_level
+                reinitialize_service_logging = True
+
+            if reinitialize_service_logging:
+                self._reinitialize_service_logging()
 
             if taskings_log_directory is not None:
                 this_type.taskings_log_directory = taskings_log_directory
@@ -249,6 +277,8 @@ class TaskerService(rpyc.Service):
     def exposed_set_notify_parameters(self, *, notify_url: str, notify_headers: dict):
 
         this_type = type(self)
+
+        this_type.logger.info("Method 'exposed_set_notify_parameters' was called.")
 
         this_type.service_lock.acquire()
         try:
@@ -303,5 +333,34 @@ class TaskerService(rpyc.Service):
 
         finally:
             tasking_manager.shutdown()
+
+        return
+
+    def _reinitialize_service_logging(self):
+
+        this_type = type(self)
+
+        if this_type.logger is None:
+            this_type.logger = logging.getLogger()
+        
+        handlers_list = [h for h in this_type.logger.handlers]
+
+        for handler in handlers_list:
+            this_type.logger.removeHandler(handler)
+
+        logging_dir = this_type.logging_directory
+        if not os.path.exists(logging_dir):
+            try:
+                logging_dir = os.makedirs(logging_dir)
+            except:
+                logging_dir = tempfile.mkdtemp()
+                this_type.logging_directory = logging_dir
+
+        log_file = os.path.join(logging_dir, "tasker-server.log")
+
+        rotating_handler = RotatingFileHandler(log_file, maxBytes=8000, backupCount=10)
+        rotating_handler.setLevel(this_type.logging_level)
+
+        this_type.logger.addHandler(rotating_handler)
 
         return
