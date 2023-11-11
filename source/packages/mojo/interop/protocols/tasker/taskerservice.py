@@ -42,6 +42,7 @@ from mojo.errors.exceptions import SemanticError
 from mojo.results.model.progresscode import ProgressCode
 from mojo.results.model.progressinfo import ProgressInfo
 
+from mojo.xmods.fspath import expand_path
 from mojo.xmods.ximport import import_by_name
 
 from mojo.interop.protocols.tasker.taskingresult import TaskingResult, TaskingRef
@@ -69,7 +70,7 @@ class TaskerService(rpyc.Service):
     logging_directory = "/opt/tasker/logs"
     logging_level = logging.DEBUG
 
-    taskings_log_directory = None
+    taskings_log_directory = "/opt/tasker/logs/taskings"
     taskings_log_level = logging.DEBUG
 
     notify_url = None
@@ -255,20 +256,20 @@ class TaskerService(rpyc.Service):
             reinitialize_service_logging = False
 
             if logging_directory is not None:
-                this_type.logging_directory = logging_directory
+                this_type.logging_directory = expand_path(logging_directory)
                 reinitialize_service_logging = True
 
             if logging_level is not None:
-                this_type.logging_level = logging_level
+                this_type.logging_level = expand_path(logging_level)
                 reinitialize_service_logging = True
 
             if reinitialize_service_logging:
                 self._reinitialize_service_logging()
 
             if taskings_log_directory is not None:
-                this_type.taskings_log_directory = taskings_log_directory
+                this_type.taskings_log_directory = expand_path(taskings_log_directory)
             if taskings_log_level is not None:
-                this_type.taskings_log_level = taskings_log_level
+                this_type.taskings_log_level = expand_path(taskings_log_level)
         finally:
             this_type.service_lock.release()
         

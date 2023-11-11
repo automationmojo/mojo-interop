@@ -27,6 +27,13 @@ import pickle
 from mojo.interop.protocols.tasker.taskingresult import TaskingResult, TaskingResultPromise
 
 
+TASKER_PROTOCOL_CONFIG = {
+    "allow_public_attrs": True,
+    "allow_pickle": True,
+    "import_custom_exceptions": True,
+    "allow_custom_exceptions": True
+}
+
 class TaskerNode:
     """
         The :class:`TaskerNode` object represents a remote tasker service endpoint.
@@ -88,5 +95,5 @@ class TaskerNode:
         return
 
     def _connect(self):
-        self._client = rpyc.connect(self._ipaddr, self._port, keepalive=True, config={'allow_public_attrs': True})
+        self._client = rpyc.connect(self._ipaddr, self._port, keepalive=True, config=TASKER_PROTOCOL_CONFIG)
         return

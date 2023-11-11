@@ -33,6 +33,14 @@ from rpyc.utils.server import ThreadPoolServer
 from mojo.interop.protocols.tasker.taskerservice import TaskerService
 
 
+TASKER_PROTOCOL_CONFIG = {
+    "allow_public_attrs": True,
+    "allow_pickle": True,
+    "import_custom_exceptions": True,
+    "allow_custom_exceptions": True,
+    "logger": logging.getLogger()
+}
+
 class TaskerServer(ThreadPoolServer):
     """
         The :class:`TaskerServer` starts an RPyC server in an internal thread that is capable of handling
@@ -44,7 +52,7 @@ class TaskerServer(ThreadPoolServer):
 
     def __init__(self, hostname=None, ipv6=False, port=TASKER_SERVICE_PORT,
                  backlog=socket.SOMAXCONN, reuse_addr=True, authenticator=None, registrar=None,
-                 auto_register=None, protocol_config=None, logging_directory: Optional[str]=None,
+                 auto_register=None, protocol_config=TASKER_PROTOCOL_CONFIG, logging_directory: Optional[str]=None,
                  listener_timeout=0.5, socket_path=None):
         
         if logging_directory is None:
