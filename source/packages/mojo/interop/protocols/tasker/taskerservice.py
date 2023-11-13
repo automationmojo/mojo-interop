@@ -101,6 +101,8 @@ class TaskerService(rpyc.Service):
         if not archive_name.endswith(".zip"):
             archive_name = f"{archive_name}.zip"
 
+        folder_to_archive = expand_path(folder_to_archive)
+
         if not os.path.exists(folder_to_archive):
             raise FileNotFoundError(f"The folder to archive folder={folder_to_archive} does not exist")
 
@@ -289,6 +291,8 @@ class TaskerService(rpyc.Service):
 
 
     def exposed_make_folder(self, *, folder: str):
+
+        folder = expand_path(folder)
 
         os.makedirs(folder)
 
