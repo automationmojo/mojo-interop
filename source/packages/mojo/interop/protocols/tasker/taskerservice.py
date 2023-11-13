@@ -42,6 +42,7 @@ from mojo.errors.exceptions import SemanticError
 from mojo.results.model.progresscode import ProgressCode
 from mojo.results.model.progressinfo import ProgressInfo
 
+from mojo.xmods.compression import create_archive_of_folder
 from mojo.xmods.fspath import expand_path
 from mojo.xmods.ximport import import_by_name
 
@@ -90,6 +91,29 @@ class TaskerService(rpyc.Service):
 
         return
 
+
+    def exposed_archive_folder(self, *, folder_to_archive: str, dest_folder: str, archive_name: str, compression_level: int = 7):
+
+        this_type = type(self)
+
+        this_type.logger.info("Method 'exposed_archive_folder' was called.")
+
+        if not archive_name.endswith(".zip"):
+            archive_name = f"{archive_name}.zip"
+
+        if not os.path.exists(folder_to_archive):
+            raise FileNotFoundError(f"The folder to archive folder={folder_to_archive} does not exist")
+
+        if not os.path.exists(dest_folder):
+            raise FileNotFoundError(f"The specified 'dest_folder' folder={dest_folder} does not exist")
+
+        archive_full = os.path.join(dest_folder, archive_name)
+
+        create_archive_of_folder(folder_to_archive, archive_full, compression_level=compression_level)
+
+        return
+
+
     def exposed_dispose_tasking(self, *, task_id):
 
         this_type = type(self)
@@ -113,6 +137,7 @@ class TaskerService(rpyc.Service):
             this_type.service_lock.release()
 
         return
+    
 
     def exposed_execute_tasking(self, *, module_name: str, tasking_name: str, parent_id: Optional[str] = None,
                                 aspects: Optional[TaskerAspects]=None, **kwargs) -> dict:
@@ -191,6 +216,31 @@ class TaskerService(rpyc.Service):
 
         return taskref.as_dict()
 
+
+    def exposed_file_exists(self, *, filename) -> str:
+
+        filename = expand_path(filename)
+
+        exists = False
+
+        if os.path.exists(filename) and os.path.isfile(filename):
+            exists = True
+
+        return exists
+    
+
+    def exposed_file_exists(self, *, folder) -> str:
+
+        folder = expand_path(folder)
+
+        exists = False
+
+        if os.path.exists(folder) and os.path.isdir(folder):
+            exists = True
+
+        return exists
+
+
     def exposed_get_tasking_result(self, *, task_id) -> TaskingResult:
 
         this_type = type(self)
@@ -236,6 +286,14 @@ class TaskerService(rpyc.Service):
             this_type.service_lock.release()
 
         return tstatus
+
+
+    def exposed_make_folder(self, *, folder: str):
+
+        os.makedirs(folder)
+
+        return
+
 
     def exposed_reinitialize_logging(self, *, logging_directory: Optional[str] = None,
                                      logging_level: Optional[int] = None,

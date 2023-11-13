@@ -53,6 +53,19 @@ class TaskerNode:
     def port(self):
         return self._port
 
+    def archive_folder(self, *, folder_to_archive: str, dest_folder: str, archive_name: str, compression_level: int = 7):
+        self._client.root.archive_folder(folder_to_archive=folder_to_archive, dest_folder=dest_folder,
+                                         archive_name=archive_name, compression_level=compression_level)
+        return
+
+    def file_exists(self, *, filename: str) -> bool:
+        exists = self._client.root.file_exists(filename=filename)
+        return exists
+    
+    def folder_exists(self, *, folder: str) -> bool:
+        exists = self._client.root.folder_exists(folder=folder)
+        return exists
+
     def get_tasking_status(self, *, task_id: str) -> str:
         tstatus = self._client.root.get_tasking_status(task_id=task_id)
         return tstatus
