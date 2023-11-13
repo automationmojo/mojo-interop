@@ -23,7 +23,7 @@ from mojo.errors.exceptions import NotOverloadedError, SemanticError
 
 from mojo.interop.protocols.tasker.taskeraspects import TaskerAspects
 from mojo.interop.protocols.tasker.tasking import Tasking, TaskingIdentity
-from mojo.interop.protocols.tasker.taskernode import TaskerNode
+from mojo.interop.protocols.tasker.taskernode import TaskerNode, TaskerClientNode
 from mojo.interop.protocols.tasker.taskingresult import TaskingResultPromise
 from mojo.interop.protocols.tasker.taskerservice import TaskerService
 from mojo.interop.protocols.tasker.taskerservermanager import TaskerServerManager, spawn_tasking_server_process
@@ -171,7 +171,7 @@ class ClientTaskerController(TaskerController):
 
         for cl in clients:
 
-            node = TaskerNode(ipaddr=cl.ipaddr, port=TASKER_PORT)
+            node = TaskerClientNode(client=cl, ipaddr=cl.ipaddr, port=TASKER_PORT)
             
             if notify_url is not None:
                 node.set_notify_parameters(notify_url=notify_url, notify_headers=notify_headers)

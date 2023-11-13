@@ -17,14 +17,19 @@ __status__ = "Development" # Prototype, Development or Production
 __license__ = "MIT"
 
 
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 
 import rpyc
 import pickle
+import weakref
 
 
 from mojo.interop.protocols.tasker.taskingresult import TaskingResult, TaskingResultPromise
+
+
+if TYPE_CHECKING:
+    from mojo.xmods.landscaping.client.clientbase import ClientBase
 
 
 TASKER_PROTOCOL_CONFIG = {
@@ -42,7 +47,7 @@ class TaskerNode:
     def __init__(self, ipaddr: str, port: int):
         self._ipaddr = ipaddr
         self._port = port
-        self._client = None
+        self._rpyc_client = None
         return
 
     @property
@@ -54,33 +59,33 @@ class TaskerNode:
         return self._port
 
     def archive_folder(self, *, folder_to_archive: str, dest_folder: str, archive_name: str, compression_level: int = 7):
-        self._client.root.archive_folder(folder_to_archive=folder_to_archive, dest_folder=dest_folder,
+        self._rpyc_client.root.archive_folder(folder_to_archive=folder_to_archive, dest_folder=dest_folder,
                                          archive_name=archive_name, compression_level=compression_level)
         return
 
     def file_exists(self, *, filename: str) -> bool:
-        exists = self._client.root.file_exists(filename=filename)
+        exists = self._rpyc_client.root.file_exists(filename=filename)
         return exists
     
     def folder_exists(self, *, folder: str) -> bool:
-        exists = self._client.root.folder_exists(folder=folder)
+        exists = self._rpyc_client.root.folder_exists(folder=folder)
         return exists
 
     def get_tasking_status(self, *, task_id: str) -> str:
-        tstatus = self._client.root.get_tasking_status(task_id=task_id)
+        tstatus = self._rpyc_client.root.get_tasking_status(task_id=task_id)
         return tstatus
     
     def get_tasking_result(self, *, task_id: str) -> TaskingResult:
-        tresult_str = self._client.root.get_tasking_result(task_id=task_id)
+        tresult_str = self._rpyc_client.root.get_tasking_result(task_id=task_id)
         tresult = pickle.loads(tresult_str)
         return tresult
 
     def execute_tasking(self, *, module_name: str, tasking_name: str, **kwargs) -> TaskingResultPromise:
 
-        if self._client is None:
+        if self._rpyc_client is None:
             self._connect()
 
-        taskref_info = self._client.root.execute_tasking(module_name=module_name, tasking_name=tasking_name, **kwargs)
+        taskref_info = self._rpyc_client.root.execute_tasking(module_name=module_name, tasking_name=tasking_name, **kwargs)
         promise = TaskingResultPromise(taskref_info["module_name"], taskref_info["task_id"], taskref_info["task_name"], taskref_info["log_dir"], self)
 
         return promise
@@ -90,23 +95,35 @@ class TaskerNode:
                                       taskings_log_directory: Optional[str] = None,
                                       taskings_log_level: Optional[int] = None):
         
-        if self._client is None:
+        if self._rpyc_client is None:
             self._connect()
         
-        self._client.root.reinitialize_logging(logging_directory=logging_directory, logging_level=logging_level,
+        self._rpyc_client.root.reinitialize_logging(logging_directory=logging_directory, logging_level=logging_level,
                 taskings_log_directory=taskings_log_directory, taskings_log_level=taskings_log_level)
 
         return
 
     def set_notify_parameters(self, *, notify_url: str, notify_headers: dict):
         
-        if self._client is None:
+        if self._rpyc_client is None:
             self._connect()
         
-        self._client.root.set_notify_parameters(notify_url=notify_url, notify_headers=notify_headers)
+        self._rpyc_client.root.set_notify_parameters(notify_url=notify_url, notify_headers=notify_headers)
 
         return
 
     def _connect(self):
-        self._client = rpyc.connect(self._ipaddr, self._port, keepalive=True, config=TASKER_PROTOCOL_CONFIG)
+        self._rpyc_client = rpyc.connect(self._ipaddr, self._port, keepalive=True, config=TASKER_PROTOCOL_CONFIG)
         return
+
+
+class TaskerClientNode(TaskerNode):
+
+    def __init__(self, client: "ClientBase", ipaddr: str, port: int):
+        self._client_ref = weakref.ref(client)
+        super().__init__(ipaddr, port)
+        return
+
+    @property
+    def client(self) -> "ClientBase":
+        return self._client_ref()
