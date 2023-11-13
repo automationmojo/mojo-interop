@@ -92,7 +92,7 @@ class TaskerService(rpyc.Service):
         return
 
 
-    def exposed_archive_folder(self, *, folder_to_archive: str, dest_folder: str, archive_name: str, compression_level: int = 7):
+    def exposed_archive_folder(self, *, folder_to_archive: str, dest_folder: str, archive_name: str, compression_level: int = 7) -> str:
 
         this_type = type(self)
 
@@ -111,7 +111,7 @@ class TaskerService(rpyc.Service):
 
         create_archive_of_folder(folder_to_archive, archive_full, compression_level=compression_level)
 
-        return
+        return archive_full
 
 
     def exposed_dispose_tasking(self, *, task_id):
@@ -332,6 +332,14 @@ class TaskerService(rpyc.Service):
             this_type.service_lock.release()
         
         return
+
+
+    def exposed_resolve_path(self, *, path) -> str:
+
+        path = expand_path(path)
+
+        return path
+
 
     def exposed_set_notify_parameters(self, *, notify_url: str, notify_headers: dict):
 

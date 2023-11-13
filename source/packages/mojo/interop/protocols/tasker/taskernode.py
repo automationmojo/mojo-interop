@@ -103,6 +103,12 @@ class TaskerNode:
 
         return
 
+    def resolve_path(self, *, path) -> str:
+
+        full_path = self._rpyc_client.root.resolve_path(path=path)
+        
+        return full_path
+
     def set_notify_parameters(self, *, notify_url: str, notify_headers: dict):
         
         if self._rpyc_client is None:
