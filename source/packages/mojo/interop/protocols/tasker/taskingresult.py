@@ -86,7 +86,7 @@ class TaskingRef:
 
 class TaskingResultPromise:
 
-    def __init__(self, module_name: str, task_id: str, task_name: str, log_dir: str, node: TaskerNode):
+    def __init__(self, module_name: str, task_id: str, task_name: str, log_dir: str, node: "TaskerNode"):
         self._module_name = module_name
         self._task_id = task_id
         self._task_name = task_name
