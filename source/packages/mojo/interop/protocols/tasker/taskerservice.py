@@ -106,8 +106,9 @@ class TaskerService(rpyc.Service):
         if not os.path.exists(folder_to_archive):
             raise FileNotFoundError(f"The folder to archive folder={folder_to_archive} does not exist")
 
+        dest_folder = expand_path(dest_folder)
         if not os.path.exists(dest_folder):
-            raise FileNotFoundError(f"The specified 'dest_folder' folder={dest_folder} does not exist")
+            os.makedirs(dest_folder)
 
         archive_full = os.path.join(dest_folder, archive_name)
 
