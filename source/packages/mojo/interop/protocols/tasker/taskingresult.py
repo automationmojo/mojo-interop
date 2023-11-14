@@ -148,14 +148,6 @@ class TaskingResultPromise:
     
     def _is_task_complete(self) -> bool:
 
-        rtnval = False
-
-        status = self._node.has_completed_and_result_ready(task_id=self._task_id)
-        if status == ProgressCode.Completed:
-            rtnval = True
-        elif status == ProgressCode.Errored:
-            rtnval = True
-        else:
-            print(f"task_id={self._task_id} status={status}")
+        rtnval = self._node.has_completed_and_result_ready(task_id=self._task_id)
 
         return rtnval
