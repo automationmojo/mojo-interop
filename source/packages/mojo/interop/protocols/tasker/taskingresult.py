@@ -16,7 +16,7 @@ __status__ = "Development" # Prototype, Development or Production
 __license__ = "MIT"
 
 
-from typing import Any, Optional
+from typing import Any, Optional, TYPE_CHECKING
 
 import os
 import time
@@ -33,6 +33,9 @@ DEFAULT_WAIT_INTERVAL = 5
 
 
 from mojo.results.model.progresscode import ProgressCode
+
+if TYPE_CHECKING:
+    from mojo.interop.protocols.tasker.taskernode import TaskerNode
 
 @dataclass
 class TaskingResult:
@@ -83,7 +86,7 @@ class TaskingRef:
 
 class TaskingResultPromise:
 
-    def __init__(self, module_name: str, task_id: str, task_name: str, log_dir: str, node: Any):
+    def __init__(self, module_name: str, task_id: str, task_name: str, log_dir: str, node: TaskerNode):
         self._module_name = module_name
         self._task_id = task_id
         self._task_name = task_name
@@ -147,7 +150,7 @@ class TaskingResultPromise:
 
         rtnval = False
 
-        status = self._node.get_tasking_status(task_id=self._task_id)
+        status = self._node.has_completed_and_result_ready(task_id=self._task_id)
         if status == ProgressCode.Completed:
             rtnval = True
         elif status == ProgressCode.Errored:

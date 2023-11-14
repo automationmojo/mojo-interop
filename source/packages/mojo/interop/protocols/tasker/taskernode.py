@@ -80,6 +80,10 @@ class TaskerNode:
         tresult = pickle.loads(tresult_str)
         return tresult
 
+    def has_completed_and_result_ready(self, *, task_id: str):
+        complete_and_ready = self._rpyc_client.root.has_completed_and_result_ready(task_id=task_id)
+        return complete_and_ready
+
     def execute_tasking(self, *, module_name: str, tasking_name: str, **kwargs) -> TaskingResultPromise:
 
         if self._rpyc_client is None:

@@ -289,6 +289,28 @@ class TaskerService(rpyc.Service):
             this_type.service_lock.release()
 
         return tstatus
+    
+    def exposed_has_completed_and_result_ready(self, *, task_id):
+
+        complete_and_ready = False
+
+        this_type = type(self)
+
+        this_type.logger.info("Method 'exposed_get_tasking_status' was called.")
+
+        this_type.service_lock.acquire()
+        try:
+            if task_id in this_type.statuses:
+                tstatus = str(this_type.statuses[task_id])
+
+                if tstatus == ProgressCode.Completed or tstatus == ProgressCode.Errored:
+                    if task_id in this_type.results:
+                        complete_and_ready = True
+
+        finally:
+            this_type.service_lock.release()
+
+        return complete_and_ready
 
 
     def exposed_make_folder(self, *, folder: str):
