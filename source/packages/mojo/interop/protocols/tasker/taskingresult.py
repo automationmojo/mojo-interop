@@ -16,7 +16,7 @@ __status__ = "Development" # Prototype, Development or Production
 __license__ = "MIT"
 
 
-from typing import Any, Optional, TYPE_CHECKING
+from typing import Any, Optional, List, Protocol, TYPE_CHECKING
 
 import os
 import time
@@ -34,8 +34,12 @@ DEFAULT_WAIT_INTERVAL = 5
 
 from mojo.results.model.progresscode import ProgressCode
 
+from mojo.xmods.xformatting import indent_lines_list
+
 if TYPE_CHECKING:
     from mojo.interop.protocols.tasker.taskernode import TaskerNode
+
+
 
 @dataclass
 class TaskingResult:
@@ -151,3 +155,49 @@ class TaskingResultPromise:
         rtnval = self._node.has_completed_and_result_ready(task_id=self._task_id)
 
         return rtnval
+
+
+class TaskingResultFormatter(Protocol):
+    
+    def __call__(self, result: TaskingResult) -> List[str]: ...
+
+
+def default_tasking_result_formatter(result: TaskingResult) -> List[str]:
+    return
+
+
+def assert_tasking_results(results: List[TaskingResult], context_message: str,
+                           result_formatter: TaskingResultFormatter = default_tasking_result_formatter):
+
+    #errored = []
+    failed = []
+    passed = []
+
+    for res in results:
+        if res.result_code == 0:
+            if res.exception is not None:
+                raise RuntimeError("We should never have an exception and a result code of 0.")
+            
+            passed.append(res)
+
+        failed.append(res)
+
+    # TODO: Handle errors first as they imply a different kind of problem.
+
+    if len(failed) > 0:
+        err_msg_lines = [
+            context_message,
+            "RESULTS:"
+        ]
+
+        for res in results:
+            fmt_res_lines = result_formatter(res)
+            fmt_res_lines = indent_lines_list(fmt_res_lines, 1)
+            err_msg_lines.extend(fmt_res_lines)
+            err_msg_lines.append("")
+
+        err_msg = os.linesep.join(err_msg_lines)
+
+        raise AssertionError(err_msg)
+
+    return
