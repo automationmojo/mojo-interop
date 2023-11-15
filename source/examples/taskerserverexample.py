@@ -99,7 +99,7 @@ def tasking_server_example_main():
     for node in controller.tasker_nodes:
         print(f"    ipaddr={node.ipaddr} port={node.port} ...")
 
-    promise_list = controller.execute_task_on_all_nodes(tasking=PrintTasking, message="Hello World")
+    promise_list = controller.execute_tasking_on_all_nodes(tasking=PrintTasking, message="Hello World")
 
     for promise in promise_list:
         promise.wait()

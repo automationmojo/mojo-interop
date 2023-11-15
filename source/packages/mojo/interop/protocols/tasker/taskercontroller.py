@@ -51,7 +51,7 @@ class TaskerController:
     def tasker_nodes(self):
         return self._tasker_nodes
 
-    def execute_task_on_all_nodes(self, *, tasking: Union[TaskingIdentity, Type[Tasking]], parent_id: str = None, aspects: Optional[TaskerAspects] = None, **kwargs) -> List[TaskingResultPromise]:
+    def execute_tasking_on_all_nodes(self, *, tasking: Union[TaskingIdentity, Type[Tasking]], parent_id: str = None, aspects: Optional[TaskerAspects] = None, **kwargs) -> List[TaskingResultPromise]:
 
         if aspects is None:
             aspects = self._aspects
@@ -68,7 +68,7 @@ class TaskerController:
 
         return promise_list
 
-    def execute_task_on_node(self, nindex: int, *, tasking: Union[TaskingIdentity, Type[Tasking]], parent_id: str = None, aspects: Optional[TaskerAspects] = None, **kwargs) -> TaskingResultPromise:
+    def execute_tasking_on_node(self, nindex: int, *, tasking: Union[TaskingIdentity, Type[Tasking]], parent_id: str = None, aspects: Optional[TaskerAspects] = None, **kwargs) -> TaskingResultPromise:
 
         if aspects is None:
             aspects = self._aspects
