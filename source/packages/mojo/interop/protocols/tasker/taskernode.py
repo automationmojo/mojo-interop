@@ -44,11 +44,16 @@ class TaskerNode:
         The :class:`TaskerNode` object represents a remote tasker service endpoint.
     """
 
-    def __init__(self, ipaddr: str, port: int):
+    def __init__(self, client: "ClientBase", ipaddr: str, port: int):
+        self._client_ref = weakref.ref(client)
         self._ipaddr = ipaddr
         self._port = port
         self._rpyc_client = None
         return
+
+    @property
+    def client(self) -> "ClientBase":
+        return self._client_ref()
 
     @property
     def ipaddr(self):

@@ -48,8 +48,14 @@ class TaskerController:
         return
 
     @property
+    def tasker_clients(self) -> List[ClientBase]:
+        clients = [ tn.client for tn in self._tasker_nodes]
+        return clients
+
+    @property
     def tasker_nodes(self):
         return self._tasker_nodes
+
 
     def execute_tasking_on_all_nodes(self, *, tasking: Union[TaskingIdentity, Type[Tasking]], parent_id: str = None, aspects: Optional[TaskerAspects] = None, **kwargs) -> List[TaskingResultPromise]:
 
