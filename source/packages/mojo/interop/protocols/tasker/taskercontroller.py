@@ -21,10 +21,10 @@ from typing import List, Optional, Type, Union
 
 from mojo.errors.exceptions import NotOverloadedError, SemanticError
 
-from mojo.interop.protocols.tasker.taskeraspects import TaskerAspects
+from mojo.interop.protocols.tasker.taskeraspects import TaskerAspects, DEFAULT_TASKER_ASPECTS
 from mojo.interop.protocols.tasker.tasking import Tasking, TaskingIdentity
 from mojo.interop.protocols.tasker.taskernode import TaskerNode, TaskerClientNode
-from mojo.interop.protocols.tasker.taskingresult import TaskingResultPromise
+from mojo.interop.protocols.tasker.taskingresult import TaskingResultPromise, TaskingResult
 from mojo.interop.protocols.tasker.taskerservice import TaskerService
 from mojo.interop.protocols.tasker.taskerservermanager import TaskerServerManager, spawn_tasking_server_process
 
@@ -39,7 +39,7 @@ class TaskerController:
         a collection of clients.
     """
 
-    def __init__(self, logging_directory: Optional[str] = None, aspects: Optional[TaskerAspects] = None):
+    def __init__(self, logging_directory: Optional[str] = None, aspects: Optional[TaskerAspects] = DEFAULT_TASKER_ASPECTS):
         self._logging_directory = logging_directory
         self._aspects = aspects
 
@@ -107,11 +107,35 @@ class TaskerController:
 
         return
 
-
     def start_tasker_network(self):
         """
         """
         raise NotOverloadedError("The 'start_task_network' method must be overloaded.")
+
+
+    def wait_for_tasking_results(self, promises: List[TaskingResultPromise],  aspects: Optional[TaskerAspects] = None) -> List[TaskingResult]:
+        
+        if aspects == None:
+            aspects = self._aspects
+
+        timeout = None
+        interval = None
+        if aspects is not None:
+            timeout = aspects.completion_timeout
+            interval = aspects.completion_interval
+
+        wait_on = [ np for np in promises ]
+
+        while len(wait_on) > 0:
+            np = wait_on.pop()
+            np.wait(timeout=timeout, interval=interval)
+
+        results = []
+        for np in promises:
+            nxtres = np.get_result()
+            results.append(nxtres)
+
+        return results
 
 
 class ProcessTaskerController(TaskerController):
