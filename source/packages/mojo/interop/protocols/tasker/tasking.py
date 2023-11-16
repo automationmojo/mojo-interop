@@ -34,7 +34,7 @@ from pprint import pformat
 
 from dataclasses import dataclass
 from datetime import datetime
-from logging.handlers import WatchedFileHandler
+from logging import FileHandler
 
 from uuid import uuid4
 
@@ -62,10 +62,13 @@ def instantiate_tasking(module_name: str, tasking_name: str, task_id: str, paren
 
     if hasattr(module, tasking_name):
 
-        log_handler = WatchedFileHandler(logfile)
-        logging.basicConfig(format=logging.BASIC_FORMAT, level=log_level, handlers=[log_handler])
+        logging.basicConfig(format=logging.BASIC_FORMAT, level=log_level)
 
-        logger = logging.getLogger("tasker-server")
+        log_handler = FileHandler(logfile)
+        log_handler.setLevel(log_level)
+        
+        logger = logging.getLogger("TASKING")
+        logger.addHandler(log_handler)
 
         tasking_type: Type[Tasking] = getattr(module, tasking_name)
 
