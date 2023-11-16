@@ -624,5 +624,6 @@ class Tasking:
         except:
             errmsg = traceback.format_exc()
             self._logger.error(errmsg)
+            raise
 
         return
