@@ -314,7 +314,9 @@ class SshBase(ISystemContext):
                 else:
                     ssh_client.connect(self._ipaddr, port=self._port, username=cl_username, password=cl_password,
                                     pkey=pkey, allow_agent=cl_allow_agent)
-                    
+                
+                break
+
             except NoValidConnectionsError as cerr:
                 errmsg = f"SSH connection attempt failed for host={self._ipaddr} begin={begin_time} end={now_time} now={now_time}."
                 logger.error(errmsg)
