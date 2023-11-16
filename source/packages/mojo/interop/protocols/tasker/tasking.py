@@ -525,98 +525,104 @@ class Tasking:
 
         sgate.set()
 
-        self.begin(kwparams)
-
         try:
+
+            self.begin(kwparams)
 
             try:
 
                 try:
-                    self.mark_progress_start()
-                    self.submit_progress()
 
-                    while self._running:
+                    try:
+                        self.mark_progress_start()
+                        self.submit_progress()
 
-                        if self._task_status == ProgressCode.Paused:
-                            self.mark_progress_paused()
+                        while self._running:
+
+                            if self._task_status == ProgressCode.Paused:
+                                self.mark_progress_paused()
+                                self.submit_progress()
+
+                                self._pause_gate.wait()
+
+                                if not self._running:
+                                    break
+
+                                self.mark_progress_running()
+                                self.submit_progress()
+
+                            cont = self.fire_perform()
+                            
                             self.submit_progress()
 
-                            self._pause_gate.wait()
-
-                            if not self._running:
+                            if not cont:
                                 break
-
-                            self.mark_progress_running()
-                            self.submit_progress()
-
-                        cont = self.fire_perform()
                         
+                        if self._shutdown:
+                            self.submit_progress()
+                        else:
+                            self.mark_progress_complete()
+
                         self.submit_progress()
 
-                        if not cont:
-                            break
-                    
-                    if self._shutdown:
-                        self.submit_progress()
+                    except Exception as innererr:
+                        self._exception = innererr
+
+                        self.mark_errored()
+
+                    finally:
+                        self._result_code = self.evaluate_results()
+
+                except Exception as evalerr:
+                    if self._result_code is None:
+                        self._result_code = -999
+
+                    if self._exception is not None:
+                        try:
+                            raise evalerr from self._exception
+                        except Exception as comberr:
+                            self._exception = comberr
                     else:
-                        self.mark_progress_complete()
-
-                    self.submit_progress()
-
-                except Exception as innererr:
-                    self._exception = innererr
+                        self._exception = evalerr
 
                     self.mark_errored()
 
-                finally:
-                    self._result_code = self.evaluate_results()
+                # We still need to attempt to cleanup
+                self.cleanup()
 
-            except Exception as evalerr:
+            except Exception as finalerr:
                 if self._result_code is None:
-                    self._result_code = -999
+                        self._result_code = -888
 
                 if self._exception is not None:
                     try:
-                        raise evalerr from self._exception
+                        raise finalerr from self._exception
                     except Exception as comberr:
                         self._exception = comberr
                 else:
-                    self._exception = evalerr
+                    self._exception = finalerr
 
                 self.mark_errored()
 
-            # We still need to attempt to cleanup
-            self.cleanup()
+            finally:
+                self._result.mark_result(self._result_code, self._exception)
+                self._summary["stop"] = self._result.stop
 
-        except Exception as finalerr:
-            if self._result_code is None:
-                    self._result_code = -888
-
-            if self._exception is not None:
                 try:
-                    raise finalerr from self._exception
-                except Exception as comberr:
-                    self._exception = comberr
-            else:
-                self._exception = finalerr
+                    self.finalize()
+                except Exception as xcpt:
+                    errmsg = traceback.format_exception(xcpt)
+                    self._logger.error(errmsg)
 
-            self.mark_errored()
+                self._running = False
 
-        finally:
-            self._result.mark_result(self._result_code, self._exception)
-            self._summary["stop"] = self._result.stop
+                # Pushing the result to the progress queue indicates to the
+                # monitoring thread or process that this tasking is complete
+                # and shutting down.
+                progress_queue.put(self._result)
 
-            try:
-                self.finalize()
-            except Exception as xcpt:
-                errmsg = traceback.format_exception(xcpt)
-                self._logger.error(errmsg)
-
-            self._running = False
-
-            # Pushing the result to the progress queue indicates to the
-            # monitoring thread or process that this tasking is complete
-            # and shutting down.
-            progress_queue.put(self._result)
+        except:
+            errmsg = traceback.format_exc()
+            self._logger.error(errmsg)
 
         return
