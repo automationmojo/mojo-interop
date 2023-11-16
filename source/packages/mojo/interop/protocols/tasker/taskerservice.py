@@ -193,6 +193,7 @@ class TaskerService(rpyc.Service):
 
                 this_type.service_lock.acquire()
                 try:
+                    this_type.statuses[task_id] = str(ProgressCode.NotStarted.value)
                     this_type.taskings[task_id] = tasking
                 finally:
                     this_type.service_lock.release()
@@ -296,7 +297,7 @@ class TaskerService(rpyc.Service):
 
         this_type = type(self)
 
-        this_type.logger.info("Method 'exposed_get_tasking_status' was called.")
+        this_type.logger.info("Method 'exposed_has_completed_and_result_ready' was called.")
 
         this_type.service_lock.acquire()
         try:

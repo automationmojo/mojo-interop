@@ -129,6 +129,10 @@ class TaskingResultPromise:
         if timeout is not None:
             end_time = now + timedelta(seconds=timeout)
 
+        if interval is None:
+            # 'interval' cannot be None
+            interval = DEFAULT_WAIT_INTERVAL
+
         while (True):
 
             finished = self._is_task_complete()
