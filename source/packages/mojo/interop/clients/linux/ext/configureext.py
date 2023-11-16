@@ -1,5 +1,5 @@
 
-from typing import Dict, Optional, TYPE_CHECKING
+from typing import Dict, List, Optional, TYPE_CHECKING
 
 import os
 import shutil
@@ -30,6 +30,12 @@ FILE_TASKER_SERVICE_SVC_TEMPLATE = os.path.join(DIR_TASKER_SERVICE, "linux", "ta
 
 class ConfigureExt:
 
+    REQUIRED_SYSTEM_PACKAGES = [
+        'build-essential',
+        'python3-dev',
+        'zip'
+    ]
+
     def __init__(self, client: "LinuxClient"):
         self._client_ref = weakref.ref(client)
         return
@@ -37,6 +43,7 @@ class ConfigureExt:
     @property
     def client(self) -> "LinuxClient":
         return self._client_ref()
+
 
     def configure_tasker_service(self, remote_source_root: str, sudo_username: Optional[str] = None, sudo_password: Optional[str] = None,
                                  config: Optional[Dict[str, Dict[str, str]]] = None, sys_context: Optional[ISystemContext] = None):
@@ -131,6 +138,7 @@ class ConfigureExt:
 
         return
 
+
     def deploy_source_package(self, source_root: str, package_name: str, remote_source_root: str, cache_dir: Optional[str] = None,
                               force_repackage: Optional[bool]=False, force_deploy: Optional[bool]=False, sys_context: Optional[ISystemContext] = None):
 
@@ -164,6 +172,7 @@ class ConfigureExt:
             packager.deploy_zip_package_via_ssh(session, package_name, install_env, remote_source_root, force_update=force_deploy)
 
         return
+
 
     def enabled_no_password_sudo(self, sudo_username: Optional[str] = None, sudo_password: Optional[str] = None,
                                  sys_context: Optional[ISystemContext] = None):
@@ -201,6 +210,7 @@ class ConfigureExt:
         
         return
     
+
     def get_python_version(self, sys_context: Optional[ISystemContext] = None):
 
         client = self.client
@@ -219,6 +229,14 @@ class ConfigureExt:
             python_version = stdout.strip()
 
         return python_version
+
+
+    def install_required_system_packages(self, sys_context: Optional[ISystemContext] = None):
+
+        self.system_packages_install(self.REQUIRED_SYSTEM_PACKAGES, sys_context=sys_context)
+
+        return
+
 
     def install_systemd_service(self, svcname: str, svcuser: str, source_svc_config_file: str, pidfolder: Optional[str] =  None,
                                 optfolder: Optional[str] =  None, runtime_config_file: Optional[str] = None, sys_context: Optional[ISystemContext] = None):
@@ -325,6 +343,7 @@ class ConfigureExt:
 
         return
     
+
     def is_service_running(self, svcname: str, sys_context: Optional[ISystemContext] = None):
 
         client = self.client
@@ -345,3 +364,40 @@ class ConfigureExt:
                 svc_running = True
 
         return svc_running
+    
+
+    def system_packages_install(self, packages_to_install: List[str], sys_context: Optional[ISystemContext] = None):
+
+        client = self.client
+
+        with client.ssh.open_session(sys_context=sys_context) as session:
+
+            for package in packages_to_install:
+                ensure_cmd = f"apt list --installed | grep -E '^[{package[0]}]{package[1:]}/[a-z]+'"
+                status, stdout, stderr = session.run_cmd(ensure_cmd)
+                if status != 0:
+                    # If the 'zip' package is not found, install it.
+                    install_cmd = f"sudo DEBIAN_FRONTEND=noninteractive apt -yq install {package}"
+                    status, stdout, stderr = session.run_cmd(install_cmd)
+                    if status != 0:
+                        errmsg = format_command_result(f"Error while attempting to install the `{package}` system package.",
+                                                    status, stdout, stderr, exp_status=[0], target=client.ipaddr)
+                        raise CommandError(errmsg, status, stdout, stderr)
+
+        return
+
+
+    def system_packages_update(self, sys_context: Optional[ISystemContext] = None):
+        
+        client = self.client
+
+        with client.ssh.open_session(sys_context=sys_context) as session:
+
+            apt_update_cmd = f"sudo apt update"
+            status, stdout, stderr = session.run_cmd(apt_update_cmd)
+            if status != 0:
+                errmsg = format_command_result("Error attempting to the apt package list.",
+                                            status, stdout, stderr, exp_status=[0], target=client.ipaddr)
+                raise CommandError(errmsg, status, stdout, stderr)
+            
+        return
