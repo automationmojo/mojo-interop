@@ -25,7 +25,11 @@ import stat
 import threading
 import time
 
+from datetime import datetime, timedelta
+
 import paramiko
+
+from paramiko.ssh_exception import NoValidConnectionsError
 
 from mojo.waiting.waitmodel import TimeoutContext
 
@@ -269,37 +273,58 @@ class SshBase(ISystemContext):
         cl_keypasswd = self._keypasswd
         cl_allow_agent = self._allow_agent
 
-        if session_user is not None:
-            if session_user not in self._users:
-                errmsg_list = [
-                    "No credentials found for the specified user '%s'." % session_user
-                ]
-                errmsg = os.linesep.join(errmsg_list)
-                raise ConfigurationError(errmsg) from None
+        now_time = datetime.now()
+        begin_time = now_time
+        end_time = begin_time + self._aspects.connection_timeout
 
-            user_creds = self._users[session_user]
+        connection_interval = self._aspects.connection_interval
 
-            cl_username = user_creds["username"]
-            cl_password = user_creds["password"]
-            cl_keyfile = user_creds["keyfile"]
-            cl_keypasswd = user_creds["keypasswd"]
-            cl_allow_agent = user_creds["allow_agent"]
+        while now_time < end_time:
 
-        pkey = None
-        if cl_keyfile is not None:
-            cl_keyfile = os.path.expanduser(os.path.expandvars(cl_keyfile))
-            pkey = paramiko.RSAKey.from_private_key_file(cl_keyfile, password=cl_keypasswd)
+            try:
 
-        ssh_client = paramiko.SSHClient()
-        ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                if session_user is not None:
+                    if session_user not in self._users:
+                        errmsg_list = [
+                            "No credentials found for the specified user '%s'." % session_user
+                        ]
+                        errmsg = os.linesep.join(errmsg_list)
+                        raise ConfigurationError(errmsg) from None
 
-        if self._jump is not None:
-            proxy = paramiko.ProxyCommand(self._jump)
-            ssh_client.connect(self._ipaddr, port=self._port, username=cl_username, password=cl_password,
-                               pkey=pkey, allow_agent=cl_allow_agent, sock = proxy)
-        else:
-            ssh_client.connect(self._ipaddr, port=self._port, username=cl_username, password=cl_password,
-                               pkey=pkey, allow_agent=cl_allow_agent)
+                    user_creds = self._users[session_user]
+
+                    cl_username = user_creds["username"]
+                    cl_password = user_creds["password"]
+                    cl_keyfile = user_creds["keyfile"]
+                    cl_keypasswd = user_creds["keypasswd"]
+                    cl_allow_agent = user_creds["allow_agent"]
+
+                pkey = None
+                if cl_keyfile is not None:
+                    cl_keyfile = os.path.expanduser(os.path.expandvars(cl_keyfile))
+                    pkey = paramiko.RSAKey.from_private_key_file(cl_keyfile, password=cl_keypasswd)
+
+                ssh_client = paramiko.SSHClient()
+                ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+                if self._jump is not None:
+                    proxy = paramiko.ProxyCommand(self._jump)
+                    ssh_client.connect(self._ipaddr, port=self._port, username=cl_username, password=cl_password,
+                                    pkey=pkey, allow_agent=cl_allow_agent, sock = proxy)
+                else:
+                    ssh_client.connect(self._ipaddr, port=self._port, username=cl_username, password=cl_password,
+                                    pkey=pkey, allow_agent=cl_allow_agent)
+                    
+            except NoValidConnectionsError as cerr:
+                errmsg = f"SSH connection attempt failed for host={self._ipaddr} begin={begin_time} end={now_time} now={now_time}."
+                logger.error(errmsg)
+
+                now_time = datetime.now()
+                if now_time > end_time:
+                    raise ConnectionError(errmsg) from cerr
+                else:
+                    time.sleep(connection_interval)
+
 
         return ssh_client
 
