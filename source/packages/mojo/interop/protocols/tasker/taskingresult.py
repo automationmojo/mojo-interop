@@ -191,7 +191,8 @@ def assert_tasking_results(results: List[TaskingResult], context_message: str,
             
             passed.append(res)
 
-        failed.append(res)
+        else:
+            failed.append(res)
 
     # TODO: Handle errors first as they imply a different kind of problem.
 
