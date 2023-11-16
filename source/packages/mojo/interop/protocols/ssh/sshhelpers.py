@@ -279,7 +279,7 @@ def primitive_file_push(ssh_client: paramiko.SSHClient, localpath: str, remotepa
         status, stdout, stderr = ssh_execute_command(ssh_client, command=cat_cmd, chunk_size=read_size, input=content, decode=False)
         if status != 0:
             errmsg = "Error pushing file={} to remote path.".format(remotepath)
-            fmt_errmsg = format_command_result(errmsg, status, stdout.decode(), stderr.decode())
+            fmt_errmsg = format_command_result(errmsg, cat_cmd, status, stdout.decode(), stderr.decode())
             raise CommandError(fmt_errmsg)
 
     return

@@ -42,10 +42,11 @@ class CommandsExt:
                 errmsg = f"The parent directory '{mparent}' of the specified mount point must exist. mpoint={mpoint}"
                 raise SemanticError(errmsg)
 
-            status, stderr, stdout = session.run_cmd(f"mkdir -p {mpoint}")
+            mount_cmd = f"mkdir -p {mpoint}"
+            status, stderr, stdout = session.run_cmd()
             if status != 0:
                 errmsg = f"Error attempting to create mount point mpoint={mpoint}."
-                errmsg = format_command_result(errmsg, status, stdout, stderr, exp_status=0)
+                errmsg = format_command_result(errmsg, mount_cmd, status, stdout, stderr, exp_status=0)
                 raise extype(errmsg)
 
             if username is not None and password is None:
@@ -70,7 +71,7 @@ class CommandsExt:
             status, stderr, stdout = session.run_cmd(mnt_cmd)
             if status != 0:
                 errmsg = f"Error attempting to mount cifs share={share} on mpoint={mpoint}."
-                errmsg = format_command_result(errmsg, status, stdout, stderr, exp_status=0)
+                errmsg = format_command_result(errmsg, mnt_cmd, status, stdout, stderr, exp_status=0)
                 raise extype(errmsg)
         finally:
             session.close()
@@ -94,17 +95,18 @@ class CommandsExt:
                 errmsg = f"The parent directory '{mparent}' of the specified mount point must exist. mpoint={mpoint}"
                 raise SemanticError(errmsg)
 
-            status, stderr, stdout = session.run_cmd(f"mkdir -p {mpoint}")
+            mkdir_cmd = f"mkdir -p {mpoint}"
+            status, stderr, stdout = session.run_cmd(mkdir_cmd)
             if status != 0:
                 errmsg = f"Error attempting to create mount point mpoint={mpoint}."
-                errmsg = format_command_result(errmsg, status, stdout, stderr, exp_status=0)
+                errmsg = format_command_result(errmsg, mkdir_cmd, status, stdout, stderr, exp_status=0)
                 raise extype(errmsg)
 
             mnt_cmd = f"mount -t nfs {host}:\"{export}\" \"{mpoint}\""
             status, stderr, stdout = session.run_cmd(mnt_cmd)
             if status != 0:
                 errmsg = f"Error attempting to mount nfsmoun export={export} on mpoint={mpoint}."
-                errmsg = format_command_result(errmsg, status, stdout, stderr, exp_status=0)
+                errmsg = format_command_result(errmsg, mnt_cmd, status, stdout, stderr, exp_status=0)
                 raise extype(errmsg)
 
         finally:
@@ -128,7 +130,7 @@ class CommandsExt:
             status, stderr, stdout = session.run_cmd(mnt_cmd)
             if status != 0:
                 errmsg = f"Error attempting to unmount mpoint={mpoint}."
-                errmsg = format_command_result(errmsg, status, stdout, stderr, exp_status=0)
+                errmsg = format_command_result(errmsg, mnt_cmd, status, stdout, stderr, exp_status=0)
                 raise extype(errmsg)
 
         finally:

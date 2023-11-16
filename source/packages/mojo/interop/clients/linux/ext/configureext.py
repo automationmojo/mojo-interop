@@ -77,7 +77,7 @@ class ConfigureExt:
             status, stdout, stderr = session.run_cmd(chmod_cmd)
             if status != 0:
                 errmsg = format_command_result(f"Unable to make file='{tasker_server_bin_rmt}' executable",
-                                            status, stdout, stderr, target=client.ipaddr)
+                                            chmod_cmd, status, stdout, stderr, target=client.ipaddr)
                 raise CommandError(errmsg, status, stdout, stderr)
 
             # If we were able to install the `taserserver` binary, then setup the service to automatically
@@ -198,14 +198,14 @@ class ConfigureExt:
                 status, stdout, stderr = session.run_cmd(sudo_grp_cmd)
                 if status != 0:
                     errmsg = format_command_result(f"Error while attempting to add `{sudo_username}` to the 'sudo' user group.",
-                                                status, stdout, stderr, exp_status=[0], target=client.ipaddr)
+                                                sudo_grp_cmd, status, stdout, stderr, exp_status=[0], target=client.ipaddr)
                     raise CommandError(errmsg, status, stdout, stderr)
 
                 sudo_user_cfg_cmd =  f"echo '{sudo_password}' | sudo -S bash -c \"echo '{sudo_username} ALL=(ALL) NOPASSWD: ALL' | EDITOR='tee -a' visudo -f {user_cfg_file}\""
                 status, stdout, stderr = session.run_cmd(sudo_user_cfg_cmd)
                 if status != 0:
                     errmsg = format_command_result(f"Error while installing sudo config for user `{sudo_username}`.",
-                                                status, stdout, stderr, exp_status=[0], target=client.ipaddr)
+                                                sudo_user_cfg_cmd, status, stdout, stderr, exp_status=[0], target=client.ipaddr)
                     raise CommandError(errmsg, status, stdout, stderr)
         
         return
@@ -223,7 +223,7 @@ class ConfigureExt:
             status, stdout, stderr = session.run_cmd(getpyver_cmd)
             if status != 0:
                 errmsg = format_command_result(f"Error while attempting to get the python version from the remote machine.",
-                                            status, stdout, stderr, exp_status=[0], target=client.ipaddr)
+                                            getpyver_cmd, status, stdout, stderr, exp_status=[0], target=client.ipaddr)
                 raise CommandError(errmsg, status, stdout, stderr)
 
             python_version = stdout.strip()
@@ -253,14 +253,14 @@ class ConfigureExt:
                 status, stdout, stderr = session.run_cmd(mkdir_cmd)
                 if status != 0:
                     errmsg = format_command_result(f"Error while attempting to create the opt folder for `{svcname}`.",
-                                                status, stdout, stderr, exp_status=[0], target=client.ipaddr)
+                                                mkdir_cmd, status, stdout, stderr, exp_status=[0], target=client.ipaddr)
                     raise CommandError(errmsg, status, stdout, stderr)
 
                 chown_cmd = f"sudo chown {svcuser}:{svcuser} {optfolder}"
                 status, stdout, stderr = session.run_cmd(chown_cmd)
                 if status != 0:
                     errmsg = format_command_result(f"Error while attempting to change the ownership of the opt folder for `{svcname}`.",
-                                                status, stdout, stderr, exp_status=[0], target=client.ipaddr)
+                                                chown_cmd, status, stdout, stderr, exp_status=[0], target=client.ipaddr)
                     raise CommandError(errmsg, status, stdout, stderr)
                 
                 if runtime_config_file is not None:
@@ -275,14 +275,14 @@ class ConfigureExt:
                 status, stdout, stderr = session.run_cmd(mkdir_cmd)
                 if status != 0:
                     errmsg = format_command_result(f"Error while attempting to create the pid folder for `{svcname}`.",
-                                                status, stdout, stderr, exp_status=[0], target=client.ipaddr)
+                                                mkdir_cmd, status, stdout, stderr, exp_status=[0], target=client.ipaddr)
                     raise CommandError(errmsg, status, stdout, stderr)
 
                 chown_cmd = f"sudo chown {svcuser}:{svcuser} {pidfolder}"
                 status, stdout, stderr = session.run_cmd(chown_cmd)
                 if status != 0:
                     errmsg = format_command_result(f"Error while attempting to change the ownership of pid folder for `{svcname}`.",
-                                                status, stdout, stderr, exp_status=[0], target=client.ipaddr)
+                                                chown_cmd, status, stdout, stderr, exp_status=[0], target=client.ipaddr)
                     raise CommandError(errmsg, status, stdout, stderr)
 
             stop_svc_cmd = f"sudo systemctl stop {svcname}"
@@ -292,7 +292,7 @@ class ConfigureExt:
             status, stdout, stderr = session.run_cmd(rm_svc_cfg_cmd)
             if status != 0:
                 errmsg = format_command_result(f"Error while attempting to remove the config file for `{svcname}` service.",
-                                            status, stdout, stderr, exp_status=[0], target=client.ipaddr)
+                                            rm_svc_cfg_cmd, status, stdout, stderr, exp_status=[0], target=client.ipaddr)
                 raise CommandError(errmsg, status, stdout, stderr)
 
             session.file_push(source_svc_config_file, tmp_dest_svc_config_file)
@@ -301,35 +301,35 @@ class ConfigureExt:
             status, stdout, stderr = session.run_cmd(enable_svc_cmd)
             if status != 0:
                 errmsg = format_command_result(f"Error while attempting to install `{svcname}` service config file.",
-                                            status, stdout, stderr, exp_status=[0], target=client.ipaddr)
+                                            enable_svc_cmd, status, stdout, stderr, exp_status=[0], target=client.ipaddr)
                 raise CommandError(errmsg, status, stdout, stderr)
 
             chown_cmd = f"sudo chown root {final_dest_svc_config_file}"
             status, stdout, stderr = session.run_cmd(chown_cmd)
             if status != 0:
                 errmsg = format_command_result(f"Error while attempting to change `{svcname}` service config file owner.",
-                                            status, stdout, stderr, exp_status=[0], target=client.ipaddr)
+                                            chown_cmd, status, stdout, stderr, exp_status=[0], target=client.ipaddr)
                 raise CommandError(errmsg, status, stdout, stderr)
 
             chmod_cmd = f"sudo chmod 644 {final_dest_svc_config_file}"
             status, stdout, stderr = session.run_cmd(chmod_cmd)
             if status != 0:
                 errmsg = format_command_result(f"Error while attempting to change `{svcname}` service config permissions.",
-                                            status, stdout, stderr, exp_status=[0], target=client.ipaddr)
+                                            chmod_cmd, status, stdout, stderr, exp_status=[0], target=client.ipaddr)
                 raise CommandError(errmsg, status, stdout, stderr)
 
             daemon_reload_cmd = f"sudo systemctl daemon-reload"
             status, stdout, stderr = session.run_cmd(daemon_reload_cmd)
             if status != 0:
                 errmsg = format_command_result(f"Error while attempting to reload systemclt daemon.",
-                                            status, stdout, stderr, exp_status=[0], target=client.ipaddr)
+                                            daemon_reload_cmd, status, stdout, stderr, exp_status=[0], target=client.ipaddr)
                 raise CommandError(errmsg, status, stdout, stderr)
 
             start_svc_cmd = f"sudo systemctl enable {svcname}"
             status, stdout, stderr = session.run_cmd(start_svc_cmd)
             if status != 0:
                 errmsg = format_command_result(f"Error while attempting to start `{svcname}` service.",
-                                            status, stdout, stderr, exp_status=[0], target=client.ipaddr)
+                                            start_svc_cmd, status, stdout, stderr, exp_status=[0], target=client.ipaddr)
                 raise CommandError(errmsg, status, stdout, stderr)
 
             if not self.is_service_running(svcname, sys_context=session):
@@ -338,7 +338,7 @@ class ConfigureExt:
                 status, stdout, stderr = session.run_cmd(start_svc_cmd)
                 if status != 0:
                     errmsg = format_command_result(f"Error while attempting to start `{svcname}` service.",
-                                                status, stdout, stderr, exp_status=[0], target=client.ipaddr)
+                                                start_svc_cmd, status, stdout, stderr, exp_status=[0], target=client.ipaddr)
                     raise CommandError(errmsg, status, stdout, stderr)
 
         return
@@ -356,7 +356,7 @@ class ConfigureExt:
             if status != 0:
                 if stderr != "":
                     errmsg = format_command_result(f"Error while attempting to start `{svcname}` service.",
-                                                status, stdout, stderr, exp_status=[0], target=client.ipaddr)
+                                                chk_svc_running_cmd, status, stdout, stderr, exp_status=[0], target=client.ipaddr)
                     raise CommandError(errmsg, status, stdout, stderr)
                 else:
                     svc_running = False
@@ -381,7 +381,7 @@ class ConfigureExt:
                     status, stdout, stderr = session.run_cmd(install_cmd)
                     if status != 0:
                         errmsg = format_command_result(f"Error while attempting to install the `{package}` system package.",
-                                                    status, stdout, stderr, exp_status=[0], target=client.ipaddr)
+                                                    install_cmd, status, stdout, stderr, exp_status=[0], target=client.ipaddr)
                         raise CommandError(errmsg, status, stdout, stderr)
 
         return
@@ -397,7 +397,7 @@ class ConfigureExt:
             status, stdout, stderr = session.run_cmd(apt_update_cmd)
             if status != 0:
                 errmsg = format_command_result("Error attempting to the apt package list.",
-                                            status, stdout, stderr, exp_status=[0], target=client.ipaddr)
+                                            apt_update_cmd, status, stdout, stderr, exp_status=[0], target=client.ipaddr)
                 raise CommandError(errmsg, status, stdout, stderr)
             
         return
