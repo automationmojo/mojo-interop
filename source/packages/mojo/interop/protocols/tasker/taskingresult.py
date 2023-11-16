@@ -124,7 +124,10 @@ class TaskingResultPromise:
 
         now = datetime.now()
         start_time = now
-        end_time = now + timedelta(seconds=timeout)
+
+        end_time = None
+        if timeout is not None:
+            end_time = now + timedelta(seconds=timeout)
 
         while (True):
 
@@ -133,20 +136,24 @@ class TaskingResultPromise:
                 break
 
             now = datetime.now()
-            if now > end_time:
+            if end_time is not None and now > end_time:
                 break
 
             time.sleep(interval)
 
-        if not finished and now > end_time:
-            diff = now - start_time
-            task_label = f"{self.module_name}.{self._task_name}"
-            errmsg_lines = [
-                f"Timeout waiting for task={task_label} id={self._task_id} start={start_time} end={end_time} now={now} diff={diff}",
-                f"    LOGDIR: {self._logdir}"
-            ]
-            errmsg = os.linesep.join(errmsg_lines)
-            raise TimeoutError(errmsg)
+        if not finished:
+            if end_time is not None:
+                diff = now - start_time
+                task_label = f"{self.module_name}.{self._task_name}"
+                errmsg_lines = [
+                    f"Timeout waiting for task={task_label} id={self._task_id} start={start_time} end={end_time} now={now} diff={diff}",
+                    f"    LOGDIR: {self._logdir}"
+                ]
+                errmsg = os.linesep.join(errmsg_lines)
+                raise TimeoutError(errmsg)
+            else:
+                errmsg = "Timeout was not set but we exited before finished was 'True'."
+                raise RuntimeError(errmsg)
 
         return
     

@@ -877,7 +877,7 @@ class UpnpRootDevice(UpnpDevice, ProtocolExtension):
         self._mode = mode
         raise NotImplementedError("UpnpRootDevice.switchModes must be overloaded by custom UPNP devices.") from None
 
-    def to_dict(self, brief=False) -> dict:
+    def as_dict(self, brief=False) -> dict:
         """
             Returns a description of this device as a python dictionary.
 
@@ -885,7 +885,7 @@ class UpnpRootDevice(UpnpDevice, ProtocolExtension):
 
             :returns: The python dictionary description of the device.
         """
-        dval = super(UpnpRootDevice, self).to_dict(brief=brief)
+        dval = super(UpnpRootDevice, self).as_dict(brief=brief)
         dval["IPAddress"] = self.IPAddress
         dval["USN"] = self.USN
         dval["USN_DEV"] = self.USN_DEV

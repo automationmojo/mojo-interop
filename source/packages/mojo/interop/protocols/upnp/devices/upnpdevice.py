@@ -175,7 +175,7 @@ class UpnpDevice:
 
         return svc
 
-    def to_dict(self, brief=False):
+    def as_dict(self, brief=False):
         """
             Creates a dictionary description of the device and its sub devices and services.
         """
@@ -186,7 +186,7 @@ class UpnpDevice:
             desc = self._description
 
             if desc is not None:
-                dval = desc.to_dict(brief=brief)
+                dval = desc.as_dict(brief=brief)
 
                 dval["URLBase"] = self.URLBase
 

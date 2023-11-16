@@ -76,18 +76,18 @@ class UpnpDevice1ElementBase:
         """
         return self._ref_node
 
-    def to_dict(self, brief=False) -> dict:
+    def as_dict(self, brief=False) -> dict:
         """
             Converts the icon data to a python dictionary.
         """
         # pylint: disable=no-self-use, unused-argument
-        raise NotImplementedError("UpnpDevice1Base.to_dict: Must be overridden by derived classes.") from None
+        raise NotImplementedError("UpnpDevice1Base.as_dict: Must be overridden by derived classes.") from None
 
     def to_json(self) -> str:
         """
             Converts the icon data to a dictionary and then converts it to a JSON string.
         """
-        dval = self.to_dict()
+        dval = self.as_dict()
         json_str = json.dumps(dval, indent=4)
         return json_str
 
@@ -196,7 +196,7 @@ class UpnpDevice1Icon(UpnpDevice1ElementBase):
         rtnval = self._find_value("width", namespaces=self._namespaces)
         return rtnval
 
-    def to_dict(self, brief=False) -> dict:
+    def as_dict(self, brief=False) -> dict:
         """
             Converts the icon data to a python dictionary.
         """
@@ -289,7 +289,7 @@ class UpnpDevice1Service(UpnpDevice1ElementBase):
         rtnval = self._find_value("serviceType", namespaces=self._namespaces)
         return rtnval
 
-    def to_dict(self, brief=False) -> dict:
+    def as_dict(self, brief=False) -> dict:
         """
             Converts the icon data to a python dictionary.
         """
@@ -346,7 +346,7 @@ class UpnpDevice1SpecVersion(UpnpDevice1ElementBase):
         rtnval = self._find_value("minor", namespaces=self._namespaces)
         return rtnval
 
-    def to_dict(self, brief=False) -> dict:
+    def as_dict(self, brief=False) -> dict:
         """
             Converts the icon data to a python dictionary.
         """
@@ -555,7 +555,7 @@ class UpnpDevice1Device(UpnpDevice1ElementBase):
         rtnval = self._find_value("presentationURL", namespaces=self._namespaces)
         return rtnval
 
-    def to_dict(self, brief=False) -> dict:
+    def as_dict(self, brief=False) -> dict:
         """
             Converts the icon data to a python dictionary.
         """
@@ -574,13 +574,13 @@ class UpnpDevice1Device(UpnpDevice1ElementBase):
         if not brief:
             device_list = []
             for dvc in self.deviceList:
-                lival = dvc.to_dict()
+                lival = dvc.as_dict()
                 device_list.append(lival)
             dval["deviceList"] = device_list
 
             icon_list = []
             for icon in self.iconList:
-                lival = icon.to_dict()
+                lival = icon.as_dict()
                 icon_list.append(lival)
                 if firstIcon is None:
                     firstIcon = lival
@@ -588,12 +588,12 @@ class UpnpDevice1Device(UpnpDevice1ElementBase):
 
             service_list = []
             for svc in self.serviceList:
-                lsval = svc.to_dict()
+                lsval = svc.as_dict()
                 service_list.append(lsval)
             dval["serviceList"] = service_list
         else:
             for icon in self.iconList:
-                lival = icon.to_dict()
+                lival = icon.as_dict()
                 if firstIcon is None:
                     firstIcon = lival
                     break
