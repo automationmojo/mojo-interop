@@ -33,12 +33,15 @@ if TYPE_CHECKING:
 
 class LinuxClient(ClientBase):
 
+    EXT_COMMANDS = CommandsExt
+    EXT_CONFIGURE = ConfigureExt
+
     def __init__(self, lscape: "Landscape", coordinator: "CoordinatorBase",
                  friendly_id:FriendlyIdentifier, device_type: str, device_config: dict):
         super().__init__(lscape, coordinator, friendly_id, device_type, device_config)
 
-        self._ext_commands = CommandsExt(self)
-        self._ext_configure = ConfigureExt(self)
+        self._ext_commands = self.EXT_COMMANDS(self)
+        self._ext_configure = self.EXT_CONFIGURE(self)
         return
 
     @property
