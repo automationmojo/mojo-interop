@@ -43,7 +43,7 @@ from mojo.errors.exceptions import NotOverloadedError, SemanticError
 from mojo.results.model.progressinfo import ProgressInfo, ProgressType
 from mojo.results.model.progresscode import ProgressCode
 
-from mojo.xmods.xformatting import indent_lines
+from mojo.xmods.xformatting import indent_lines_list
 from mojo.xmods.ximport import import_by_name
 from mojo.xmods.jsos import CHAR_RECORD_SEPERATOR
 
@@ -140,6 +140,7 @@ class Tasking:
         # The following variables are shared between process but must be updated in the parent process
         # when progress or state comes back from the child process
         self._result = None
+        self._result_code = None
         self._exception = None
 
         # The following variables are used by the task process state
@@ -255,11 +256,11 @@ class Tasking:
             f"      START: {self._result.start}"
         ]
 
-        kwparams_lines = pformat(kwparams, indent=4, width=200)
-        kwparams_lines = indent_lines(kwparams_lines, level=1, indent=10)
+        kwparams_lines = pformat(kwparams, indent=4, width=200).splitlines(False)
+        kwparams_lines = indent_lines_list(kwparams_lines, level=1, indent=10)
 
         begin_msg_lines.append("  KWPARAMS:")
-        begin_msg_lines.append(kwparams_lines)
+        begin_msg_lines.extend(kwparams_lines)
 
         begin_msg = os.linesep.join(begin_msg_lines)
 
@@ -287,8 +288,8 @@ class Tasking:
             finalize_msg_lines.append(f"    EXCEPTION: ")
 
             xcpt_lines = traceback.format_exception(self._result.exception)
-            xcpt_lines = indent_lines(xcpt_lines, level=1, indent=10)
-            finalize_msg_lines.append(xcpt_lines)
+            xcpt_lines = indent_lines_list(xcpt_lines, level=1, indent=10)
+            finalize_msg_lines.extend(xcpt_lines)
 
         finalize_msg = os.linesep.join(finalize_msg_lines)
 
@@ -300,10 +301,10 @@ class Tasking:
         """
         prog_msg_lines = ["PROGRESS"]
 
-        progress_lines = pformat(progress, indent=4, width=200)
-        progress_lines = indent_lines(progress_lines, level=1, indent=4)
+        progress_lines = pformat(progress, indent=4, width=200).splitlines(False)
+        progress_lines = indent_lines_list(progress_lines, level=1, indent=4)
 
-        prog_msg_lines.append(progress_lines)
+        prog_msg_lines.extend(progress_lines)
 
         prog_msg = os.linesep.join(prog_msg_lines)
 
