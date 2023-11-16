@@ -275,7 +275,7 @@ class SshBase(ISystemContext):
 
         now_time = datetime.now()
         begin_time = now_time
-        end_time = begin_time + self._aspects.connection_timeout
+        end_time = begin_time + timedelta(seconds=self._aspects.connection_timeout)
 
         connection_interval = self._aspects.connection_interval
 
