@@ -29,7 +29,7 @@ from datetime import datetime, timedelta
 
 import paramiko
 
-from paramiko.ssh_exception import NoValidConnectionsError
+from paramiko.ssh_exception import NoValidConnectionsError, BadAuthenticationType
 
 from mojo.waiting.waitmodel import TimeoutContext
 
@@ -317,7 +317,7 @@ class SshBase(ISystemContext):
                 
                 break
 
-            except NoValidConnectionsError as cerr:
+            except (NoValidConnectionsError, BadAuthenticationType) as cerr:
                 errmsg = f"SSH connection attempt failed for host={self._ipaddr} begin={begin_time} end={now_time} now={now_time}."
                 logger.error(errmsg)
 
