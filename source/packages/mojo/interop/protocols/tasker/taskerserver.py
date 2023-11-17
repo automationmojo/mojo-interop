@@ -27,7 +27,7 @@ import logging
 import threading
 
 from logging.handlers import WatchedFileHandler
-from rpyc.utils.server import ThreadPoolServer
+from rpyc.utils.server import ThreadedServer
 
 
 from mojo.interop.protocols.tasker.taskerservice import TaskerService
@@ -41,7 +41,7 @@ TASKER_PROTOCOL_CONFIG = {
     "logger": logging.getLogger()
 }
 
-class TaskerServer(ThreadPoolServer):
+class TaskerServer(ThreadedServer):
     """
         The :class:`TaskerServer` starts an RPyC server in an internal thread that is capable of handling
         requests for tasking. 
