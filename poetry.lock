@@ -68,14 +68,14 @@ typecheck = ["mypy"]
 
 [[package]]
 name = "certifi"
-version = "2023.7.22"
+version = "2023.11.17"
 description = "Python package for providing Mozilla's CA Bundle."
 category = "main"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "certifi-2023.7.22-py3-none-any.whl", hash = "sha256:92d6037539857d8206b8f6ae472e8b77db8058fec5937a1ef3f54304089edbb9"},
-    {file = "certifi-2023.7.22.tar.gz", hash = "sha256:539cc1d13202e33ca466e88b2807e29f4c13049d6d87031a3c110744495cb082"},
+    {file = "certifi-2023.11.17-py3-none-any.whl", hash = "sha256:e036ab49d5b79556f99cfc2d9320b34cfbe5be05c5871b51de9329f0603b0474"},
+    {file = "certifi-2023.11.17.tar.gz", hash = "sha256:9b469f3a900bf28dc19b8cfbf8019bf47f7fdd1a65a1d4ffb98fc14166beb4d1"},
 ]
 
 [[package]]
@@ -559,20 +559,20 @@ files = [
 
 [[package]]
 name = "mojo-config"
-version = "0.0.28"
+version = "0.0.30"
 description = "Automation Mojo Configuration Package"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "mojo_config-0.0.28-py3-none-any.whl", hash = "sha256:77157454957214d4de0cdd1eb6d0e41af0e82a175b0117e2c339212145704c38"},
-    {file = "mojo_config-0.0.28.tar.gz", hash = "sha256:5b831fcf687e3f030c8c4f5e1176c8781a63e2413d1474a989ec990384e9fb62"},
+    {file = "mojo_config-0.0.30-py3-none-any.whl", hash = "sha256:0eb41f5fcb3352e0b5d9113ef37870ae7f099a270f9cf0ed4371d158032bbb26"},
+    {file = "mojo_config-0.0.30.tar.gz", hash = "sha256:6c68d2fa5231bea55ecb1fcbb54a82b36365f577583cf82b7fc79a48419c9d58"},
 ]
 
 [package.dependencies]
 cryptography = ">=41.0.3,<42.0.0"
-mojo-collections = ">=0.0.11,<0.1.0"
-mojo-errors = ">=0.0.1,<0.1.0"
+mojo-collections = ">=0.0.12,<0.1.0"
+mojo-errors = ">=0.0.3,<0.1.0"
 
 [package.extras]
 couchdb = ["couchdb (>=1.2,<2.0)"]
@@ -580,14 +580,14 @@ mongodb = ["pymongo[srv] (>=4.0.0,<5.0.0)"]
 
 [[package]]
 name = "mojo-errors"
-version = "0.0.2"
+version = "0.0.3"
 description = "Automation Mojo Errors Module"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "mojo_errors-0.0.2-py3-none-any.whl", hash = "sha256:2800296d2c06b2adfd38c7e169cf717e7a1d71629b3329dd8f84590469c8bbb9"},
-    {file = "mojo_errors-0.0.2.tar.gz", hash = "sha256:8b966e8f08b16f418a763e1bc1fd30c0c2c71319488e81e8c77452e9fc576426"},
+    {file = "mojo_errors-0.0.3-py3-none-any.whl", hash = "sha256:08605759cd84171da07e5945b212fc73129eeefa972e7e55b282e2dbb140050b"},
+    {file = "mojo_errors-0.0.3.tar.gz", hash = "sha256:667b316c7cc1aebd2dc51cc3067165e3b51811132e209bc6b09320515d7737dc"},
 ]
 
 [[package]]
@@ -636,22 +636,22 @@ files = [
 
 [[package]]
 name = "mojo-xmodules"
-version = "0.0.124"
+version = "0.0.126"
 description = "Automation Mojo X-Modules"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "mojo_xmodules-0.0.124-py3-none-any.whl", hash = "sha256:acae363218a42791183034605b8d4580afc80bf6d6c26e8d1b5ada23404e906d"},
-    {file = "mojo_xmodules-0.0.124.tar.gz", hash = "sha256:170f3453781512eb4563c3201694affd6e928e6e81ce51aaeb7fd02f816d9184"},
+    {file = "mojo_xmodules-0.0.126-py3-none-any.whl", hash = "sha256:7f00976eceae8c8ce3c81c4d7824767ff1f345a67093f5952dc0eebdadbe8e5b"},
+    {file = "mojo_xmodules-0.0.126.tar.gz", hash = "sha256:5f89fad7e1cf55038c522858c6a66bf151dd06f1ae080f1c380d549ff372e5ee"},
 ]
 
 [package.dependencies]
 click = ">=8.1.5,<9.0.0"
 debugpy = ">=1.6.6,<2.0.0"
-mojo-collections = ">=0.0.11,<0.1.0"
-mojo-config = ">=0.0.20,<0.1.0"
-mojo-errors = ">=0.0.2,<1.0.0"
+mojo-collections = ">=0.0.12,<0.1.0"
+mojo-config = ">=0.0.30,<0.1.0"
+mojo-errors = ">=0.0.3,<1.0.0"
 mojo-waiting = ">=1.1.0,<2.0.0"
 paramiko = ">=3.1.0,<4.0.0"
 
@@ -1262,4 +1262,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0"
-content-hash = "5819c2ed3822c4ca6f23f647f2429fea96b2bc37ae42a9c1f08a33f296957a2c"
+content-hash = "6d91b970aeead8fedd3221cfba10a4e96ef1abf57440fe57404fdbe00f4cccb0"
