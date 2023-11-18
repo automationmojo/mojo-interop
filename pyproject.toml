@@ -26,7 +26,7 @@ mojo-xmodules = ">=0.0.126 <0.1.0"
 mojo-networking = ">=0.0.4 <0.1.0"
 mojo-errors = ">=0.0.3 < 0.1.0"
 rpyc = "^5.3.1"
-mojo-results = ">=0.0.13 <0.1.0"
+mojo-results = ">=0.0.20 <0.1.0"
 pexpect = "^4.8.0"
 psutil = "^5.9.6"
 

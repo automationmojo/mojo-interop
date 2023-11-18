@@ -41,12 +41,13 @@ from mojo.errors.exceptions import SemanticError
 
 from mojo.results.model.progresscode import ProgressCode
 from mojo.results.model.progressinfo import ProgressInfo
+from mojo.results.model.taskingresult import TaskingResult
 
 from mojo.xmods.compression import create_archive_of_folder
 from mojo.xmods.fspath import expand_path
 from mojo.xmods.ximport import import_by_name
 
-from mojo.interop.protocols.tasker.taskingresult import TaskingResult, TaskingRef
+from mojo.interop.protocols.tasker.taskingresultpromise import TaskingRef
 from mojo.interop.protocols.tasker.taskeraspects import TaskerAspects, DEFAULT_TASKER_ASPECTS
 from mojo.interop.protocols.tasker.tasking import Tasking, TaskingManager
 
@@ -261,7 +262,7 @@ class TaskerService(rpyc.Service):
                 if task_id in this_type.taskings:
                     tstatus = this_type.statuses[task_id]
                     
-                    if not (tstatus == ProgressCode.Completed or tstatus == ProgressCode.Errored):
+                    if not (tstatus == ProgressCode.Completed or tstatus == ProgressCode.Errored or tstatus == ProgressCode.Failed):
                         errmsg = f"The task for task_id='{task_id}' is not in a completed state. The results are not yet available."
                         raise SemanticError(errmsg)
                 else:
@@ -304,7 +305,7 @@ class TaskerService(rpyc.Service):
             if task_id in this_type.statuses:
                 tstatus = str(this_type.statuses[task_id])
 
-                if tstatus == ProgressCode.Completed or tstatus == ProgressCode.Errored:
+                if tstatus == ProgressCode.Completed or tstatus == ProgressCode.Errored or tstatus == ProgressCode.Failed:
                     if task_id in this_type.results:
                         complete_and_ready = True
 
@@ -412,8 +413,10 @@ class TaskerService(rpyc.Service):
                     if isinstance(progress, TaskingResult):
                         result: TaskingResult = progress
 
-                        if result.exception is not None:
+                        if len(result.errors) > 0:
                             this_type.statuses[task_id] = str(ProgressCode.Errored.value)
+                        elif len(result.failures) > 0:
+                            this_type.statuses[task_id] = str(ProgressCode.Failed.value)
                         else:
                             this_type.statuses[task_id] = str(ProgressCode.Completed.value)
 

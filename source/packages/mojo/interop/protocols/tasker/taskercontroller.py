@@ -21,10 +21,12 @@ from typing import List, Optional, Type, Union
 
 from mojo.errors.exceptions import NotOverloadedError, SemanticError
 
+from mojo.results.model.taskingresult import TaskingResult
+
 from mojo.interop.protocols.tasker.taskeraspects import TaskerAspects, DEFAULT_TASKER_ASPECTS
 from mojo.interop.protocols.tasker.tasking import Tasking, TaskingIdentity
 from mojo.interop.protocols.tasker.taskernode import TaskerNode, TaskerClientNode
-from mojo.interop.protocols.tasker.taskingresult import TaskingResultPromise, TaskingResult
+from mojo.interop.protocols.tasker.taskingresultpromise import TaskingResultPromise
 from mojo.interop.protocols.tasker.taskerservice import TaskerService
 from mojo.interop.protocols.tasker.taskerservermanager import TaskerServerManager, spawn_tasking_server_process
 
@@ -57,7 +59,8 @@ class TaskerController:
         return self._tasker_nodes
 
 
-    def execute_tasking_on_all_nodes(self, *, tasking: Union[TaskingIdentity, Type[Tasking]], parent_id: str = None, aspects: Optional[TaskerAspects] = None, **kwargs) -> List[TaskingResultPromise]:
+    def execute_tasking_on_all_nodes(self, *, tasking: Union[TaskingIdentity, Type[Tasking]], parent_id: str = None,
+                                     aspects: Optional[TaskerAspects] = None, **kwargs) -> List[TaskingResultPromise]:
 
         if aspects is None:
             aspects = self._aspects
@@ -74,7 +77,8 @@ class TaskerController:
 
         return promise_list
 
-    def execute_tasking_on_node(self, nindex: int, *, tasking: Union[TaskingIdentity, Type[Tasking]], parent_id: str = None, aspects: Optional[TaskerAspects] = None, **kwargs) -> TaskingResultPromise:
+    def execute_tasking_on_node(self, nindex: int, *, tasking: Union[TaskingIdentity, Type[Tasking]], parent_id: str = None,
+                                aspects: Optional[TaskerAspects] = None, **kwargs) -> TaskingResultPromise:
 
         if aspects is None:
             aspects = self._aspects

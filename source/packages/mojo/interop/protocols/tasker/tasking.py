@@ -28,7 +28,6 @@ import logging
 import os
 import requests
 import threading
-import traceback
 
 from pprint import pformat
 
@@ -39,15 +38,19 @@ from logging import FileHandler
 from uuid import uuid4
 
 from mojo.errors.exceptions import NotOverloadedError, SemanticError
+from mojo.errors.xtraceback import create_traceback_detail, format_traceback_detail
 
+from mojo.results.model.resultcode import ResultCode
+from mojo.results.model.resulttype import ResultType
 from mojo.results.model.progressinfo import ProgressInfo, ProgressType
 from mojo.results.model.progresscode import ProgressCode
+from mojo.results.model.taskingresult import TaskingResult
 
+from mojo.xmods.xdatetime import format_datetime_with_fractional
 from mojo.xmods.xformatting import indent_lines_list
 from mojo.xmods.ximport import import_by_name
 from mojo.xmods.jsos import CHAR_RECORD_SEPERATOR
 
-from mojo.interop.protocols.tasker.taskingresult import TaskingResult
 from mojo.interop.protocols.tasker.taskeraspects import TaskerAspects, DEFAULT_TASKER_ASPECTS
 
 
@@ -143,8 +146,6 @@ class Tasking:
         # The following variables are shared between process but must be updated in the parent process
         # when progress or state comes back from the child process
         self._result = None
-        self._result_code = None
-        self._exception = None
 
         # The following variables are used by the task process state
         self._current_progress = None
@@ -221,20 +222,22 @@ class Tasking:
 
         return
 
-    def evaluate_results(self) -> int:
+    def evaluate_results(self):
         """
             The `evaluate_results` method is called in order to process information to
             create a final status code for the given tasking.
 
             :returns: Returns the 'result_code' that is written into the tasking result.
         """
-        return 0
+        return
 
     def finalize(self):
         """
             The `finalize` method is called in order to provide an opportunity for a tasking
             to finalize execution and cleanup resources as required.
         """
+        self.result.finalize()
+
         finalize_msg = self.format_finalize_message()
         self._logger.info(finalize_msg)
         return
@@ -250,13 +253,15 @@ class Tasking:
             Formats the tasking 'BEGIN' log message.
         """
         
+        start_fmt = format_datetime_with_fractional(self._result.start)
+
         begin_msg_lines = [
             f"------------------------------- TASKING BEGUN -------------------------------",
-            f"  TASK_NAME: {self._result.task_name}",
-            f"    TASK_ID: {self._result.task_id}",
-            f"  PARENT_ID: {self._result.parent_id}",
+            f"  TASK_NAME: {self._result.name}",
+            f"    TASK_ID: {self._result.inst_id}",
+            f"  PARENT_ID: {self._result.parent_inst}",
             f"     LOGDIR: {self._logdir}",
-            f"      START: {self._result.start}"
+            f"      START: {start_fmt}"
         ]
 
         kwparams_lines = pformat(kwparams, indent=4, width=200).splitlines(False)
@@ -274,25 +279,29 @@ class Tasking:
             Formats the tasking 'FINALIZE' log message.
         """
 
+        start_fmt = format_datetime_with_fractional(self._result.start)
+        stop_fmt = format_datetime_with_fractional(self._result.stop)
+
         finalize_msg_lines = [
             "------------------------------- TASKING FINALIZED -------------------------------"
-            f"    TASK_NAME: {self._result.task_name}",
-            f"      TASK_ID: {self._result.task_id}",
-            f"    PARENT_ID: {self._result.parent_id}",
+            f"    TASK_NAME: {self._result.name}",
+            f"      TASK_ID: {self._result.inst_id}",
+            f"    PARENT_ID: {self._result.parent_inst}",
             f"       LOGDIR: {self._logdir}",
-            f"        START: {self._result.start}",
-            f"         STOP: {self._result.stop}",
+            f"        START: {start_fmt}",
+            f"         STOP: {stop_fmt}",
             f"  RESULT_CODE: {self._result.result_code}",
         ]
 
-        if self._result.exception is None:
-            finalize_msg_lines.append(f"    EXCEPTION: None")
-        else:
-            finalize_msg_lines.append(f"    EXCEPTION: ")
+        finalize_msg_lines.append("ERRORS:")
+        for err in self._result.errors:
+            finalize_msg_lines.extend(indent_lines_list(format_traceback_detail(err), 1))
+            finalize_msg_lines.append("")
 
-            xcpt_lines = traceback.format_exception(self._result.exception)
-            xcpt_lines = indent_lines_list(xcpt_lines, level=1, indent=10)
-            finalize_msg_lines.extend(xcpt_lines)
+        finalize_msg_lines.append("FAILURES:")
+        for fail in self._result.failures:
+            finalize_msg_lines.extend(indent_lines_list(format_traceback_detail(fail), 1))
+            finalize_msg_lines.append("")
 
         finalize_msg = os.linesep.join(finalize_msg_lines)
 
@@ -333,8 +342,8 @@ class Tasking:
             "name": self.full_name,
             "type": this_type.__name__,
             "module": this_type.__module__,
-            "id": self._result.task_id,
-            "parent": self._result.parent_id,
+            "id": self._result.inst_id,
+            "parent": self._result.parent_inst,
             "start": self._result.start,
             "stop": None,
             "status": str(ProgressCode.Running.value),
@@ -345,12 +354,23 @@ class Tasking:
 
         return
 
-    def mark_errored(self):
+    def mark_errored(self, err: BaseException):
         """
             Marks the tasking as having errored.  This indicates to the TaskingServer that shutdown of the
             tasking has begun.
         """
+        tbdetail = create_traceback_detail(err)
+        self._result.add_failure(tbdetail)
+    
         self.mark_progress_errored()
+        self._progress_queue.put_nowait(self._current_progress)
+        return
+
+    def mark_failed(self, err: BaseException):
+        tbdetail = create_traceback_detail(err)
+        self._result.add_failure(tbdetail)
+
+        self.mark_progress_failed()
         self._progress_queue.put_nowait(self._current_progress)
         return
 
@@ -372,6 +392,15 @@ class Tasking:
         self._current_progress.status = ProgressCode.Errored
         return
     
+    def mark_progress_failed(self):
+        """
+            The `mark_progress_failed` method is called to generate a :class:`ProgressInfo` failed.
+        """
+        self._task_status = ProgressCode.Failed
+        self._current_progress.when = datetime.now()
+        self._current_progress.status = ProgressCode.Failed
+        return
+
     def mark_progress_paused(self):
         """
             The `mark_progress_paused` method is called to generate a :class:`ProgressInfo` paused.
@@ -521,7 +550,7 @@ class Tasking:
         # Update our local in process copy of these queues, because we have forked
         self._progress_queue = progress_queue
 
-        self._result = TaskingResult(self.full_name, self._task_id, self._logdir, parent_id=self._parent_id)
+        self._result = TaskingResult(self._task_id, self.full_name, self._parent_id, ResultType.TASK)
         self._running = True
 
         try:
@@ -565,56 +594,25 @@ class Tasking:
                     else:
                         self.mark_progress_complete()
 
+                    self.evaluate_results()
+
                     self.submit_progress()
-
-                except Exception as innererr:
-                    self._exception = innererr
-
-                    self.mark_errored()
-
-                finally:
-                    self._result_code = self.evaluate_results()
+                except AssertionError as aerr:
+                    self.mark_failed(aerr)
+                except Exception as gerr:
+                    self.mark_errored(gerr)
 
             except Exception as evalerr:
-                if self._result_code is None:
-                    self._result_code = -999
-
-                if self._exception is not None:
-                    try:
-                        raise evalerr from self._exception
-                    except Exception as comberr:
-                        self._exception = comberr
-                else:
-                    self._exception = evalerr
-
-                self.mark_errored()
+                self.mark_errored(evalerr)
 
             # We still need to attempt to cleanup
             self.cleanup()
 
         except BaseException as finalerr:
-            if self._result_code is None:
-                    self._result_code = -888
-
-            if self._exception is not None:
-                try:
-                    raise finalerr from self._exception
-                except BaseException as comberr:
-                    self._exception = comberr
-            else:
-                self._exception = finalerr
-
-            self.mark_errored()
+            self.mark_errored(finalerr)
 
         finally:
-            self._result.mark_result(self._result_code, self._exception)
-            self._summary["stop"] = self._result.stop
-
-            try:
-                self.finalize()
-            except Exception as xcpt:
-                errmsg = traceback.format_exception(xcpt)
-                self._logger.error(errmsg)
+            self.finalize()
 
             self._running = False
 

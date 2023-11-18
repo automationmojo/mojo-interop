@@ -608,19 +608,19 @@ requests = "<=2.29.0"
 
 [[package]]
 name = "mojo-results"
-version = "0.0.13"
+version = "0.0.22"
 description = "The Automation Mojo Results Package"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "mojo_results-0.0.13-py3-none-any.whl", hash = "sha256:340ee260210ba36da341d4f77477d44d5119dbd2f767207502b1e79393489abd"},
-    {file = "mojo_results-0.0.13.tar.gz", hash = "sha256:a80b4cf59fe8a6d669f0b926c3830e3945eb5a301ad7a7e0193d5b8a9559e732"},
+    {file = "mojo_results-0.0.22-py3-none-any.whl", hash = "sha256:a5bd394efa51aecf5c0065e7889eaf4d6668529f7809773d998877d8db0b5a41"},
+    {file = "mojo_results-0.0.22.tar.gz", hash = "sha256:ef481602e85a2496a217e330e622dffed317d56574ea95b495dcceb682e6f8e7"},
 ]
 
 [package.dependencies]
-mojo-errors = ">=0.0.2,<0.1.0"
-mojo-xmodules = ">=0.0.106,<0.1.0"
+mojo-errors = ">=0.0.3,<0.1.0"
+mojo-xmodules = ">=0.0.127,<0.1.0"
 
 [[package]]
 name = "mojo-waiting"
@@ -636,14 +636,14 @@ files = [
 
 [[package]]
 name = "mojo-xmodules"
-version = "0.0.126"
+version = "0.0.127"
 description = "Automation Mojo X-Modules"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "mojo_xmodules-0.0.126-py3-none-any.whl", hash = "sha256:7f00976eceae8c8ce3c81c4d7824767ff1f345a67093f5952dc0eebdadbe8e5b"},
-    {file = "mojo_xmodules-0.0.126.tar.gz", hash = "sha256:5f89fad7e1cf55038c522858c6a66bf151dd06f1ae080f1c380d549ff372e5ee"},
+    {file = "mojo_xmodules-0.0.127-py3-none-any.whl", hash = "sha256:f446d2fb0801213f2d5cbf9a130ee2441fe870163fc7947f7defc4dcc246cfb4"},
+    {file = "mojo_xmodules-0.0.127.tar.gz", hash = "sha256:4bd7aed6861c12bc813c0c59355cb26da5f17309b57f543d5adea03ec17ed63d"},
 ]
 
 [package.dependencies]
@@ -846,18 +846,19 @@ files = [
 
 [[package]]
 name = "pygments"
-version = "2.16.1"
+version = "2.17.0"
 description = "Pygments is a syntax highlighting package written in Python."
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "Pygments-2.16.1-py3-none-any.whl", hash = "sha256:13fc09fa63bc8d8671a6d247e1eb303c4b343eaee81d861f3404db2935653692"},
-    {file = "Pygments-2.16.1.tar.gz", hash = "sha256:1daff0494820c69bc8941e407aa20f577374ee88364ee10a98fdbe0aece96e29"},
+    {file = "pygments-2.17.0-py3-none-any.whl", hash = "sha256:cd0c46944b2551af02ecc15961050182ea120d3895000e2676160820f3421527"},
+    {file = "pygments-2.17.0.tar.gz", hash = "sha256:edaa0fa2453d055d0ac94449d1f73ec7bc52c5e318204da1377c1392978c4a8d"},
 ]
 
 [package.extras]
 plugins = ["importlib-metadata"]
+windows-terminal = ["colorama (>=0.4.6)"]
 
 [[package]]
 name = "pynacl"
@@ -1262,4 +1263,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0"
-content-hash = "6d91b970aeead8fedd3221cfba10a4e96ef1abf57440fe57404fdbe00f4cccb0"
+content-hash = "672f8248d17704aa6822807619c280bd115f6c6b63f2f126d2814a0de7760acb"

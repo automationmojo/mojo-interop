@@ -5,7 +5,6 @@ import time
 from mojo.results.model.progressinfo import ProgressInfo, ProgressType, ProgressCode
 
 from mojo.interop.protocols.tasker.tasking import Tasking
-from mojo.interop.protocols.tasker.taskingresult import TaskingResult
 
 class HelloWorldTasking(Tasking):
 

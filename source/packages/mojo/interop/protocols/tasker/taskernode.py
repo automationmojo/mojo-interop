@@ -25,7 +25,9 @@ import pickle
 import weakref
 
 
-from mojo.interop.protocols.tasker.taskingresult import TaskingResult, TaskingResultPromise
+from mojo.results.model.taskingresult import TaskingResult
+
+from mojo.interop.protocols.tasker.taskingresultpromise import TaskingResultPromise
 from mojo.interop.protocols.tasker.taskeraspects import TaskerAspects, DEFAULT_TASKER_ASPECTS
 
 if TYPE_CHECKING:

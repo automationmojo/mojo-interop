@@ -9,9 +9,9 @@ from mojo.interop.protocols.tasker.taskeraspects import TaskerAspects
 from mojo.interop.protocols.tasker.taskercontroller import ProcessTaskerController
 
 from mojo.results.model.progressinfo import ProgressInfo, ProgressType, ProgressCode
+from mojo.results.model.taskingresult import TaskingResult
 
 from mojo.interop.protocols.tasker.tasking import Tasking
-from mojo.interop.protocols.tasker.taskingresult import TaskingResult
 
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
@@ -108,12 +108,10 @@ def tasking_server_example_main():
         result: TaskingResult = promise.get_result()
         print(f"RESULT - {promise.task_name}")
         print(f"    id: {promise.task_id}")
-        print(f"    parent: {result.parent_id}")
+        print(f"    parent: {result.parent_inst}")
         print(f"    start: {result.start}")
-        print(f"   logdir: {result.logdir}")
         print(f"    stop: {result.stop}")
         print(f"    result_code: {result.result_code}")
-        print(f"    exception: {result.exception}")
         print("")
 
 

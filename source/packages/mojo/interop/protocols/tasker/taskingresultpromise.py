@@ -1,7 +1,7 @@
 """
-.. module:: taskingresult
+.. module:: taskingresultpromise
     :platform: Darwin, Linux, Unix, Windows
-    :synopsis: Module containing the :class:`TaskingResult` class which is used to report tasking completion.
+    :synopsis: Module containing the :class:`TaskingResultPromise` class which is used to report tasking completion.
 
 .. moduleauthor:: Myron Walker <myron.walker@gmail.com>
 """
@@ -32,47 +32,8 @@ DEFAULT_WAIT_TIMEOUT = 600
 DEFAULT_WAIT_INTERVAL = 5
 
 
-from mojo.results.model.progresscode import ProgressCode
-
-from mojo.xmods.xformatting import indent_lines_list
-
 if TYPE_CHECKING:
     from mojo.interop.protocols.tasker.taskernode import TaskerNode
-
-
-
-@dataclass
-class TaskingResult:
-    """
-    """
-
-    task_name: str
-    task_id: str
-    logdir: str
-    start: datetime = datetime.now()
-    stop: Optional[datetime] = None
-    result_code: Optional[int] = None
-    parent_id: Optional[str] = None
-    exception: Optional[Exception] = None
-
-    def mark_result(self, result_code: int, exception: Optional[Exception] = None):
-
-        if self.stop is None:
-            self.stop = datetime.now()
-
-        # It is possible for us to have a chain of result codes being set if errors are being
-        # encountered in teardown methods.
-        if self.result_code is None:
-            self.result_code = result_code
-        elif isinstance(self.result_code, list):
-            self.result_code.append(result_code)
-        else:
-            self.result_code = [self.result_code, result_code]
-
-        if exception is not None:
-            self.exception = exception
-
-        return
 
 
 @dataclass
@@ -167,49 +128,3 @@ class TaskingResultPromise:
 
         return rtnval
 
-
-class TaskingResultFormatter(Protocol):
-    
-    def __call__(self, result: TaskingResult) -> List[str]: ...
-
-
-def default_tasking_result_formatter(result: TaskingResult) -> List[str]:
-    return
-
-
-def assert_tasking_results(results: List[TaskingResult], context_message: str,
-                           result_formatter: TaskingResultFormatter = default_tasking_result_formatter):
-
-    #errored = []
-    failed = []
-    passed = []
-
-    for res in results:
-        if res.result_code == 0:
-            if res.exception is not None:
-                raise RuntimeError("We should never have an exception and a result code of 0.")
-            
-            passed.append(res)
-
-        else:
-            failed.append(res)
-
-    # TODO: Handle errors first as they imply a different kind of problem.
-
-    if len(failed) > 0:
-        err_msg_lines = [
-            context_message,
-            "RESULTS:"
-        ]
-
-        for res in results:
-            fmt_res_lines = result_formatter(res)
-            fmt_res_lines = indent_lines_list(fmt_res_lines, 1)
-            err_msg_lines.extend(fmt_res_lines)
-            err_msg_lines.append("")
-
-        err_msg = os.linesep.join(err_msg_lines)
-
-        raise AssertionError(err_msg)
-
-    return
