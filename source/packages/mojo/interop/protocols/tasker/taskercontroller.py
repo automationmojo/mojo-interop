@@ -23,6 +23,7 @@ from mojo.errors.exceptions import NotOverloadedError, SemanticError
 
 from mojo.results.model.taskingresult import TaskingResult
 
+from mojo.interop.protocols.tasker.itaskingsequencer import ITaskingProtocol
 from mojo.interop.protocols.tasker.taskeraspects import TaskerAspects, DEFAULT_TASKER_ASPECTS
 from mojo.interop.protocols.tasker.tasking import Tasking, TaskingIdentity
 from mojo.interop.protocols.tasker.taskernode import TaskerNode, TaskerClientNode
@@ -41,7 +42,8 @@ class TaskerController:
         a collection of clients.
     """
 
-    def __init__(self, logging_directory: Optional[str] = None, aspects: Optional[TaskerAspects] = DEFAULT_TASKER_ASPECTS):
+    def __init__(self, logging_directory: Optional[str] = None,
+                 aspects: Optional[TaskerAspects] = DEFAULT_TASKER_ASPECTS):
         self._logging_directory = logging_directory
         self._aspects = aspects
 
@@ -77,7 +79,7 @@ class TaskerController:
 
         return promise_list
 
-    def execute_tasking_on_node(self, nindex: int, *, tasking: Union[TaskingIdentity, Type[Tasking]], parent_id: str = None,
+    def execute_tasking_on_node(self, node: TaskerNode, *, tasking: Union[TaskingIdentity, Type[Tasking]], parent_id: str = None,
                                 aspects: Optional[TaskerAspects] = None, **kwargs) -> TaskingResultPromise:
 
         if aspects is None:
@@ -89,15 +91,27 @@ class TaskerController:
             tasking = tasking.get_identity()
         module_name, tasking_name = tasking.as_tuple()
         
-        node_count = len(self._tasker_nodes)
-        if nindex < node_count:
-            node = self._tasker_nodes[nindex]
-            promise = node.execute_tasking(module_name=module_name, tasking_name=tasking_name, parent_id=parent_id, aspects=aspects, **kwargs)
-        else:
-            errmsg = f"The specified node index nindex={nindex} is out of range. min=0 max={node_count}"
-            raise IndexError(errmsg)
-        
+        promise = node.execute_tasking(module_name=module_name, tasking_name=tasking_name, parent_id=parent_id, aspects=aspects, **kwargs)
+
         return promise
+
+    def execute_tasking_on_node_list(self, node_list: List[TaskerNode], *, tasking: Union[TaskingIdentity, Type[Tasking]], parent_id: str = None,
+                                     aspects: Optional[TaskerAspects] = None, **kwargs) -> List[TaskingResultPromise]:
+
+        if aspects is None:
+            aspects = self._aspects
+
+        promise_list = []
+
+        if not isinstance(tasking, TaskingIdentity):
+            tasking = tasking.get_identity()
+        module_name, tasking_name = tasking.as_tuple()
+
+        for node in node_list:
+            promise = node.execute_tasking(module_name=module_name, tasking_name=tasking_name, parent_id=parent_id, aspects=aspects, **kwargs)
+            promise_list.append(promise)
+
+        return promise_list
 
     def reinitialize_logging_on_nodes(self, *, logging_directory: Optional[str] = None,
                                       logging_level: Optional[int] = None,
@@ -213,3 +227,4 @@ class ClientTaskerController(TaskerController):
             self._tasker_nodes.append(node)
 
         return
+
