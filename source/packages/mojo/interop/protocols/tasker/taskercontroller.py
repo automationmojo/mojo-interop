@@ -23,7 +23,7 @@ from mojo.errors.exceptions import NotOverloadedError, SemanticError
 
 from mojo.results.model.taskingresult import TaskingResult
 
-from mojo.interop.protocols.tasker.itaskingsequencer import ITaskingProtocol
+from mojo.interop.protocols.tasker.itaskingsequencer import ITaskingSequencer
 from mojo.interop.protocols.tasker.taskeraspects import TaskerAspects, DEFAULT_TASKER_ASPECTS
 from mojo.interop.protocols.tasker.tasking import Tasking, TaskingIdentity
 from mojo.interop.protocols.tasker.taskernode import TaskerNode, TaskerClientNode

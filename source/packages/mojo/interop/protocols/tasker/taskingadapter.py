@@ -81,7 +81,7 @@ class TaskingAdapter:
 
         tnodes = self.checkout_tasker_nodes(node_count=node_count)
 
-        tscope = TaskingGroupScope(self, tgroup, tnodes, aspects)
+        tscope = TaskingGroupScope(group_name, self, self._controller, tgroup, tnodes, aspects)
 
         return tscope
 

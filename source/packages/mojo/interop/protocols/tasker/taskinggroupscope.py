@@ -64,16 +64,18 @@ class TaskingGroupScope:
         return
 
 
-    def execute_tasking(self, *, tasking: Union[TaskingIdentity, Type[Tasking]], parent_id: str = None,
-                                     aspects: Optional[TaskerAspects] = None, **kwargs) -> List[TaskingResultPromise]:
+    def execute_tasking(self, *, tasking: Union[TaskingIdentity, Type[Tasking]], aspects: Optional[TaskerAspects] = None,
+                        **kwargs) -> List[TaskingResultPromise]:
 
         if self._state != TaskingGroupState.NotStarted:
             errmsg = f"The tasking group '{self._name}' has already been started."
             raise SemanticError(errmsg)
 
         adapter = self.adapter
+        parent_id = self._tgroup.inst_id
 
-        self._promises = self._controller.execute_tasking_on_node_list(self._tnodes)
+        self._promises = self._controller.execute_tasking_on_node_list(self._tnodes, tasking=tasking, parent_id=parent_id,
+                                                                       aspects=aspects, **kwargs)
 
         return self._promises
 
@@ -92,7 +94,7 @@ class TaskingGroupScope:
         adapter = self.adapter
 
         if len(self._promises) > 0:
-            adapter.wait_for_tasking_results(self._promises)
+            self.wait_for_tasking_results()
 
         return
 
@@ -101,6 +103,6 @@ class TaskingGroupScope:
         
         adapter = self.adapter
 
-        results = adapter.wait_for_tasking_results(self._promises)
+        results = self._controller.wait_for_tasking_results(self._promises)
 
         return results
