@@ -76,12 +76,13 @@ class TaskingAdapter:
 
         scope_id = str(uuid.uuid4())
         parent_id = self._sequencer.get_top_scope_id()
+        recorder = self._sequencer.get_recorder()
 
         tgroup = self._sequencer.create_tasking_group(scope_id, group_name, parent_id)
 
         tnodes = self.checkout_tasker_nodes(node_count=node_count)
 
-        tscope = TaskingGroupScope(group_name, self, self._controller, tgroup, tnodes, aspects)
+        tscope = TaskingGroupScope(group_name, self, self._controller, recorder, tgroup, tnodes, aspects)
 
         return tscope
 

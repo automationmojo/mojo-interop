@@ -2,6 +2,7 @@
 from typing import Protocol
 
 
+from mojo.results.recorders.resultrecorder import ResultRecorder
 from mojo.results.model.taskinggroup import TaskingGroup
 from mojo.results.model.taskingresult import TaskingResult
 
@@ -18,6 +19,11 @@ class ITaskingSequencer(Protocol):
         """
             Method for creating a tasking result group that is used for grouping tasking
             results by a test framework.
+        """
+
+    def get_recorder(self) -> ResultRecorder:
+        """
+            Method to get the 'ResultRecorder' recorder for a job run from the sequencer.
         """
 
     def get_top_scope_id(self) -> str:
