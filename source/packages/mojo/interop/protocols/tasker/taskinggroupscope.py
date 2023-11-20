@@ -53,12 +53,17 @@ class TaskingGroupScope:
 
 
     @property
-    def adapter(self):
+    def adapter(self) -> TaskingAdapter:
         return self._adapter_ref()
 
 
     @property
-    def promises(self):
+    def name(self) - str:
+        return self._name
+
+
+    @property
+    def promises(self) -> List[TaskingResultPromise]:
         plist = [p for p in self._promises]
         return plist
 

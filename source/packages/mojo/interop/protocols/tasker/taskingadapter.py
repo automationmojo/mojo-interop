@@ -34,8 +34,14 @@ class TaskingAdapter:
     
 
     @property
-    def available_node_count(self):
+    def available_node_count(self) -> int:
         return len(self._available_nodes)
+
+
+    @property
+    def available_nodes(self) -> List[TaskerNode]:
+        node_list = [n for n in self._available_nodes]
+        return node_list
 
 
     def checkin_tasker_nodes(self, node_list: List[TaskerNode]):
@@ -47,7 +53,7 @@ class TaskingAdapter:
         return
 
 
-    def checkout_tasker_nodes(self, node_count: Optional[int] = None):
+    def checkout_tasker_nodes(self, node_count: Optional[int] = None) -> List[TaskerNode]:
 
         nodes = []
 
@@ -69,7 +75,7 @@ class TaskingAdapter:
         return nodes
 
 
-    def create_tasking_group(self, group_name: str, node_count: Optional[int] = None, aspects: Optional[TaskerAspects] = None) -> TaskingGroupScope:
+    def create_tasking_group_scope(self, group_name: str, node_count: Optional[int] = None, aspects: Optional[TaskerAspects] = None) -> TaskingGroupScope:
 
         if aspects is None:
             aspects = self._aspects
