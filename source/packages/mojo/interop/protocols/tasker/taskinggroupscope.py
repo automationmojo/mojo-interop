@@ -58,7 +58,7 @@ class TaskingGroupScope:
 
 
     @property
-    def name(self) - str:
+    def name(self) -> str:
         return self._name
 
 
