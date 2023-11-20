@@ -53,7 +53,7 @@ class TaskingGroupScope:
 
 
     @property
-    def adapter(self) -> TaskingAdapter:
+    def adapter(self) -> "TaskingAdapter":
         return self._adapter_ref()
 
 
