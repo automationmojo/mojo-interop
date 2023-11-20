@@ -608,14 +608,14 @@ requests = "<=2.29.0"
 
 [[package]]
 name = "mojo-results"
-version = "0.0.25"
+version = "0.0.26"
 description = "The Automation Mojo Results Package"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "mojo_results-0.0.25-py3-none-any.whl", hash = "sha256:c4560120b7615b16e8a1fdf84e594aee8cc71af23b79c1eeb3a9393fcd3e4405"},
-    {file = "mojo_results-0.0.25.tar.gz", hash = "sha256:f3ebda0633a215014057c682c84d91ace9899d643fd4e70122c41b1ff4ada773"},
+    {file = "mojo_results-0.0.26-py3-none-any.whl", hash = "sha256:ca3b4aa92fffbddc033e38e56a48b70f9c015b1dd1b5dd14b0989061cf6a2eb3"},
+    {file = "mojo_results-0.0.26.tar.gz", hash = "sha256:16f6bcb02258127a200942fb4482b54e3259ee64390290126a9209c3a1e81c91"},
 ]
 
 [package.dependencies]
@@ -1263,4 +1263,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0"
-content-hash = "9b5e6c0fc9fad17ff3b22c08a94def0235f69b2d50d4086a7c1f303a9f5bf4a9"
+content-hash = "6d09bd9604459d57cdc51aa86c341fb0053f0fcf4d6d7eba06a0eeb4b81b197e"

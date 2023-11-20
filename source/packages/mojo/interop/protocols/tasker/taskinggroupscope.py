@@ -104,6 +104,7 @@ class TaskingGroupScope:
         if sync:
             self.synchronize()
 
+        self._tgroup.finalize()
         self._recorder.record(self._tgroup)
 
         adapter.checkin_tasker_nodes(self._tnodes)
