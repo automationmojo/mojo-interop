@@ -608,14 +608,14 @@ requests = "<=2.29.0"
 
 [[package]]
 name = "mojo-results"
-version = "0.0.24"
+version = "0.0.25"
 description = "The Automation Mojo Results Package"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "mojo_results-0.0.24-py3-none-any.whl", hash = "sha256:bbbf39b4f5db42619fda704c14412ce12a52b4c139be9d58a01778323d2f551f"},
-    {file = "mojo_results-0.0.24.tar.gz", hash = "sha256:13084d7770410536dc993bc23860311affa4a1ba54f1684a104c515dd3a63237"},
+    {file = "mojo_results-0.0.25-py3-none-any.whl", hash = "sha256:c4560120b7615b16e8a1fdf84e594aee8cc71af23b79c1eeb3a9393fcd3e4405"},
+    {file = "mojo_results-0.0.25.tar.gz", hash = "sha256:f3ebda0633a215014057c682c84d91ace9899d643fd4e70122c41b1ff4ada773"},
 ]
 
 [package.dependencies]
