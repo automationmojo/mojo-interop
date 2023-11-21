@@ -162,6 +162,8 @@ class TaskerService(rpyc.Service):
 
             if hasattr(module, tasking_name):
 
+                tasking_type = getattr(module, tasking_name)
+
                 task_id = str(uuid4())
 
                 log_dir = None
@@ -174,7 +176,9 @@ class TaskerService(rpyc.Service):
                     if not os.path.exists(taskings_log_directory):
                         os.makedirs(taskings_log_directory)
 
-                    log_dir = os.path.join(taskings_log_directory, f"tasking-{task_id}")
+                    prefix = tasking_type.PREFIX
+
+                    log_dir = os.path.join(taskings_log_directory, f"{prefix}-{task_id}")
                     if not os.path.exists(log_dir):
                         os.makedirs(log_dir)
 

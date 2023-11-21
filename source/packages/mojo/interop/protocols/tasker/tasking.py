@@ -110,6 +110,8 @@ class Tasking:
     """
     """
 
+    PREFIX = "tasking"
+
     def __init__(self, task_id: str, parent_id: str, logdir: str, logfile: str, logger: logging.Logger, 
                  notify_url: Optional[str] = None, notify_headers: Optional[dict] = None,
                  aspects: Optional[TaskerAspects] = DEFAULT_TASKER_ASPECTS):
@@ -550,7 +552,9 @@ class Tasking:
         # Update our local in process copy of these queues, because we have forked
         self._progress_queue = progress_queue
 
-        self._result = TaskingResult(self._task_id, self.full_name, self._parent_id, ResultType.TASK)
+        prefix = self.PREFIX
+
+        self._result = TaskingResult(self._task_id, self.full_name, self._parent_id, ResultType.TASK, prefix=prefix)
         self._running = True
 
         try:
