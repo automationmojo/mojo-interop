@@ -37,6 +37,8 @@ class NotifyRequestHandler(BaseHTTPRequestHandler):
 
 class PrintTasking(Tasking):
 
+    PREFIX = "print"
+
     def begin(self, kwparams: dict):
 
         self._data = {
