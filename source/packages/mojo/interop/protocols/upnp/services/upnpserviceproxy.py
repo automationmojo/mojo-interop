@@ -39,7 +39,7 @@ from mojo.xmods.eventing.eventedvariable import EventedVariable
 from mojo.xmods.xcollections.context import Context, ContextPaths
 from mojo.xmods.xlogging.scopemonitoring import MonitoredScope
 
-from mojo.interop.protocols.upnp.aspectsupnp import AspectsUPnP, DEFAULT_UPNP_ASPECTS
+from mojo.interop.protocols.upnp.aspects import AspectsUPnP, DEFAULT_UPNP_ASPECTS
 from mojo.interop.protocols.upnp.soap import SoapProcessor, SOAP_TIMEOUT
 from mojo.interop.protocols.upnp.upnpconstants import DEFAULT_UPNP_CALL_ASPECTS
 from mojo.interop.protocols.upnp.upnperrors import UpnpError

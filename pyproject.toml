@@ -30,7 +30,7 @@ mojo-errors = ">=0.0.5 < 0.1.0"
 mojo-networking = ">=0.0.4 <0.1.0"
 mojo-xmodules = ">=1.0.0 <1.1.0"
 mojo-credentials = ">=0.0.1 <0.1.0"
-mojo-landscaping = ">=0.0.3 <0.1.0"
+mojo-landscaping = ">=0.0.5 <0.1.0"
 
 [tool.poetry.group.dev.dependencies]
 myst-parser = "^0.18.1"

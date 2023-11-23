@@ -634,21 +634,21 @@ files = [
 
 [[package]]
 name = "mojo-landscaping"
-version = "0.0.3"
+version = "0.0.5"
 description = "Automation Mojo Landscaping Package"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "mojo_landscaping-0.0.3-py3-none-any.whl", hash = "sha256:373ddfb9b38d9cb8051ffd4232dc985d81ff43cfc6903f6ec9c11447b37ef627"},
-    {file = "mojo_landscaping-0.0.3.tar.gz", hash = "sha256:72113e16744c9ecefda90d0a647e90cf0894f9bfe1140be96fddb766a1d3b92b"},
+    {file = "mojo_landscaping-0.0.5-py3-none-any.whl", hash = "sha256:70c245fae3eb3e1cc639b73cffe83799b4e8c302166db34d8d01bbb228470fc3"},
+    {file = "mojo_landscaping-0.0.5.tar.gz", hash = "sha256:057733f769cc5abf1a379dd2b383f83bbd41d577ec9b97422889f905ac7ccb50"},
 ]
 
 [package.dependencies]
 mojo-credentials = ">=0.0.1,<0.0.2"
 mojo-extension = ">=0.0.2,<0.0.3"
 mojo-interfaces = ">=0.0.1,<0.0.2"
-mojo-xmodules = ">=1.0.0,<=1.1.0"
+mojo-xmodules = ">=1.0.2,<1.1.0"
 
 [[package]]
 name = "mojo-networking"
@@ -708,14 +708,14 @@ files = [
 
 [[package]]
 name = "mojo-xmodules"
-version = "1.0.0"
+version = "1.0.2"
 description = "Automation Mojo X-Modules"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "mojo_xmodules-1.0.0-py3-none-any.whl", hash = "sha256:9f17b95c80febdf6e9d680f45991a765c0aa778a587228eae08b9db94547aa2c"},
-    {file = "mojo_xmodules-1.0.0.tar.gz", hash = "sha256:2355932f61462587c3c26830b033c1f34d1255db704bd95849cdbee143e5262b"},
+    {file = "mojo_xmodules-1.0.2-py3-none-any.whl", hash = "sha256:efeac1bc8e59300ad7ebb79fff9332a89f7ce0b5a0b4923b3a5b7f9343728f07"},
+    {file = "mojo_xmodules-1.0.2.tar.gz", hash = "sha256:ab6c8c838ed911d58d30aa8cecc8af5a0aab59265a89e79282a4116afaa4ecbd"},
 ]
 
 [package.dependencies]
@@ -1334,4 +1334,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0"
-content-hash = "c2f79721102521996e9fc51376a05cc12b85f485adebfd4224ce0f6540c704ac"
+content-hash = "67a7b4611cb663b59c65227d959b4cb0d433fc0efc99bd2ebccd42bd8dde828f"

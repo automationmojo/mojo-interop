@@ -3,7 +3,8 @@ from typing import List, Type
 
 from mojo.extension.extensionfactory import ExtFactory
 
-from mojo.landscaping.coupling.integrationcoupling import IntegrationCoupling
+from mojo.xmods.injection.coupling.integrationcoupling import IntegrationCoupling
+
 from mojo.landscaping.extensionfactories import LandscapingExtensionFactory
 
 from mojo.interop.clients.linux.linuxclientcoordinatorcoupling import LinuxClientCoordinatorCoupling
