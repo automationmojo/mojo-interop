@@ -607,14 +607,14 @@ files = [
 
 [[package]]
 name = "mojo-extension"
-version = "0.0.2"
+version = "0.0.3"
 description = "Automation Mojo Extension Package"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "mojo_extension-0.0.2-py3-none-any.whl", hash = "sha256:d997972fc60e8a8e94b5cf3ebcc63b80b7319ff00b7bd6090fc49c0af13e5987"},
-    {file = "mojo_extension-0.0.2.tar.gz", hash = "sha256:a2263cde16a2cfb1da9b1cd557558f130ed3ed1c71c5bd0aaef70b3dbb159393"},
+    {file = "mojo_extension-0.0.3-py3-none-any.whl", hash = "sha256:1269ba42129c6922d803ad0d08c35479df14b569b39e89d035495655b0c583a1"},
+    {file = "mojo_extension-0.0.3.tar.gz", hash = "sha256:f9de84d183546c95814bd1b2d5550c0d50642ab32e12cfff947e6df27edfa651"},
 ]
 
 [package.dependencies]
@@ -634,20 +634,20 @@ files = [
 
 [[package]]
 name = "mojo-landscaping"
-version = "0.0.5"
+version = "0.0.6"
 description = "Automation Mojo Landscaping Package"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "mojo_landscaping-0.0.5-py3-none-any.whl", hash = "sha256:70c245fae3eb3e1cc639b73cffe83799b4e8c302166db34d8d01bbb228470fc3"},
-    {file = "mojo_landscaping-0.0.5.tar.gz", hash = "sha256:057733f769cc5abf1a379dd2b383f83bbd41d577ec9b97422889f905ac7ccb50"},
+    {file = "mojo_landscaping-0.0.6-py3-none-any.whl", hash = "sha256:b359a44c14a7ceea4d0852548af02796d5157023f780de5f8ab5517f4ade513e"},
+    {file = "mojo_landscaping-0.0.6.tar.gz", hash = "sha256:01fc4489c3b7672a8f0e1e3920391bd661f52896ad029c8bc0fa75d64a2d8023"},
 ]
 
 [package.dependencies]
-mojo-credentials = ">=0.0.1,<0.0.2"
-mojo-extension = ">=0.0.2,<0.0.3"
-mojo-interfaces = ">=0.0.1,<0.0.2"
+mojo-credentials = ">=0.0.1,<0.1.0"
+mojo-extension = ">=0.0.3,<0.1.0"
+mojo-interfaces = ">=0.0.1,<0.1.0"
 mojo-xmodules = ">=1.0.2,<1.1.0"
 
 [[package]]
