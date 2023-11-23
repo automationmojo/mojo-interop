@@ -6,7 +6,7 @@ import weakref
 
 from mojo.errors.exceptions import SemanticError
 
-from mojo.xmods.interfaces.isystemcontext import ISystemContext
+from mojo.interfaces.isystemcontext import ISystemContext
 from mojo.xmods.xformatting import format_command_result
 
 from mojo.interop.protocols.ssh.sshagent import SshSession

@@ -1,16 +1,16 @@
 from typing import TYPE_CHECKING
 
-from mojo.xmods.credentials.basecredential import BaseCredential
-from mojo.xmods.landscaping.coordinators.coordinatorbase import CoordinatorBase
-from mojo.xmods.landscaping.friendlyidentifier import FriendlyIdentifier
-from mojo.xmods.landscaping.landscape import Landscape
-from mojo.xmods.landscaping.service.servicebase import ServiceBase
+from mojo.credentials.basecredential import BaseCredential
+from mojo.landscaping.coordinators.coordinatorbase import CoordinatorBase
+from mojo.landscaping.friendlyidentifier import FriendlyIdentifier
+from mojo.landscaping.landscape import Landscape
+from mojo.landscaping.service.servicebase import ServiceBase
 
 from mojo.interop.services.vmware.vsphere.vsphereagent import VSphereAgent
 
 if TYPE_CHECKING:
-    from mojo.xmods.landscaping.landscape import Landscape
-    from mojo.xmods.landscaping.coordinators.coordinatorbase import CoordinatorBase
+    from mojo.landscaping.landscape import Landscape
+    from mojo.landscaping.coordinators.coordinatorbase import CoordinatorBase
 
 class VSphereService(ServiceBase):
 

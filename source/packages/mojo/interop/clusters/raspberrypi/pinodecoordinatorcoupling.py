@@ -19,7 +19,7 @@ __license__ = "MIT"
 from typing import TYPE_CHECKING
 
 from mojo.interop.clusters.constants import INTEGRATION_CLASS_FOR_RASPBERRYPI_NODE
-from mojo.xmods.landscaping.cluster.nodecoordinatorcouplingbase import NodeCoordinatorCouplingBase
+from mojo.landscaping.cluster.nodecoordinatorcouplingbase import NodeCoordinatorCouplingBase
 
 
 class PiNodeCoordinatorCoupling(NodeCoordinatorCouplingBase):

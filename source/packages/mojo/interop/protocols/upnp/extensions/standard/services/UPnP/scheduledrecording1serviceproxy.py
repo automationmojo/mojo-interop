@@ -5,12 +5,12 @@
 
 
 
-from akit.aspects import AspectsUPnP, DEFAULT_UPNP_ASPECTS
+from mojo.interop.protocols.upnp.aspects import AspectsUPnP, DEFAULT_UPNP_ASPECTS
 
-from akit.extensible import LoadableExtension
+from mojo.xmods.extension.dynamic import DynamicExtension
 from mojo.interop.protocols.upnp.services.upnpserviceproxy import UpnpServiceProxy
 
-class ScheduledRecording1ServiceProxy(UpnpServiceProxy, LoadableExtension):
+class ScheduledRecording1ServiceProxy(UpnpServiceProxy, DynamicExtension):
     """
         This is a code generated proxy class to the 'urn:schemas-upnp-org:service:ScheduledRecording:1' service.
     """

@@ -31,7 +31,7 @@ from mojo.interop.protocols.tasker.taskingresultpromise import TaskingResultProm
 from mojo.interop.protocols.tasker.taskeraspects import TaskerAspects, DEFAULT_TASKER_ASPECTS
 
 if TYPE_CHECKING:
-    from mojo.xmods.landscaping.client.clientbase import ClientBase
+    from mojo.landscaping.client.clientbase import ClientBase
 
 
 TASKER_PROTOCOL_CONFIG = {

@@ -1,14 +1,14 @@
 
 from typing import Any, Dict, Optional, TYPE_CHECKING
-from mojo.xmods.landscaping.landscape import Landscape
+from mojo.landscaping.landscape import Landscape
 
-from mojo.xmods.landscaping.service.servicecoordinatorbase import ServiceCoordinatorBase
+from mojo.landscaping.service.servicecoordinatorbase import ServiceCoordinatorBase
 
 from mojo.interop.services.common import INTEGRATIION_CLASS_FOR_VSPHERE_VCENTER_SERVICE
 from mojo.interop.services.vmware.vsphere.vsphereservice import VSphereService
 
 if TYPE_CHECKING:
-    from mojo.xmods.landscaping.landscape import Landscape
+    from mojo.landscaping.landscape import Landscape
 
 class VSphereCoordinator(ServiceCoordinatorBase):
     """

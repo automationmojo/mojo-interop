@@ -1,8 +1,8 @@
 
 import os
 
-from mojo.xmods.landscaping.landscapeparameters import LandscapeActivationParams
-from mojo.xmods.landscaping.landscape import startup_landscape
+from mojo.landscaping.landscapeparameters import LandscapeActivationParams
+from mojo.landscaping.landscape import startup_landscape
 
 from mojo.collections.context import Context
 from mojo.collections.contextpaths import ContextPaths

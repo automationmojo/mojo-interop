@@ -21,13 +21,13 @@ from types import TracebackType
 import telnetlib
 
 from mojo.xmods.aspects import AspectsCmd, DEFAULT_CMD_ASPECTS
-from mojo.xmods.interfaces.isystemcontext import ISystemContext
+from mojo.interfaces.isystemcontext import ISystemContext
 from mojo.xmods.xconvert import (
     safe_as_bytes,
     safe_as_str
 )
 
-from mojo.xmods.landscaping.agents.serialagentbase import SerialAgentBase
+from mojo.landscaping.agents.serialagentbase import SerialAgentBase
 
 import telnetlib
 

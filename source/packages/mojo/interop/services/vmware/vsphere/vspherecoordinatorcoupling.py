@@ -1,5 +1,5 @@
 
-from mojo.xmods.landscaping.service.servicecoordinatorcouplingbase import ServiceCoordinatorCouplingBase
+from mojo.landscaping.service.servicecoordinatorcouplingbase import ServiceCoordinatorCouplingBase
 
 from mojo.interop.services.common import INTEGRATIION_CLASS_FOR_VSPHERE_VCENTER_SERVICE
 from mojo.interop.services.vmware.vsphere.vspherecoordinator import VSphereCoordinator

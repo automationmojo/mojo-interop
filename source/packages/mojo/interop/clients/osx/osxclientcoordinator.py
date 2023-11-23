@@ -17,8 +17,8 @@ __license__ = "MIT"
 
 from typing import Any, Dict, Optional, TYPE_CHECKING
 
-from mojo.xmods.credentials.basecredential import BaseCredential
-from mojo.xmods.landscaping.client.clientcoordinatorbase import ClientCoordinatorBase
+from mojo.credentials.basecredential import BaseCredential
+from mojo.landscaping.client.clientcoordinatorbase import ClientCoordinatorBase
 
 from mojo.interop.clients.constants import INTEGRATION_CLASS_FOR_OSX_CLIENT
 from mojo.interop.clients.osx.osxclient import OsxClient
@@ -27,7 +27,7 @@ from mojo.interop.protocols.ssh.sshagent import SshAgent
 from mojo.interop.protocols.ssh.sshcoordinator import SUPPORTED_INTEGRATION_CLASS
 
 if TYPE_CHECKING:
-    from mojo.xmods.landscaping.landscape import Landscape
+    from mojo.landscaping.landscape import Landscape
 
 class OsxClientCoordinator(ClientCoordinatorBase):
     """

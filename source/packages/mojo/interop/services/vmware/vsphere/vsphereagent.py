@@ -21,7 +21,7 @@ from  http import HTTPStatus
 
 import requests
 
-from mojo.xmods.credentials.basiccredential import BasicCredential
+from mojo.credentials.basiccredential import BasicCredential
 
 from mojo.interop.services.vmware.datastructures.specs.vmplacement import VmPlacementSpec
 

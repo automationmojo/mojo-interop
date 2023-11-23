@@ -8,8 +8,8 @@ import weakref
 
 from mojo.errors.exceptions import CommandError
 
-from mojo.xmods.credentials.sshcredential import SshCredential
-from mojo.xmods.interfaces.isystemcontext import ISystemContext
+from mojo.credentials.sshcredential import SshCredential
+from mojo.interfaces.isystemcontext import ISystemContext
 from mojo.xmods.xformatting import format_command_result
 
 from mojo.interop.clients.clientsourcepackager import ClientSourcePackager

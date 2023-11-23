@@ -17,9 +17,9 @@ __license__ = "MIT"
 
 from typing import Dict
 
-from mojo.xmods.landscaping.cluster.nodebase import NodeBase
-from mojo.xmods.landscaping.landscapedevicecluster import LandscapeDeviceCluster
-from mojo.xmods.landscaping.landscapedevicegroup import LandscapeDeviceGroup
+from mojo.landscaping.cluster.nodebase import NodeBase
+from mojo.landscaping.landscapedevicecluster import LandscapeDeviceCluster
+from mojo.landscaping.landscapedevicegroup import LandscapeDeviceGroup
 
 class PiCluster(LandscapeDeviceCluster):
     """

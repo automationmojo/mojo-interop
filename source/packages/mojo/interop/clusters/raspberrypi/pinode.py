@@ -17,15 +17,15 @@ __license__ = "MIT"
 
 from typing import TYPE_CHECKING
 
-from mojo.xmods.interfaces.isystemcontext import ISystemContext
-from mojo.xmods.landscaping.friendlyidentifier import FriendlyIdentifier
-from mojo.xmods.landscaping.cluster.nodebase import NodeBase
+from mojo.interfaces.isystemcontext import ISystemContext
+from mojo.landscaping.friendlyidentifier import FriendlyIdentifier
+from mojo.landscaping.cluster.nodebase import NodeBase
 
 from mojo.interop.protocols.ssh.sshagent import SshAgent
 
 if TYPE_CHECKING:
-    from mojo.xmods.landscaping.landscape import Landscape
-    from mojo.xmods.landscaping.coordinators.coordinatorbase import CoordinatorBase
+    from mojo.landscaping.landscape import Landscape
+    from mojo.landscaping.coordinators.coordinatorbase import CoordinatorBase
 
 class PiNode(NodeBase):
 

@@ -24,9 +24,9 @@ import weakref
 import paramiko
 
 from mojo.xmods.aspects import  AspectsCmd, DEFAULT_CMD_ASPECTS
-from mojo.xmods.credentials.sshcredential import SshCredential
-from mojo.xmods.landscaping.protocolextension import ProtocolExtension
-from mojo.xmods.interfaces.isystemcontext import ISystemContext
+from mojo.credentials.sshcredential import SshCredential
+from mojo.landscaping.protocolextension import ProtocolExtension
+from mojo.interfaces.isystemcontext import ISystemContext
 
 from mojo.interop.protocols.ssh.sshbase import SshBase
 from mojo.interop.protocols.ssh.sshconst import (

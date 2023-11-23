@@ -19,21 +19,19 @@ from typing import Any, Dict, List, Optional, Tuple, Union, TYPE_CHECKING
 
 import os
 import pprint
-import socket
 import weakref
 
-from mojo.errors.exceptions import ConfigurationError
-from mojo.xmods.landscaping.friendlyidentifier import FriendlyIdentifier
+from mojo.landscaping.friendlyidentifier import FriendlyIdentifier
 
-from mojo.xmods.landscaping.coordinators.coordinatorbase import CoordinatorBase
-from mojo.xmods.landscaping.landscapeparameters import LandscapeActivationParams
-from mojo.xmods.landscaping.landscapedevice import LandscapeDevice
+from mojo.landscaping.coordinators.coordinatorbase import CoordinatorBase
+from mojo.landscaping.landscapeparameters import LandscapeActivationParams
+from mojo.landscaping.landscapedevice import LandscapeDevice
 
 from mojo.interop.protocols.ssh.sshagent import SshAgent
 from mojo.interop.protocols.ssh.sshdevice import SshDevice
 
 if TYPE_CHECKING:
-    from mojo.xmods.landscaping.landscape import Landscape
+    from mojo.landscaping.landscape import Landscape
 
 SUPPORTED_INTEGRATION_CLASS = "network/ssh"
 

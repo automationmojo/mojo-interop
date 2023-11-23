@@ -50,12 +50,12 @@ PROXY_BASE_CLASS_NAME = "UpnpServiceProxy"
 
 TEMPLATE_CLASS_PREFIX = """
 
-from akit.aspects import AspectsUPnP, DEFAULT_UPNP_ASPECTS
+from mojo.interop.protocols.upnp.aspects import AspectsUPnP, DEFAULT_UPNP_ASPECTS
 
-from akit.extensible import LoadableExtension
+from mojo.xmods.extension.dynamic import DynamicExtension
 %(base_class_import)s
 
-class %(class_name)s(%(base_class_name)s, LoadableExtension):
+class %(class_name)s(%(base_class_name)s, DynamicExtension):
     \"""
         This is a code generated proxy class to the '%(service_name)s' service.
     \"""

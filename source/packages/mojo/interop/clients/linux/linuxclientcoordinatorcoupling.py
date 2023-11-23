@@ -17,7 +17,7 @@ __license__ = "MIT"
 
 from typing import TYPE_CHECKING
 
-from mojo.xmods.landscaping.client.clientcoordinatorcouplingbase import ClientCoordinatorCouplingBase
+from mojo.landscaping.client.clientcoordinatorcouplingbase import ClientCoordinatorCouplingBase
 
 from mojo.interop.clients.constants import INTEGRATION_CLASS_FOR_LINUX_CLIENT
 from mojo.interop.clients.linux.linuxclientcoordinator import LinuxClientCoordinator

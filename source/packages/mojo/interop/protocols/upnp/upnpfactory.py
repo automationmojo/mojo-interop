@@ -25,7 +25,8 @@ from mojo.xmods.extension.dynamic import (
     generate_extension_key
 )
 from mojo.xmods.ximport import import_by_name
-from mojo.xmods.xcollections.context import Context, ContextPaths
+from mojo.collections.context import Context
+from mojo.collections.contextpaths import ContextPaths
 
 from mojo.interop.protocols.upnp.devices.upnpembeddeddevice import UpnpEmbeddedDevice
 from mojo.interop.protocols.upnp.devices.upnprootdevice import UpnpRootDevice

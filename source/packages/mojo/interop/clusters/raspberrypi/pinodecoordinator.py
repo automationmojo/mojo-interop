@@ -18,8 +18,8 @@ __license__ = "MIT"
 
 from typing import Any, Dict, Optional, TYPE_CHECKING
 
-from mojo.xmods.credentials.basecredential import BaseCredential
-from mojo.xmods.landscaping.cluster.nodecoordinatorbase import NodeCoordinatorBase
+from mojo.credentials.basecredential import BaseCredential
+from mojo.landscaping.cluster.nodecoordinatorbase import NodeCoordinatorBase
 
 from mojo.interop.clusters.constants import INTEGRATION_CLASS_FOR_RASPBERRYPI_NODE
 from mojo.interop.clusters.raspberrypi.pinode import PiNode
@@ -29,7 +29,7 @@ from mojo.interop.protocols.ssh.sshagent import SshAgent
 from mojo.interop.protocols.ssh.sshcoordinator import SUPPORTED_INTEGRATION_CLASS
 
 if TYPE_CHECKING:
-    from mojo.xmods.landscaping.landscape import Landscape
+    from mojo.landscaping.landscape import Landscape
 
 class PiNodeCoordinator(NodeCoordinatorBase):
     """

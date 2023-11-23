@@ -20,7 +20,7 @@ import dataclasses
 import os
 import re
 
-from mojo.xmods.credentials.sshcredential import SshCredential
+from mojo.credentials.sshcredential import SshCredential
 
 DEFAULT_SSH_TIMEOUT = 300
 DEFAULT_SSH_RETRY_INTERVAL = .5

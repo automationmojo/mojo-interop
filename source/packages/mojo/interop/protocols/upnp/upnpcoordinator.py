@@ -33,7 +33,7 @@ import yaml
 from requests.exceptions import ConnectionError
 
 from mojo.errors.exceptions import ConfigurationError, SemanticError
-from mojo.xmods.landscaping.friendlyidentifier import FriendlyIdentifier
+from mojo.landscaping.friendlyidentifier import FriendlyIdentifier
 from mojo.xmods.xcollections.context import Context, ContextPaths
 
 from mojo.networking.constants import HTTP1_1_LINESEP, HTTP1_1_END_OF_HEADER
@@ -44,8 +44,8 @@ from mojo.networking.trafficcapturecontext import TrafficCaptureContext
 
 import mojo.interop.protocols.upnp as upnp_module
 
-from mojo.xmods.landscaping.coordinators.coordinatorbase import CoordinatorBase
-from mojo.xmods.landscaping.landscapedevice import LandscapeDevice
+from mojo.landscaping.coordinators.coordinatorbase import CoordinatorBase
+from mojo.landscaping.landscapedevice import LandscapeDevice
 
 from mojo.interop.protocols.upnp.upnpconstants import UPNP_HEADERS
 from mojo.interop.protocols.upnp.devices.upnprootdevice import UpnpRootDevice
@@ -63,7 +63,7 @@ from mojo.networking.interfaces import get_ipv4_address
 
 # Types imported only for type checking purposes
 if TYPE_CHECKING:
-    from mojo.xmods.landscaping.landscape import Landscape
+    from mojo.landscaping.landscape import Landscape
 
 EMPTY_LIST = []
 

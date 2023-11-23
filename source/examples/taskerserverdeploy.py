@@ -10,8 +10,8 @@ from mojo.collections.contextpaths import ContextPaths
 from mojo.config.variables import resolve_configuration_variables
 from mojo.config.configurationmaps import resolve_configuration_maps
 
-from mojo.xmods.landscaping.landscapeparameters import LandscapeActivationParams
-from mojo.xmods.landscaping.landscape import startup_landscape
+from mojo.landscaping.landscapeparameters import LandscapeActivationParams
+from mojo.landscaping.landscape import startup_landscape
 
 from mojo.interop.clients.linux.linuxclient import LinuxClient
 

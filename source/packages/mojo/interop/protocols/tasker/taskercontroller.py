@@ -31,7 +31,7 @@ from mojo.interop.protocols.tasker.taskingresultpromise import TaskingResultProm
 from mojo.interop.protocols.tasker.taskerservice import TaskerService
 from mojo.interop.protocols.tasker.taskerservermanager import TaskerServerManager, spawn_tasking_server_process
 
-from mojo.xmods.landscaping.client.clientbase import ClientBase
+from mojo.landscaping.client.clientbase import ClientBase
 
 
 TASKER_PORT = 8686

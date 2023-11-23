@@ -21,7 +21,7 @@ from typing import Optional
 import base64
 from  http import HTTPStatus
 
-from mojo.xmods.credentials.basiccredential import BasicCredential
+from mojo.credentials.basiccredential import BasicCredential
 
 import requests
 

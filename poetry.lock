@@ -579,6 +579,21 @@ couchdb = ["couchdb (>=1.2,<2.0)"]
 mongodb = ["pymongo[srv] (>=4.0.0,<5.0.0)"]
 
 [[package]]
+name = "mojo-credentials"
+version = "0.0.1"
+description = "Automation Mojo Credentials Package"
+category = "main"
+optional = false
+python-versions = ">=3.8,<4.0"
+files = [
+    {file = "mojo_credentials-0.0.1-py3-none-any.whl", hash = "sha256:ccedc2c99d4f7faa6dc5997990b3073907479ef952139c73f3b3c5638aeba480"},
+    {file = "mojo_credentials-0.0.1.tar.gz", hash = "sha256:e51ff05bae868f0b726a2ccdd93b4103763bc633fc050ae7277e9353a2a1cefe"},
+]
+
+[package.dependencies]
+mojo-config = ">=0.0.30,<0.0.31"
+
+[[package]]
 name = "mojo-errors"
 version = "0.0.5"
 description = "Automation Mojo Errors Module"
@@ -589,6 +604,51 @@ files = [
     {file = "mojo_errors-0.0.5-py3-none-any.whl", hash = "sha256:db81c1b35a9554cf64bdca74477d0f87e083855cb929331c0830d76e14e09e88"},
     {file = "mojo_errors-0.0.5.tar.gz", hash = "sha256:f5233c7beda22abf1352f00d9d784aab2895ff39b1f6a6d75c224700a8f39f78"},
 ]
+
+[[package]]
+name = "mojo-extension"
+version = "0.0.2"
+description = "Automation Mojo Extension Package"
+category = "main"
+optional = false
+python-versions = ">=3.8,<4.0"
+files = [
+    {file = "mojo_extension-0.0.2-py3-none-any.whl", hash = "sha256:d997972fc60e8a8e94b5cf3ebcc63b80b7319ff00b7bd6090fc49c0af13e5987"},
+    {file = "mojo_extension-0.0.2.tar.gz", hash = "sha256:a2263cde16a2cfb1da9b1cd557558f130ed3ed1c71c5bd0aaef70b3dbb159393"},
+]
+
+[package.dependencies]
+mojo-startup = ">=0.0.1,<0.0.2"
+
+[[package]]
+name = "mojo-interfaces"
+version = "0.0.1"
+description = "Automation Mojo Interfaces Package"
+category = "main"
+optional = false
+python-versions = ">=3.8,<4.0"
+files = [
+    {file = "mojo_interfaces-0.0.1-py3-none-any.whl", hash = "sha256:cfb357e8116e7a9c01e11bacedb136ccc50b0e4f828aa9287c9c3c8e58418903"},
+    {file = "mojo_interfaces-0.0.1.tar.gz", hash = "sha256:738110666bfa13e117584d0c45a64d5035c3e31d996201692370cbdcddd3b857"},
+]
+
+[[package]]
+name = "mojo-landscaping"
+version = "0.0.3"
+description = "Automation Mojo Landscaping Package"
+category = "main"
+optional = false
+python-versions = ">=3.8,<4.0"
+files = [
+    {file = "mojo_landscaping-0.0.3-py3-none-any.whl", hash = "sha256:373ddfb9b38d9cb8051ffd4232dc985d81ff43cfc6903f6ec9c11447b37ef627"},
+    {file = "mojo_landscaping-0.0.3.tar.gz", hash = "sha256:72113e16744c9ecefda90d0a647e90cf0894f9bfe1140be96fddb766a1d3b92b"},
+]
+
+[package.dependencies]
+mojo-credentials = ">=0.0.1,<0.0.2"
+mojo-extension = ">=0.0.2,<0.0.3"
+mojo-interfaces = ">=0.0.1,<0.0.2"
+mojo-xmodules = ">=1.0.0,<=1.1.0"
 
 [[package]]
 name = "mojo-networking"
@@ -608,19 +668,31 @@ requests = "<=2.29.0"
 
 [[package]]
 name = "mojo-results"
-version = "0.0.29"
+version = "0.1.0"
 description = "The Automation Mojo Results Package"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "mojo_results-0.0.29-py3-none-any.whl", hash = "sha256:7df57c13ed7c57d6654ca0554093ae2231945f5ca524b1dd3a2e6492078208c1"},
-    {file = "mojo_results-0.0.29.tar.gz", hash = "sha256:0b281e07604b7e04d48a33b8a1613c6b21c6855547c7d12fd834899ae5b0b15d"},
+    {file = "mojo_results-0.1.0-py3-none-any.whl", hash = "sha256:977ecc91b1b011c1d392828ee7e15b41aeaa2627b7a9e819b83c705be57cb0e8"},
+    {file = "mojo_results-0.1.0.tar.gz", hash = "sha256:a0531c7ccac7c2077e2b1854967eab58d4f7ab89ab2a713b2c7f8b9862da70d3"},
 ]
 
 [package.dependencies]
 mojo-errors = ">=0.0.5,<0.1.0"
-mojo-xmodules = ">=0.0.127,<0.1.0"
+mojo-xmodules = ">=1.0.0,<1.1.0"
+
+[[package]]
+name = "mojo-startup"
+version = "0.0.1"
+description = "Automation Mojo Startup Package"
+category = "main"
+optional = false
+python-versions = ">=3.8,<4.0"
+files = [
+    {file = "mojo_startup-0.0.1-py3-none-any.whl", hash = "sha256:d7d541ea91231f6f9307187adae094b70a69952350bb12e361c53b8c167dd0ba"},
+    {file = "mojo_startup-0.0.1.tar.gz", hash = "sha256:89917267877fd88d1599b43ecf188804eb0791adcb721f11ccdd274834d766a2"},
+]
 
 [[package]]
 name = "mojo-waiting"
@@ -636,22 +708,21 @@ files = [
 
 [[package]]
 name = "mojo-xmodules"
-version = "0.0.131"
+version = "1.0.0"
 description = "Automation Mojo X-Modules"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "mojo_xmodules-0.0.131-py3-none-any.whl", hash = "sha256:bde4b7ed7102c05101c2ccf183cb555fb258fa796c274f02ae779877187ec55e"},
-    {file = "mojo_xmodules-0.0.131.tar.gz", hash = "sha256:14a08e792c8fb4b71d96881c5a7c289cd61c1c062c76fa9687b33391bd955372"},
+    {file = "mojo_xmodules-1.0.0-py3-none-any.whl", hash = "sha256:9f17b95c80febdf6e9d680f45991a765c0aa778a587228eae08b9db94547aa2c"},
+    {file = "mojo_xmodules-1.0.0.tar.gz", hash = "sha256:2355932f61462587c3c26830b033c1f34d1255db704bd95849cdbee143e5262b"},
 ]
 
 [package.dependencies]
 click = ">=8.1.5,<9.0.0"
 debugpy = ">=1.6.6,<2.0.0"
 mojo-collections = ">=0.0.12,<0.1.0"
-mojo-config = ">=0.0.30,<0.1.0"
-mojo-errors = ">=0.0.3,<1.0.0"
+mojo-errors = ">=0.0.5,<1.0.0"
 mojo-waiting = ">=1.1.0,<2.0.0"
 paramiko = ">=3.1.0,<4.0.0"
 
@@ -846,14 +917,14 @@ files = [
 
 [[package]]
 name = "pygments"
-version = "2.17.1"
+version = "2.17.2"
 description = "Pygments is a syntax highlighting package written in Python."
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "pygments-2.17.1-py3-none-any.whl", hash = "sha256:1b37f1b1e1bff2af52ecaf28cc601e2ef7077000b227a0675da25aef85784bc4"},
-    {file = "pygments-2.17.1.tar.gz", hash = "sha256:e45a0e74bf9c530f564ca81b8952343be986a29f6afe7f5ad95c5f06b7bdf5e8"},
+    {file = "pygments-2.17.2-py3-none-any.whl", hash = "sha256:b27c2826c47d0f3219f29554824c30c5e8945175d888647acd804ddd04af846c"},
+    {file = "pygments-2.17.2.tar.gz", hash = "sha256:da46cec9fd2de5be3a8a784f434e4c4ab670b4ff54d605c4c2717e9d49c4c367"},
 ]
 
 [package.extras]
@@ -1022,14 +1093,14 @@ plumbum = "*"
 
 [[package]]
 name = "setuptools"
-version = "69.0.1"
+version = "69.0.2"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
 category = "dev"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "setuptools-69.0.1-py3-none-any.whl", hash = "sha256:6875bbd06382d857b1b90cd07cee6a2df701a164f241095706b5192bc56c5c62"},
-    {file = "setuptools-69.0.1.tar.gz", hash = "sha256:f25195d54deb649832182d6455bffba7ac3d8fe71d35185e738d2198a4310044"},
+    {file = "setuptools-69.0.2-py3-none-any.whl", hash = "sha256:1e8fdff6797d3865f37397be788a4e3cba233608e9b509382a2777d25ebde7f2"},
+    {file = "setuptools-69.0.2.tar.gz", hash = "sha256:735896e78a4742605974de002ac60562d286fa8051a7e2299445e8e8fbb01aa6"},
 ]
 
 [package.extras]
@@ -1263,4 +1334,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0"
-content-hash = "6d09bd9604459d57cdc51aa86c341fb0053f0fcf4d6d7eba06a0eeb4b81b197e"
+content-hash = "c2f79721102521996e9fc51376a05cc12b85f485adebfd4224ce0f6540c704ac"

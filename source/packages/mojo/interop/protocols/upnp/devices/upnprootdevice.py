@@ -43,7 +43,7 @@ from mojo.networking.exceptions import ProtocolError, HttpRequestError, NotOverl
 from mojo.errors.exceptions import  HttpRequestError, NotOverloadedError
 from mojo.xmods.extension.dynamic import generate_extension_key
 from mojo.xmods.fspath import normalize_name_for_path
-from mojo.xmods.landscaping.protocolextension import ProtocolExtension
+from mojo.landscaping.protocolextension import ProtocolExtension
 
 from mojo.interop.protocols.upnp.upnperrors import UpnpError
 from mojo.interop.protocols.upnp.aliases import StrSvcId, StrSvcType, StrSubId

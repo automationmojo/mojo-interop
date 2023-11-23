@@ -19,16 +19,16 @@ __license__ = "MIT"
 from typing import Any, Dict, List, Tuple, TYPE_CHECKING
 
 from mojo.errors.exceptions import SemanticError
-from mojo.xmods.landscaping.coupling.coordinatorcoupling import CoordinatorCoupling
-from mojo.xmods.landscaping.friendlyidentifier import FriendlyIdentifier
-from mojo.xmods.landscaping.landscape import LandscapeDevice
+from mojo.landscaping.coupling.coordinatorcoupling import CoordinatorCoupling
+from mojo.landscaping.friendlyidentifier import FriendlyIdentifier
+from mojo.landscaping.landscape import LandscapeDevice
 from mojo.interop.protocols.ssh.sshcoordinator import SshCoordinator
 
-from mojo.xmods.landscaping.constants import StartupLevel
+from mojo.landscaping.constants import StartupLevel
 
 # Types imported only for type checking purposes
 if TYPE_CHECKING:
-    from mojo.xmods.landscaping.landscape import Landscape
+    from mojo.landscaping.landscape import Landscape
 
 SUPPORTED_INTEGRATION_CLASS = "network/dlipower"
 

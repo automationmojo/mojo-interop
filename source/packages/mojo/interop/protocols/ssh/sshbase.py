@@ -40,8 +40,8 @@ from mojo.waiting.waitmodel import TimeoutContext
 from mojo.errors.exceptions import ConfigurationError, NotOverloadedError, SemanticError
 
 from mojo.xmods.aspects import ActionPattern, AspectsCmd, LoggingPattern, DEFAULT_CMD_ASPECTS
-from mojo.xmods.credentials.sshcredential import SshCredential
-from mojo.xmods.interfaces.isystemcontext import ISystemContext
+from mojo.credentials.sshcredential import SshCredential
+from mojo.interfaces.isystemcontext import ISystemContext
 from mojo.xmods.xformatting import indent_lines
 from mojo.xmods.xlogging.scopemonitoring import MonitoredScope
 

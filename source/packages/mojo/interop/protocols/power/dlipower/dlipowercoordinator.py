@@ -17,12 +17,12 @@ __license__ = "MIT"
 
 from typing import Union, TYPE_CHECKING
 
-from mojo.xmods.landscaping.coordinators.coordinatorbase import CoordinatorBase
-from mojo.xmods.landscaping.landscapeparameters import LandscapeActivationParams
-from mojo.xmods.landscaping.landscapedevice import LandscapeDevice
+from mojo.landscaping.coordinators.coordinatorbase import CoordinatorBase
+from mojo.landscaping.landscapeparameters import LandscapeActivationParams
+from mojo.landscaping.landscapedevice import LandscapeDevice
 
 if TYPE_CHECKING:
-    from mojo.xmods.landscaping.landscape import Landscape
+    from mojo.landscaping.landscape import Landscape
 
 SUPPORTED_INTEGRATION_CLASS = "network/ssh"
 

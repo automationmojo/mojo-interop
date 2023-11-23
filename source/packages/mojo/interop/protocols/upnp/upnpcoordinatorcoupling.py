@@ -17,15 +17,15 @@ __license__ = "MIT"
 
 from typing import Dict, List, Tuple, TYPE_CHECKING
 
-from mojo.xmods.xcollections.context import ContextPaths
+from mojo.collections.contextpaths import ContextPaths
 from mojo.errors.exceptions import ConfigurationError, SemanticError
-from mojo.xmods.landscaping.coupling.coordinatorcoupling import CoordinatorCoupling
+from mojo.landscaping.coupling.coordinatorcoupling import CoordinatorCoupling
 
 from mojo.interop.protocols.upnp.upnpcoordinator import UpnpCoordinator
 
 # Types imported only for type checking purposes
 if TYPE_CHECKING:
-    from mojo.xmods.landscaping.landscape import Landscape
+    from mojo.landscaping.landscape import Landscape
 
 class UpnpCoordinatorIntegration(CoordinatorCoupling):
     """

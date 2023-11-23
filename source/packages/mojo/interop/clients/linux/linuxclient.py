@@ -17,9 +17,9 @@ __license__ = "MIT"
 
 from typing import TYPE_CHECKING
 
-from mojo.xmods.interfaces.isystemcontext import ISystemContext
-from mojo.xmods.landscaping.friendlyidentifier import FriendlyIdentifier
-from mojo.xmods.landscaping.client.clientbase import ClientBase
+from mojo.interfaces.isystemcontext import ISystemContext
+from mojo.landscaping.friendlyidentifier import FriendlyIdentifier
+from mojo.landscaping.client.clientbase import ClientBase
 
 from mojo.interop.clients.linux.ext.commandsext import CommandsExt
 from mojo.interop.clients.linux.ext.configureext import ConfigureExt
@@ -28,8 +28,8 @@ from mojo.interop.protocols.ssh.sshagent import SshAgent
 
 
 if TYPE_CHECKING:
-    from mojo.xmods.landscaping.landscape import Landscape
-    from mojo.xmods.landscaping.coordinators.coordinatorbase import CoordinatorBase
+    from mojo.landscaping.landscape import Landscape
+    from mojo.landscaping.coordinators.coordinatorbase import CoordinatorBase
 
 class LinuxClient(ClientBase):
 

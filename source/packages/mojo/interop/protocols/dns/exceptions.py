@@ -16,7 +16,7 @@ __status__ = "Development" # Prototype, Development or Production
 __license__ = "MIT"
 
 
-from mojo.xmods.xexceptions import ProtocolError
+from mojo.networking.exceptions import ProtocolError
 
 class DnsProtocolError(ProtocolError):
     """

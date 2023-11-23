@@ -24,8 +24,8 @@ import paramiko
 from types import TracebackType
 
 from mojo.xmods.aspects import AspectsCmd, DEFAULT_CMD_ASPECTS
-from mojo.xmods.credentials.sshcredential import SshCredential
-from mojo.xmods.interfaces.isystemcontext import ISystemContext
+from mojo.credentials.sshcredential import SshCredential
+from mojo.interfaces.isystemcontext import ISystemContext
 
 from mojo.interop.protocols.ssh.sshconst import (
     SshJumpParams,

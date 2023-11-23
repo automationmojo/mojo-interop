@@ -10,7 +10,7 @@ import zipfile
 
 logger = logging.getLogger()
 
-from mojo.xmods.interfaces.isystemcontext import ISystemContext
+from mojo.interfaces.isystemcontext import ISystemContext
 
 from mojo.interop.protocols.ssh.sshagent import SshAgent
 

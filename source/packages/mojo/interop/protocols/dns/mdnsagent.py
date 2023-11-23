@@ -3,8 +3,8 @@
 import threading
 import time
 
-from mojo.xmods.xnetworking.multicast import create_multicast_socket
-from mojo.xmods.xnetworking.constants import MDNS_GROUP_ADDR, MDNS_GROUP_ADDR6, MDNS_PORT
+from mojo.networking.multicast import create_multicast_socket
+from mojo.networking.constants import MDNS_GROUP_ADDR, MDNS_GROUP_ADDR6, MDNS_PORT
 
 from mojo.interop.protocols.dns.dnsinboundmessage import DnsInboundMessage
 from mojo.interop.protocols.dns.dnsoutboundmessage import DnsOutboundMessage
