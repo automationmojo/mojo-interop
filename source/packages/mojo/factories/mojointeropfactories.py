@@ -5,7 +5,7 @@ from mojo.extension.extensionfactory import ExtFactory
 
 from mojo.xmods.injection.coupling.integrationcoupling import IntegrationCoupling
 
-from mojo.landscaping.extensionfactories import LandscapingExtensionFactory
+from mojo.landscaping.landscapingextensionprotocol import LandscapingExtensionProtocol
 
 from mojo.interop.clients.linux.linuxclientcoordinatorcoupling import LinuxClientCoordinatorCoupling
 from mojo.interop.clients.osx.osxclientcoordinatorcoupling import OsxClientCoordinatorCoupling
@@ -17,7 +17,7 @@ from mojo.interop.protocols.power.dlipower.dlipowercoordinatorcoupling import Po
 
 from mojo.interop.services.vmware.vsphere.vspherecoordinatorcoupling import VSphereCoordinatorCoupling
 
-class MojoInteropLandscapingExtentionFactory(ExtFactory, LandscapingExtensionFactory):
+class MojoInteropLandscapingExtentionFactory(ExtFactory, LandscapingExtensionProtocol):
 
     @classmethod
     def get_landscape_type(self) -> Type:
