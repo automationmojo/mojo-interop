@@ -8,6 +8,8 @@ from mojo.interop.protocols.tasker.tasking import Tasking
 
 class HelloWorldTasking(Tasking):
 
+    PREFIX = "helloworld"
+
     def begin(self, kwparams: dict):
 
         self._data = {

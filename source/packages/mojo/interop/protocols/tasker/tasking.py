@@ -206,6 +206,14 @@ class Tasking:
         """
         return
 
+    def create_tasking_result(self, tasking_id: str, tasking_name: str, parent_id: str, prefix: str) -> TaskingResult:
+        """
+            Called to create the 'TaskingResult' object and can be overloaded by Tasking(s) to create a custom derived
+            'TaskingResult' type.
+        """
+        tresult = TaskingResult(tasking_id, tasking_name, parent_id, prefix=prefix)
+        return tresult
+
     def execute(self, progress_queue: multiprocessing.JoinableQueue, kwparams: dict):
         """
             The `execute` method is called by the tasking service in order to trigger the execution
@@ -554,7 +562,7 @@ class Tasking:
 
         prefix = self.PREFIX
 
-        self._result = TaskingResult(self._tasking_id, self.full_name, self._parent_id, ResultType.TASK, prefix=prefix)
+        self._result = self.create_tasking_result(self._tasking_id, self.full_name, self._parent_id, prefix)
         self._running = True
 
         try:
