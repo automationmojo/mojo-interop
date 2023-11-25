@@ -213,7 +213,7 @@ class TaskerService(rpyc.Service):
                 sgate = threading.Event()
                 sgate.clear()
 
-                dargs = (sgate, tasking_manager, tasking, tasking_name, tasking_id, prefix, parent_id, kwargs, aspects)
+                dargs = (sgate, tasking_manager, tasking, tasking_name, tasking_id, prefix, parent_id, log_file, kwargs, aspects)
 
                 # We have to dispatch the task with a thread, because we need to leave a local thread running
                 # to monitor the progress of the task.
@@ -397,8 +397,8 @@ class TaskerService(rpyc.Service):
         return
     
     def dispatch_task(self, sgate: threading.Event, tasking_manager: TaskingManager, tasking: Tasking,
-                      tasking_name: str, tasking_id: str, prefix: str, parent_id: str, kwparams: dict, 
-                      aspects: TaskerAspects):
+                      tasking_name: str, tasking_id: str, prefix: str, parent_id: str, log_file,
+                      kwparams: dict, aspects: TaskerAspects):
 
         this_type = type(self)
 
@@ -450,6 +450,8 @@ class TaskerService(rpyc.Service):
             errmsg = os.linesep.join(errmsg_lines)
 
             this_type.logger.error(errmsg)
+            with open(log_file, "+a") as tlogf:
+                tlogf.write(errmsg)
             
             tresult = TaskingResult(tasking_id, tasking.full_name, parent_id, ResultCode.ERRORED, prefix=prefix)
             this_type.statuses[tasking_id] = str(ProgressCode.Errored.value)
@@ -485,7 +487,7 @@ class TaskerService(rpyc.Service):
 
         log_file = os.path.join(logging_dir, "tasker-server.log")
 
-        rotating_handler = RotatingFileHandler(log_file, maxBytes=8000, backupCount=10)
+        rotating_handler = RotatingFileHandler(log_file, maxBytes=102400, backupCount=10)
         rotating_handler.setLevel(this_type.logging_level)
 
         this_type.logger.addHandler(rotating_handler)
