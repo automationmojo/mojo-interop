@@ -54,7 +54,7 @@ from mojo.xmods.jsos import CHAR_RECORD_SEPERATOR
 from mojo.interop.protocols.tasker.taskeraspects import TaskerAspects, DEFAULT_TASKER_ASPECTS
 
 
-def instantiate_tasking(module_name: str, tasking_name: str, task_id: str, parent_id: str, logdir: str, logfile: str,
+def instantiate_tasking(module_name: str, tasking_name: str, tasking_id: str, parent_id: str, logdir: str, logfile: str,
                         log_level: int, notify_url: Optional[str], notify_headers: Optional[Dict[str, str]],
                         aspects: Optional[TaskerAspects] = DEFAULT_TASKER_ASPECTS):
 
@@ -75,7 +75,7 @@ def instantiate_tasking(module_name: str, tasking_name: str, task_id: str, paren
 
         tasking_type: Type[Tasking] = getattr(module, tasking_name)
 
-        tasking = tasking_type(task_id=task_id, parent_id=parent_id, logdir=logdir, logfile=logfile, logger=logger,
+        tasking = tasking_type(tasking_id=tasking_id, parent_id=parent_id, logdir=logdir, logfile=logfile, logger=logger,
                                notify_url=notify_url, notify_headers=notify_headers, aspects=aspects)
 
     return tasking
@@ -112,13 +112,13 @@ class Tasking:
 
     PREFIX = "tasking"
 
-    def __init__(self, task_id: str, parent_id: str, logdir: str, logfile: str, logger: logging.Logger, 
+    def __init__(self, tasking_id: str, parent_id: str, logdir: str, logfile: str, logger: logging.Logger, 
                  notify_url: Optional[str] = None, notify_headers: Optional[dict] = None,
                  aspects: Optional[TaskerAspects] = DEFAULT_TASKER_ASPECTS):
 
-        self._task_id = task_id
-        if self._task_id is None:
-            self._task_id = str(uuid4())
+        self._tasking_id = tasking_id
+        if self._tasking_id is None:
+            self._tasking_id = str(uuid4())
 
         self._parent_id = parent_id
         self._logdir = logdir
@@ -426,7 +426,7 @@ class Tasking:
             The `mark_progress_start` method that is called to generate a :class:`ProgressInfo` running.
         """
         self._task_status = ProgressCode.Running
-        self._current_progress = ProgressInfo(self._task_id, ProgressType.NumericRange, self.full_name,
+        self._current_progress = ProgressInfo(self._tasking_id, ProgressType.NumericRange, self.full_name,
                                               0, 0, 0, ProgressCode.Running, datetime.now(), {})
         return
 
@@ -554,7 +554,7 @@ class Tasking:
 
         prefix = self.PREFIX
 
-        self._result = TaskingResult(self._task_id, self.full_name, self._parent_id, ResultType.TASK, prefix=prefix)
+        self._result = TaskingResult(self._tasking_id, self.full_name, self._parent_id, ResultType.TASK, prefix=prefix)
         self._running = True
 
         try:

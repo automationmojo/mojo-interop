@@ -94,35 +94,35 @@ class TaskerNode:
         
         return exists
 
-    def get_tasking_status(self, *, task_id: str) -> str:
+    def get_tasking_status(self, *, tasking_id: str) -> str:
 
         client = self._create_connection()
 
         try:
-            tstatus = client.root.get_tasking_status(task_id=task_id)
+            tstatus = client.root.get_tasking_status(tasking_id=tasking_id)
         finally:
             client.close()
         
         return tstatus
     
-    def get_tasking_result(self, *, task_id: str) -> TaskingResult:
+    def get_tasking_result(self, *, tasking_id: str) -> TaskingResult:
 
         client = self._create_connection()
 
         try:
-            tresult_str = client.root.get_tasking_result(task_id=task_id)
+            tresult_str = client.root.get_tasking_result(tasking_id=tasking_id)
             tresult = pickle.loads(tresult_str)
         finally:
             client.close()
         
         return tresult
 
-    def has_completed_and_result_ready(self, *, task_id: str):
+    def has_completed_and_result_ready(self, *, tasking_id: str):
 
         client = self._create_connection()
 
         try:
-            complete_and_ready = client.root.has_completed_and_result_ready(task_id=task_id)
+            complete_and_ready = client.root.has_completed_and_result_ready(tasking_id=tasking_id)
         finally:
             client.close()
         
@@ -134,7 +134,7 @@ class TaskerNode:
 
         try:
             taskref_info = client.root.execute_tasking(module_name=module_name, tasking_name=tasking_name, **kwargs)
-            promise = TaskingResultPromise(taskref_info["module_name"], taskref_info["task_id"], taskref_info["task_name"],
+            promise = TaskingResultPromise(taskref_info["module_name"], taskref_info["tasking_id"], taskref_info["task_name"],
                                         taskref_info["log_dir"], self)
         finally:
             client.close()

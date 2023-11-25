@@ -39,7 +39,7 @@ if TYPE_CHECKING:
 class TaskingRef:
     
     module_name: str
-    task_id: str
+    tasking_id: str
     task_name: str
     log_dir: str
 
@@ -50,9 +50,9 @@ class TaskingRef:
 
 class TaskingResultPromise:
 
-    def __init__(self, module_name: str, task_id: str, task_name: str, log_dir: str, node: "TaskerNode"):
+    def __init__(self, module_name: str, tasking_id: str, task_name: str, log_dir: str, node: "TaskerNode"):
         self._module_name = module_name
-        self._task_id = task_id
+        self._tasking_id = tasking_id
         self._task_name = task_name
         self._log_dir = log_dir
         self._node = node
@@ -67,15 +67,15 @@ class TaskingResultPromise:
         return self._module_name
     
     @property
-    def task_id(self):
-        return self._task_id
+    def tasking_id(self):
+        return self._tasking_id
     
     @property
     def task_name(self):
         return self._task_name
 
     def get_result(self):
-        rtnval = self._node.get_tasking_result(task_id=self._task_id)
+        rtnval = self._node.get_tasking_result(tasking_id=self._tasking_id)
         return rtnval
 
     def wait(self, timeout: float=DEFAULT_WAIT_TIMEOUT, interval: float=DEFAULT_WAIT_INTERVAL):
@@ -110,7 +110,7 @@ class TaskingResultPromise:
                 diff = now - start_time
                 task_label = f"{self.module_name}.{self._task_name}"
                 errmsg_lines = [
-                    f"Timeout waiting for task={task_label} id={self._task_id} start={start_time} end={end_time} now={now} diff={diff}",
+                    f"Timeout waiting for task={task_label} id={self._tasking_id} start={start_time} end={end_time} now={now} diff={diff}",
                     f"    LOGDIR: {self._logdir}"
                 ]
                 errmsg = os.linesep.join(errmsg_lines)
@@ -123,7 +123,7 @@ class TaskingResultPromise:
     
     def _is_task_complete(self) -> bool:
 
-        rtnval = self._node.has_completed_and_result_ready(task_id=self._task_id)
+        rtnval = self._node.has_completed_and_result_ready(tasking_id=self._tasking_id)
 
         return rtnval
 

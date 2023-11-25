@@ -41,6 +41,7 @@ from mojo.errors.exceptions import SemanticError
 
 from mojo.results.model.progresscode import ProgressCode
 from mojo.results.model.progressinfo import ProgressInfo
+from mojo.results.model.resultcode import ResultCode
 from mojo.results.model.taskingresult import TaskingResult
 
 from mojo.xmods.compression import create_archive_of_folder
@@ -118,7 +119,7 @@ class TaskerService(rpyc.Service):
         return archive_full
 
 
-    def exposed_dispose_tasking(self, *, task_id):
+    def exposed_dispose_tasking(self, *, tasking_id):
 
         this_type = type(self)
 
@@ -126,10 +127,10 @@ class TaskerService(rpyc.Service):
 
         this_type.service_lock.acquire()
         try:
-            if task_id in this_type.taskings:
+            if tasking_id in this_type.taskings:
 
-                task: Tasking = this_type.taskings[task_id]
-                del this_type.taskings[task_id]
+                task: Tasking = this_type.taskings[tasking_id]
+                del this_type.taskings[tasking_id]
 
                 this_type.service_lock.release()
                 try:
@@ -164,11 +165,13 @@ class TaskerService(rpyc.Service):
 
                 tasking_type = getattr(module, tasking_name)
 
-                task_id = str(uuid4())
+                tasking_id = str(uuid4())
 
                 log_dir = None
                 log_file = None
                 log_level = this_type.taskings_log_level
+
+                prefix = "tasking"
 
                 if this_type.taskings_log_directory is not None:
 
@@ -178,14 +181,14 @@ class TaskerService(rpyc.Service):
 
                     prefix = tasking_type.PREFIX
 
-                    log_dir = os.path.join(taskings_log_directory, f"{prefix}-{task_id}")
+                    log_dir = os.path.join(taskings_log_directory, f"{prefix}-{tasking_id}")
                     if not os.path.exists(log_dir):
                         os.makedirs(log_dir)
 
-                    log_file = os.path.join(log_dir, f"tasking-{task_id}.log")
+                    log_file = os.path.join(log_dir, f"tasking-{tasking_id}.log")
 
 
-                taskref = TaskingRef(module_name, task_id, tasking_name, log_dir)
+                taskref = TaskingRef(module_name, tasking_id, tasking_name, log_dir)
 
                 # Create an instance of a TaskingManager to manage the remote process, we will manage the scope
                 # if this instance by delegating it to a thread that will execute the task and monitor its lifespan
@@ -193,20 +196,20 @@ class TaskerService(rpyc.Service):
                 tasking_manager = TaskingManager(ctx=mpctx)
                 tasking_manager.start()
 
-                tasking = tasking_manager.instantiate_tasking(module_name, tasking_name, task_id, parent_id, log_dir,
+                tasking = tasking_manager.instantiate_tasking(module_name, tasking_name, tasking_id, parent_id, log_dir,
                     log_file, log_level, this_type.notify_url, this_type.notify_headers, aspects=aspects)
 
                 this_type.service_lock.acquire()
                 try:
-                    this_type.statuses[task_id] = str(ProgressCode.NotStarted.value)
-                    this_type.taskings[task_id] = tasking
+                    this_type.statuses[tasking_id] = str(ProgressCode.NotStarted.value)
+                    this_type.taskings[tasking_id] = tasking
                 finally:
                     this_type.service_lock.release()
 
                 sgate = threading.Event()
                 sgate.clear()
 
-                dargs = (sgate, tasking_manager, tasking, task_id, kwargs, aspects)
+                dargs = (sgate, tasking_manager, tasking, tasking_name, tasking_id, prefix, parent_id, kwargs, aspects)
 
                 # We have to dispatch the task with a thread, because we need to leave a local thread running
                 # to monitor the progress of the task.
@@ -250,7 +253,7 @@ class TaskerService(rpyc.Service):
         return exists
 
 
-    def exposed_get_tasking_result(self, *, task_id) -> TaskingResult:
+    def exposed_get_tasking_result(self, *, tasking_id) -> TaskingResult:
 
         this_type = type(self)
 
@@ -260,17 +263,17 @@ class TaskerService(rpyc.Service):
 
         this_type.service_lock.acquire()
         try:
-            if task_id in this_type.results:
-                result = this_type.results[task_id]
+            if tasking_id in this_type.results:
+                result = this_type.results[tasking_id]
             else:
-                if task_id in this_type.taskings:
-                    tstatus = this_type.statuses[task_id]
+                if tasking_id in this_type.taskings:
+                    tstatus = this_type.statuses[tasking_id]
                     
                     if not (tstatus == ProgressCode.Completed or tstatus == ProgressCode.Errored or tstatus == ProgressCode.Failed):
-                        errmsg = f"The task for task_id='{task_id}' is not in a completed state. The results are not yet available."
+                        errmsg = f"The task for tasking_id='{tasking_id}' is not in a completed state. The results are not yet available."
                         raise SemanticError(errmsg)
                 else:
-                    errmsg = f"The specified tasking task_id={task_id} is not known to this TaskerService instance."
+                    errmsg = f"The specified tasking tasking_id={tasking_id} is not known to this TaskerService instance."
                     raise ValueError(errmsg)
         finally:
             this_type.service_lock.release()
@@ -279,7 +282,7 @@ class TaskerService(rpyc.Service):
 
         return result_str
     
-    def exposed_get_tasking_status(self, *, task_id):
+    def exposed_get_tasking_status(self, *, tasking_id):
 
         this_type = type(self)
 
@@ -289,14 +292,14 @@ class TaskerService(rpyc.Service):
 
         this_type.service_lock.acquire()
         try:
-            if task_id in this_type.statuses:
-                tstatus = str(this_type.statuses[task_id])
+            if tasking_id in this_type.statuses:
+                tstatus = str(this_type.statuses[tasking_id])
         finally:
             this_type.service_lock.release()
 
         return tstatus
     
-    def exposed_has_completed_and_result_ready(self, *, task_id):
+    def exposed_has_completed_and_result_ready(self, *, tasking_id):
 
         complete_and_ready = False
 
@@ -306,11 +309,11 @@ class TaskerService(rpyc.Service):
 
         this_type.service_lock.acquire()
         try:
-            if task_id in this_type.statuses:
-                tstatus = str(this_type.statuses[task_id])
+            if tasking_id in this_type.statuses:
+                tstatus = str(this_type.statuses[tasking_id])
 
                 if tstatus == ProgressCode.Completed or tstatus == ProgressCode.Errored or tstatus == ProgressCode.Failed:
-                    if task_id in this_type.results:
+                    if tasking_id in this_type.results:
                         complete_and_ready = True
 
         finally:
@@ -390,7 +393,8 @@ class TaskerService(rpyc.Service):
         return
     
     def dispatch_task(self, sgate: threading.Event, tasking_manager: TaskingManager, tasking: Tasking,
-                      task_id: str, kwparams: dict, aspects: TaskerAspects):
+                      tasking_name: str, tasking_id: str, prefix: str, parent_id: str, kwparams: dict, 
+                      aspects: TaskerAspects):
 
         this_type = type(self)
 
@@ -398,10 +402,7 @@ class TaskerService(rpyc.Service):
         sgate.set()
         del sgate
 
-        tasking_type = type(tasking)
-        tasking_name = tasking_type.__name__
-
-        this_type.logger.info(f"Dispatching task_type={tasking_name} id={task_id}")
+        this_type.logger.info(f"Dispatching task_type={tasking_name} id={tasking_id}")
 
         progress = None
 
@@ -423,22 +424,26 @@ class TaskerService(rpyc.Service):
                         result: TaskingResult = progress
 
                         if len(result.errors) > 0:
-                            this_type.statuses[task_id] = str(ProgressCode.Errored.value)
+                            this_type.statuses[tasking_id] = str(ProgressCode.Errored.value)
                         elif len(result.failures) > 0:
-                            this_type.statuses[task_id] = str(ProgressCode.Failed.value)
+                            this_type.statuses[tasking_id] = str(ProgressCode.Failed.value)
                         else:
-                            this_type.statuses[task_id] = str(ProgressCode.Completed.value)
+                            this_type.statuses[tasking_id] = str(ProgressCode.Completed.value)
 
-                        this_type.results[task_id] = result
+                        this_type.results[tasking_id] = result
                         break
 
                     prog_status = str(progress.status.value)
-                    this_type.statuses[task_id] = prog_status
+                    this_type.statuses[tasking_id] = prog_status
 
                 finally:
                     this_type.service_lock.release()
 
         except:
+            tresult = TaskingResult(tasking_id, tasking.full_name, parent_id, ResultCode.ERRORED, prefix=prefix)
+            this_type.statuses[tasking_id] = str(ProgressCode.Errored.value)
+            this_type.results[tasking_id] = tresult
+
             tb_msg = traceback.format_exc()
             this_type.logger.error(tb_msg)
             raise
