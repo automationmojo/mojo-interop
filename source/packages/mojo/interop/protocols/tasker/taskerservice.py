@@ -398,6 +398,11 @@ class TaskerService(rpyc.Service):
         sgate.set()
         del sgate
 
+        tasking_type = type(tasking)
+        tasking_name = tasking_type.__name__
+
+        this_type.logger.info(f"Dispatching task_type={tasking_name} id={task_id}")
+
         progress = None
 
         inactivity_timeout = aspects.inactivity_timeout
@@ -432,6 +437,11 @@ class TaskerService(rpyc.Service):
 
                 finally:
                     this_type.service_lock.release()
+
+        except:
+            tb_msg = traceback.format_exc()
+            this_type.logger.error(tb_msg)
+            raise
 
         finally:
             tasking_manager.shutdown()
