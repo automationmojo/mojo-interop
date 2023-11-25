@@ -38,6 +38,10 @@ import rpyc
 
 from mojo.errors.exceptions import SemanticError
 
+from mojo.errors.xtraceback import (
+    create_traceback_detail,
+    format_traceback_detail
+)
 
 from mojo.results.model.progresscode import ProgressCode
 from mojo.results.model.progressinfo import ProgressInfo
@@ -439,13 +443,19 @@ class TaskerService(rpyc.Service):
                 finally:
                     this_type.service_lock.release()
 
-        except:
+        except BaseException as err:
+            tbdetail = create_traceback_detail(err)
+
+            errmsg_lines = format_traceback_detail(tbdetail)
+            errmsg = os.linesep.join(errmsg_lines)
+
+            this_type.logger.error(errmsg)
+            
             tresult = TaskingResult(tasking_id, tasking.full_name, parent_id, ResultCode.ERRORED, prefix=prefix)
             this_type.statuses[tasking_id] = str(ProgressCode.Errored.value)
+            tresult.add_error(tbdetail)
             this_type.results[tasking_id] = tresult
 
-            tb_msg = traceback.format_exc()
-            this_type.logger.error(tb_msg)
             raise
 
         finally:
