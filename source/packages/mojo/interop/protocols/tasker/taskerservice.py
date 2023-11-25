@@ -175,21 +175,17 @@ class TaskerService(rpyc.Service):
                 log_file = None
                 log_level = this_type.taskings_log_level
 
-                prefix = "tasking"
+                taskings_log_directory = this_type.taskings_log_directory
+                if not os.path.exists(taskings_log_directory):
+                    os.makedirs(taskings_log_directory)
 
-                if this_type.taskings_log_directory is not None:
+                prefix = tasking_type.PREFIX
+                
+                log_dir = os.path.join(taskings_log_directory, f"{prefix}-{tasking_id}")
+                if not os.path.exists(log_dir):
+                    os.makedirs(log_dir)
 
-                    taskings_log_directory = this_type.taskings_log_directory
-                    if not os.path.exists(taskings_log_directory):
-                        os.makedirs(taskings_log_directory)
-
-                    prefix = tasking_type.PREFIX
-
-                    log_dir = os.path.join(taskings_log_directory, f"{prefix}-{tasking_id}")
-                    if not os.path.exists(log_dir):
-                        os.makedirs(log_dir)
-
-                    log_file = os.path.join(log_dir, f"tasking-{tasking_id}.log")
+                log_file = os.path.join(log_dir, f"tasking-{tasking_id}.log")
 
 
                 taskref = TaskingRef(module_name, tasking_id, tasking_name, log_dir)
