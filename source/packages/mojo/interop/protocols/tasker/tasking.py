@@ -55,8 +55,8 @@ from mojo.xmods.jsos import CHAR_RECORD_SEPERATOR
 from mojo.interop.protocols.tasker.taskeraspects import TaskerAspects, DEFAULT_TASKER_ASPECTS
 
 
-def instantiate_tasking(module_name: str, tasking_name: str, tasking_id: str, parent_id: str, logdir: str, logfile: str,
-                        log_level: int, notify_url: Optional[str], notify_headers: Optional[Dict[str, str]],
+def instantiate_tasking(worker: str, module_name: str, tasking_name: str, tasking_id: str, parent_id: str, logdir: str,
+                        logfile: str, log_level: int, notify_url: Optional[str], notify_headers: Optional[Dict[str, str]],
                         aspects: Optional[TaskerAspects] = DEFAULT_TASKER_ASPECTS):
 
     logger = None
@@ -76,7 +76,7 @@ def instantiate_tasking(module_name: str, tasking_name: str, tasking_id: str, pa
 
         tasking_type: Type[Tasking] = getattr(module, tasking_name)
 
-        tasking = tasking_type(tasking_id=tasking_id, parent_id=parent_id, logdir=logdir, logfile=logfile, logger=logger,
+        tasking = tasking_type(worker=worker, tasking_id=tasking_id, parent_id=parent_id, logdir=logdir, logfile=logfile, logger=logger,
                                notify_url=notify_url, notify_headers=notify_headers, aspects=aspects)
 
     return tasking
@@ -113,10 +113,11 @@ class Tasking:
 
     PREFIX = "tasking"
 
-    def __init__(self, tasking_id: str, parent_id: str, logdir: str, logfile: str, logger: logging.Logger, 
+    def __init__(self, worker: str, tasking_id: str, parent_id: str, logdir: str, logfile: str, logger: logging.Logger, 
                  notify_url: Optional[str] = None, notify_headers: Optional[dict] = None,
                  aspects: Optional[TaskerAspects] = DEFAULT_TASKER_ASPECTS):
 
+        self._worker = worker
         self._tasking_id = tasking_id
         if self._tasking_id is None:
             self._tasking_id = str(uuid4())
@@ -212,7 +213,7 @@ class Tasking:
             Called to create the 'TaskingResult' object and can be overloaded by Tasking(s) to create a custom derived
             'TaskingResult' type.
         """
-        tresult = TaskingResult(tasking_id, tasking_name, parent_id, prefix=prefix)
+        tresult = TaskingResult(tasking_id, tasking_name, parent_id, self._worker, prefix=prefix)
         return tresult
 
     def execute(self, progress_queue: multiprocessing.JoinableQueue, kwparams: dict):
