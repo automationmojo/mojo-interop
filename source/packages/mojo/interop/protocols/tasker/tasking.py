@@ -28,6 +28,7 @@ import logging
 import os
 import requests
 import threading
+import traceback
 
 from pprint import pformat
 
@@ -370,6 +371,10 @@ class Tasking:
             tasking has begun.
         """
         tbdetail = create_traceback_detail(err)
+
+        errmsg = format_traceback_detail(tbdetail)
+        self._logger.error(errmsg)
+
         self._result.add_failure(tbdetail)
     
         self.mark_progress_errored()
@@ -378,6 +383,10 @@ class Tasking:
 
     def mark_failed(self, err: BaseException):
         tbdetail = create_traceback_detail(err)
+
+        errmsg = format_traceback_detail(tbdetail)
+        self._logger.error(errmsg)
+
         self._result.add_failure(tbdetail)
 
         self.mark_progress_failed()
@@ -562,6 +571,8 @@ class Tasking:
 
         prefix = self.PREFIX
 
+        self._logger.info(f"Starting thread for tasking name={self.full_name} tasking_id={self._tasking_id}")
+
         self._result = self.create_tasking_result(self._tasking_id, self.full_name, self._parent_id, prefix)
         self._running = True
 
@@ -606,6 +617,8 @@ class Tasking:
                     else:
                         self.mark_progress_complete()
 
+                    # Evaluate results should raise an AssertionError if the tasking failed
+                    # to successfully complete its tasking.
                     self.evaluate_results()
 
                     self.submit_progress()
