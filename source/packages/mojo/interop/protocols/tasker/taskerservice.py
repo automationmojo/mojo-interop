@@ -148,7 +148,7 @@ class TaskerService(rpyc.Service):
         return
     
 
-    def exposed_execute_tasking(self, *, module_name: str, tasking_name: str, parent_id: Optional[str] = None,
+    def exposed_execute_tasking(self, *, worker: str, module_name: str, tasking_name: str, parent_id: Optional[str] = None,
                                 aspects: Optional[TaskerAspects]=None, **kwargs) -> dict:
 
         this_type = type(self)
@@ -196,7 +196,7 @@ class TaskerService(rpyc.Service):
                 tasking_manager = TaskingManager(ctx=mpctx)
                 tasking_manager.start()
 
-                tasking = tasking_manager.instantiate_tasking(module_name, tasking_name, tasking_id, parent_id, log_dir,
+                tasking = tasking_manager.instantiate_tasking(worker, module_name, tasking_name, tasking_id, parent_id, log_dir,
                     log_file, log_level, this_type.notify_url, this_type.notify_headers, aspects=aspects)
 
                 this_type.service_lock.acquire()
