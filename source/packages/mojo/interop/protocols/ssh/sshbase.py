@@ -29,12 +29,6 @@ from datetime import datetime, timedelta
 
 import paramiko
 
-from paramiko.ssh_exception import (
-    AuthenticationException,
-    NoValidConnectionsError,
-    BadAuthenticationType
-)
-
 from mojo.waiting.waitmodel import TimeoutContext
 
 from mojo.errors.exceptions import ConfigurationError, NotOverloadedError, SemanticError
@@ -282,6 +276,7 @@ class SshBase(ISystemContext):
         end_time = begin_time + timedelta(seconds=self._aspects.connection_timeout)
 
         connection_interval = self._aspects.connection_interval
+        allowed_connection_exceptions = self._aspects.allowed_connection_exceptions
 
         while now_time < end_time:
 
@@ -321,15 +316,20 @@ class SshBase(ISystemContext):
                 
                 break
 
-            except (NoValidConnectionsError, BadAuthenticationType, AuthenticationException) as cerr:
-                errmsg = f"SSH connection attempt failed for host={self._ipaddr} begin={begin_time} end={now_time} now={now_time}."
-                logger.error(errmsg)
+            except BaseException as cerr:
+                extype = type(cerr)
 
-                now_time = datetime.now()
-                if now_time > end_time:
-                    raise ConnectionError(errmsg) from cerr
+                if len(allowed_connection_exceptions) > 0 and extype in allowed_connection_exceptions:
+                    errmsg = f"SSH connection attempt failed for host={self._ipaddr} begin={begin_time} end={now_time} now={now_time}."
+                    logger.error(errmsg)
+
+                    now_time = datetime.now()
+                    if now_time > end_time:
+                        raise ConnectionError(errmsg) from cerr
+                    else:
+                        time.sleep(connection_interval)
                 else:
-                    time.sleep(connection_interval)
+                    raise # If the exception we got is not an allowed type, re-raise it
 
 
         return ssh_client
