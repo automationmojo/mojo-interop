@@ -146,12 +146,12 @@ class TaskerNode:
 
         return promise
 
-    def session_close(self, *, session_id: str):
+    def session_close(self):
 
         client = self._create_connection()
 
         try:
-            client.root.session_close(session_id=session_id)
+            client.root.session_close(session_id=self._session_id)
             self._session_id = None
         finally:
             client.close()
@@ -160,7 +160,7 @@ class TaskerNode:
 
     def session_open(self, *, worker_name: str, output_directory: Optional[str] = None, log_level: Optional[int] = logging.DEBUG,
                      notify_url: Optional[str] = None, notify_headers: Optional[Dict[str, str]] = None,
-                     aspects: Optional[TaskerAspects] = None) -> str:
+                     aspects: Optional[TaskerAspects] = DEFAULT_TASKER_ASPECTS) -> str:
         
         client = self._create_connection()
 

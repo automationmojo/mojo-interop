@@ -51,7 +51,7 @@ class PrintTasking(Tasking):
         return
 
     def mark_progress_start(self):
-        self._current_progress = ProgressInfo(self._task_id, ProgressType.NumericRange, self.full_name, ProgressType.NumericRange,
+        self._current_progress = ProgressInfo(self._tasking_id, ProgressType.NumericRange, self.full_name, ProgressType.NumericRange,
                                               0, 5, 0, ProgressCode.Running, self._data)
         return
 
@@ -97,24 +97,27 @@ def tasking_server_example_main():
     controller = ProcessTaskerController(logging_directory=logging_directory)
     controller.start_tasker_network(notify_url=f'http://localhost:{notify_port}/')
 
-    print("=============== Tasker Nodes ===============")
-    for node in controller.tasker_nodes:
-        print(f"    ipaddr={node.ipaddr} port={node.port} ...")
+    try:
+        print("=============== Tasker Nodes ===============")
+        for node in controller.tasker_nodes:
+            print(f"    ipaddr={node.ipaddr} port={node.port} ...")
 
-    promise_list = controller.execute_tasking_on_all_nodes(tasking=PrintTasking, message="Hello World")
+        promise_list = controller.execute_tasking_on_all_nodes(tasking=PrintTasking, message="Hello World")
 
-    for promise in promise_list:
-        promise.wait()
+        for promise in promise_list:
+            promise.wait()
 
-    for promise in promise_list:
-        result: TaskingResult = promise.get_result()
-        print(f"RESULT - {promise.task_name}")
-        print(f"    id: {promise.task_id}")
-        print(f"    parent: {result.parent_inst}")
-        print(f"    start: {result.start}")
-        print(f"    stop: {result.stop}")
-        print(f"    result_code: {result.result_code}")
-        print("")
+        for promise in promise_list:
+            result: TaskingResult = promise.get_result()
+            print(f"RESULT - {promise.task_name}")
+            print(f"    id: {promise.tasking_id}")
+            print(f"    parent: {result.parent_inst}")
+            print(f"    start: {result.start}")
+            print(f"    stop: {result.stop}")
+            print(f"    result_code: {result.result_code}")
+            print("")
+    finally:
+        controller.stop_tasker_network()
 
 
     return

@@ -308,17 +308,17 @@ class TaskerSession:
                         result: TaskingResult = progress
 
                         if len(result.errors) > 0:
-                            this_type.statuses[tasking_id] = str(ProgressCode.Errored.value)
+                            self._statuses[tasking_id] = str(ProgressCode.Errored.value)
                         elif len(result.failures) > 0:
-                            this_type.statuses[tasking_id] = str(ProgressCode.Failed.value)
+                            self._statuses[tasking_id] = str(ProgressCode.Failed.value)
                         else:
-                            this_type.statuses[tasking_id] = str(ProgressCode.Completed.value)
+                            self._statuses[tasking_id] = str(ProgressCode.Completed.value)
 
-                        this_type.results[tasking_id] = result
+                        self._results[tasking_id] = result
                         break
 
                     prog_status = str(progress.status.value)
-                    this_type.statuses[tasking_id] = prog_status
+                    self._statuses[tasking_id] = prog_status
 
                 finally:
                     self._session_lock.release()
@@ -329,14 +329,14 @@ class TaskerSession:
             errmsg_lines = format_traceback_detail(tbdetail)
             errmsg = os.linesep.join(errmsg_lines)
 
-            this_type.logger.error(errmsg)
+            self._service_class.log_error(errmsg)
             with open(log_file, "+a") as tlogf:
                 tlogf.write(errmsg)
             
             tresult = TaskingResult(tasking_id, tasking.full_name, parent_id, ResultCode.ERRORED, prefix=prefix)
-            this_type.statuses[tasking_id] = str(ProgressCode.Errored.value)
+            self._statuses[tasking_id] = str(ProgressCode.Errored.value)
             tresult.add_error(tbdetail)
-            this_type.results[tasking_id] = tresult
+            self._results[tasking_id] = tresult
 
             raise
 

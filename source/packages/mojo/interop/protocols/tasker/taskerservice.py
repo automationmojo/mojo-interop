@@ -38,7 +38,7 @@ from mojo.results.model.taskingresult import TaskingResult
 from mojo.xmods.compression import create_archive_of_folder
 from mojo.xmods.fspath import expand_path
 
-from mojo.interop.protocols.tasker.taskeraspects import TaskerAspects
+from mojo.interop.protocols.tasker.taskeraspects import TaskerAspects, DEFAULT_TASKER_ASPECTS
 from mojo.interop.protocols.tasker.taskersession import TaskerSession
 
 class TaskerService(rpyc.Service):
@@ -312,16 +312,13 @@ class TaskerService(rpyc.Service):
 
         this_type = type(self)
 
-        session = None
-        session_id = None
-
         this_type.service_lock.acquire()
         try:
             
             this_type.logger.info("Method 'exposed_close_session' was called.")
 
             if session_id not in this_type.active_sessions:
-                errmsg = "The specified session '{}' is not an active session."
+                errmsg = f"The specified session '{session_id}' is not an active session."
                 raise RuntimeError(errmsg)
 
             session = this_type.active_sessions[session_id]
@@ -338,9 +335,6 @@ class TaskerService(rpyc.Service):
     def exposed_session_close_all(self) -> str:
 
         this_type = type(self)
-
-        session = None
-        session_id = None
 
         this_type.service_lock.acquire()
         try:
@@ -363,7 +357,8 @@ class TaskerService(rpyc.Service):
 
     def exposed_session_open(self, *, worker_name: str, output_directory: Optional[str] = None,
                              log_level: Optional[int] = logging.DEBUG, notify_url: Optional[str] = None,
-                             notify_headers: Optional[Dict[str, str]] = None, aspects: Optional[TaskerAspects] = None) -> str:
+                             notify_headers: Optional[Dict[str, str]] = None,
+                             aspects: Optional[TaskerAspects] = DEFAULT_TASKER_ASPECTS) -> str:
 
         this_type = type(self)
 
@@ -382,7 +377,7 @@ class TaskerService(rpyc.Service):
                 errmsg = "Cannot open session. The maximum number of sessions has been reached."
                 raise RuntimeError(errmsg)
 
-            session = TaskerSession(this_type.logger, worker_name, output_directory=output_directory, log_level=log_level,
+            session = TaskerSession(this_type, worker_name, output_directory=output_directory, log_level=log_level,
                                 notify_url=notify_url, notify_headers=notify_headers, aspects=aspects)
             session_id = session.session_id
 
@@ -439,47 +434,49 @@ class TaskerService(rpyc.Service):
 
         return path
 
-    def log_debug(self, message: str):
+    @classmethod
+    def log_debug(cls, message: str):
 
-        this_type = type(self)
         try:
-            this_type.logger.debug(message)
+            cls.logger.debug(message)
         except:
             pass
 
         return
 
-    def log_error(self, message: str):
+    @classmethod
+    def log_error(cls, message: str):
 
-        this_type = type(self)
         try:
-            this_type.logger.error(message)
-        except:
-            pass
-
-        return
-    
-    def log_info(self, message: str):
-
-        this_type = type(self)
-        try:
-            this_type.logger.info(message)
+            cls.logger.error(message)
         except:
             pass
 
         return
     
-    def log_warn(self, message: str):
+    @classmethod
+    def log_info(cls, message: str):
 
-        this_type = type(self)
         try:
-            this_type.logger.warn(message)
+            cls.logger.info(message)
+        except:
+            pass
+
+        return
+    
+    @classmethod
+    def log_warn(cls, message: str):
+
+        try:
+            cls.logger.warn(message)
         except:
             pass
 
         return
 
     def _locked_get_session(self, session_id: str) -> TaskerSession:
+
+        this_type = type(self)
 
         if session_id is None:
             raise ValueError(f"The session_id='{session_id}' provided was None.")
@@ -491,6 +488,8 @@ class TaskerService(rpyc.Service):
             raise SemanticError(f"The session_id={session_id} provided was not valid")
 
         rtnval = self.active_sessions[session_id]
+
+        this_type.logger.info(f"Session found for session_id={session_id}")
 
         return rtnval
 
