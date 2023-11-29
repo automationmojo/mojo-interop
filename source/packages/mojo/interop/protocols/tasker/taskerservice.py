@@ -348,6 +348,9 @@ class TaskerService(rpyc.Service):
         this_type.service_lock.acquire()
         try:
             
+            if output_directory is None:
+                output_directory = this_type.logging_directory
+
             this_type.logger.info("Method 'exposed_open_session' was called.")
 
             if len(this_type.active_sessions) >= this_type.max_sessions:
