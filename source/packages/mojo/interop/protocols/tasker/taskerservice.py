@@ -335,7 +335,7 @@ class TaskerService(rpyc.Service):
 
         return session_id
 
-    def exposed_session_close_all(self, *) -> str:
+    def exposed_session_close_all(self) -> str:
 
         this_type = type(self)
 
