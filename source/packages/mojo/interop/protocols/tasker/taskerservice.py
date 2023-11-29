@@ -335,6 +335,31 @@ class TaskerService(rpyc.Service):
 
         return session_id
 
+    def exposed_session_close_all(self, *) -> str:
+
+        this_type = type(self)
+
+        session = None
+        session_id = None
+
+        this_type.service_lock.acquire()
+        try:
+            
+            this_type.logger.info("Method 'exposed_close_session_all' was called.")
+
+            closed_sessions = []
+            for session_id, session in session in this_type.active_sessions.items():
+                session.shutdown()
+                closed_sessions.append(session_id)
+
+            for session_id in closed_sessions:
+                del this_type.active_sessions[session_id]
+
+        finally:
+            this_type.service_lock.release()
+
+        return session_id
+
 
     def exposed_session_open(self, *, worker_name: str, output_directory: Optional[str] = None,
                              log_level: Optional[int] = logging.DEBUG, notify_url: Optional[str] = None,
