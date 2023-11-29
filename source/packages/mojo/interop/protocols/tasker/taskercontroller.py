@@ -19,6 +19,8 @@ __license__ = "MIT"
 
 from typing import List, Optional, Type, Union
 
+import logging
+
 from mojo.errors.exceptions import NotOverloadedError, SemanticError
 
 from mojo.results.model.taskingresult import TaskingResult
@@ -124,18 +126,14 @@ class TaskerController:
 
         return
 
-    def set_notify_parameters_on_nodes(self, *, notify_url: str, notify_headers: dict):
-
-        for node in self._tasker_nodes:
-            node.set_notify_parameters(notify_url=notify_url, notify_headers=notify_headers)
-
-        return
-
     def start_tasker_network(self):
         """
         """
         raise NotOverloadedError("The 'start_task_network' method must be overloaded.")
 
+    def stop_tasker_network(self):
+
+        raise NotOverloadedError("The 'stop_tasker_network' method must be overloaded.")
 
     def wait_for_tasking_results(self, promises: List[TaskingResultPromise],  aspects: Optional[TaskerAspects] = None) -> List[TaskingResult]:
         
@@ -171,7 +169,8 @@ class ProcessTaskerController(TaskerController):
         self._svr_proxies: List[TaskerService] = []
         return
 
-    def start_tasker_network(self, node_count=5, notify_url: Optional[str] = None, notify_headers: Optional[dict] = None):
+    def start_tasker_network(self, node_count=5, output_directory: Optional[str] = None, log_level: Optional[int] = logging.DEBUG,
+                             notify_url: Optional[str] = None, notify_headers: Optional[dict] = None):
         """
         """
 
@@ -190,13 +189,21 @@ class ProcessTaskerController(TaskerController):
             self._svr_proxies.append(tasking_svr_proxy)
 
             ipaddr, port = tasking_svr_proxy.get_service_endpoint()
+            worker_name = f"{ipaddr}: {port}"
 
             node = TaskerNode(ipaddr=ipaddr, port=port)
             
-            if notify_url is not None:
-                node.set_notify_parameters(notify_url=notify_url, notify_headers=notify_headers)
+            node.session_open(worker_name=worker_name, output_directory=output_directory, log_level=log_level, notify_url=notify_url,
+                              notify_headers=notify_headers, aspects=self._aspects)
 
             self._tasker_nodes.append(node)
+
+        return
+    
+    def stop_tasker_network(self):
+
+        for node in self._tasker_nodes:
+            node.session_close()
 
         return
 
@@ -207,7 +214,9 @@ class ClientTaskerController(TaskerController):
         super().__init__(logging_directory=logging_directory, aspects=aspects)
         return
 
-    def start_tasker_network(self, clients: List[ClientBase], notify_url: Optional[str] = None, notify_headers: Optional[dict] = None):
+    def start_tasker_network(self, clients: List[ClientBase], output_directory: Optional[str] = None,
+                             log_level: Optional[int] = logging.DEBUG, notify_url: Optional[str] = None,
+                             notify_headers: Optional[dict] = None):
         """
         """
 
@@ -221,10 +230,19 @@ class ClientTaskerController(TaskerController):
 
             node = TaskerClientNode(client=cl, ipaddr=cl.ipaddr, port=TASKER_PORT)
             
-            if notify_url is not None:
-                node.set_notify_parameters(notify_url=notify_url, notify_headers=notify_headers)
+            worker_name = cl.ipaddr
 
+            node.session_open(worker_name=worker_name, output_directory=output_directory, log_level=log_level, notify_url=notify_url,
+                              notify_headers=notify_headers, aspects=self._aspects)
+            
             self._tasker_nodes.append(node)
+
+        return
+    
+    def stop_tasker_network(self):
+
+        for node in self._tasker_nodes:
+            node.session_close()
 
         return
 

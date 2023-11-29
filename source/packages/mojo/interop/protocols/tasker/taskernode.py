@@ -17,9 +17,9 @@ __status__ = "Development" # Prototype, Development or Production
 __license__ = "MIT"
 
 
-from typing import Optional, TYPE_CHECKING
+from typing import Dict, Optional, TYPE_CHECKING
 
-
+import logging
 import rpyc
 import pickle
 import weakref
@@ -50,6 +50,7 @@ class TaskerNode:
         self._ipaddr = ipaddr
         self._port = port
         self._aspects = aspect
+        self._session_id = None
         return
 
     @property
@@ -59,6 +60,10 @@ class TaskerNode:
     @property
     def port(self):
         return self._port
+
+    @property
+    def session_id(self):
+        return self._session_id
 
     def archive_folder(self, *, folder_to_archive: str, dest_folder: str, archive_name: str, compression_level: int = 7) -> str:
         
@@ -99,7 +104,7 @@ class TaskerNode:
         client = self._create_connection()
 
         try:
-            tstatus = client.root.get_tasking_status(tasking_id=tasking_id)
+            tstatus = client.root.get_tasking_status(session_id=self._session_id, tasking_id=tasking_id)
         finally:
             client.close()
         
@@ -110,7 +115,7 @@ class TaskerNode:
         client = self._create_connection()
 
         try:
-            tresult_str = client.root.get_tasking_result(tasking_id=tasking_id)
+            tresult_str = client.root.get_tasking_result(session_id=self._session_id, tasking_id=tasking_id)
             tresult = pickle.loads(tresult_str)
         finally:
             client.close()
@@ -122,7 +127,7 @@ class TaskerNode:
         client = self._create_connection()
 
         try:
-            complete_and_ready = client.root.has_completed_and_result_ready(tasking_id=tasking_id)
+            complete_and_ready = client.root.has_completed_and_result_ready(session_id=self._session_id, tasking_id=tasking_id)
         finally:
             client.close()
         
@@ -133,7 +138,7 @@ class TaskerNode:
         client = self._create_connection()
 
         try:
-            taskref_info = client.root.execute_tasking(worker=self._ipaddr, module_name=module_name, tasking_name=tasking_name, **kwargs)
+            taskref_info = client.root.execute_tasking(session_id=self._session_id, worker=self._ipaddr, module_name=module_name, tasking_name=tasking_name, **kwargs)
             promise = TaskingResultPromise(taskref_info["module_name"], taskref_info["tasking_id"], taskref_info["task_name"],
                                         taskref_info["log_dir"], self)
         finally:
@@ -141,16 +146,40 @@ class TaskerNode:
 
         return promise
 
+    def session_close(self, *, session_id: str):
+
+        client = self._create_connection()
+
+        try:
+            client.root.session_close(session_id=session_id)
+            self._session_id = None
+        finally:
+            client.close()
+
+        return
+
+    def session_open(self, *, worker_name: str, output_directory: Optional[str] = None, log_level: Optional[int] = logging.DEBUG,
+                     notify_url: Optional[str] = None, notify_headers: Optional[Dict[str, str]] = None,
+                     aspects: Optional[TaskerAspects] = None) -> str:
+        
+        client = self._create_connection()
+
+        try:
+            session_id = client.root.session_open(worker_name=worker_name, output_directory=output_directory, log_level=log_level,
+                                                  notify_url=notify_url, notify_headers=notify_headers, aspects=aspects)
+            self._session_id = session_id
+        finally:
+            client.close()
+
+        return session_id
+
     def reinitialize_logging(self, *, logging_directory: Optional[str] = None,
-                                      logging_level: Optional[int] = None,
-                                      taskings_log_directory: Optional[str] = None,
-                                      taskings_log_level: Optional[int] = None):
+                                      logging_level: Optional[int] = None):
         
         client = self._create_connection()
         
         try:
-            client.root.reinitialize_logging(logging_directory=logging_directory, logging_level=logging_level,
-                    taskings_log_directory=taskings_log_directory, taskings_log_level=taskings_log_level)
+            client.root.reinitialize_logging(logging_directory=logging_directory, logging_level=logging_level)
         finally:
             client.close()
 
@@ -166,17 +195,6 @@ class TaskerNode:
             client.close()
         
         return full_path
-
-    def set_notify_parameters(self, *, notify_url: str, notify_headers: dict):
-        
-        client = self._create_connection()
-        
-        try:
-            client.root.set_notify_parameters(notify_url=notify_url, notify_headers=notify_headers)
-        finally:
-            client.close()
-
-        return
 
     def _create_connection(self):
         client = rpyc.connect(self._ipaddr, self._port, keepalive=True, config=TASKER_PROTOCOL_CONFIG)

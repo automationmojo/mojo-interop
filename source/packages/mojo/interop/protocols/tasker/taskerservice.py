@@ -18,44 +18,28 @@ __status__ = "Development" # Prototype, Development or Production
 __license__ = "MIT"
 
 
-from typing import Any, Optional, Type, Union
+from typing import Dict, Optional
 
 import logging
-import multiprocessing
-import multiprocessing.context
 import os
-import pickle
 import tempfile
 import threading
 import traceback
 
-
 from collections import OrderedDict
 from logging.handlers import RotatingFileHandler
-from uuid import uuid4
 
 import rpyc
 
 from mojo.errors.exceptions import SemanticError
 
-from mojo.errors.xtraceback import (
-    create_traceback_detail,
-    format_traceback_detail
-)
-
-from mojo.results.model.progresscode import ProgressCode
-from mojo.results.model.progressinfo import ProgressInfo
-from mojo.results.model.resultcode import ResultCode
 from mojo.results.model.taskingresult import TaskingResult
 
 from mojo.xmods.compression import create_archive_of_folder
 from mojo.xmods.fspath import expand_path
-from mojo.xmods.ximport import import_by_name
 
-from mojo.interop.protocols.tasker.taskingresultpromise import TaskingRef
-from mojo.interop.protocols.tasker.taskeraspects import TaskerAspects, DEFAULT_TASKER_ASPECTS
-from mojo.interop.protocols.tasker.tasking import Tasking, TaskingManager
-
+from mojo.interop.protocols.tasker.taskeraspects import TaskerAspects
+from mojo.interop.protocols.tasker.taskersession import TaskerSession
 
 class TaskerService(rpyc.Service):
     """
@@ -67,21 +51,13 @@ class TaskerService(rpyc.Service):
 
     initialized = False
 
-    taskings = OrderedDict()
-    results = OrderedDict()
-    statuses = OrderedDict()
-
-    aspects = DEFAULT_TASKER_ASPECTS
-    
-    logger = None
+    logger: logging.Logger = None
     logging_directory = "/opt/tasker/logs"
     logging_level = logging.DEBUG
 
-    taskings_log_directory = "/opt/tasker/logs/taskings"
-    taskings_log_level = logging.DEBUG
+    active_sessions = OrderedDict()
+    max_sessions = 1
 
-    notify_url = None
-    notify_headers = None
 
     def __init__(self) -> None:
         super().__init__()
@@ -102,45 +78,49 @@ class TaskerService(rpyc.Service):
 
         this_type = type(self)
 
-        this_type.logger.info("Method 'exposed_archive_folder' was called.")
+        this_type.service_lock.acquire()
+        try:
 
-        if not archive_name.endswith(".zip"):
-            archive_name = f"{archive_name}.zip"
+            this_type.logger.info("Method 'exposed_archive_folder' was called.")
 
-        folder_to_archive = expand_path(folder_to_archive)
+            if not archive_name.endswith(".zip"):
+                archive_name = f"{archive_name}.zip"
 
-        if not os.path.exists(folder_to_archive):
-            raise FileNotFoundError(f"The folder to archive folder={folder_to_archive} does not exist")
+            folder_to_archive = expand_path(folder_to_archive)
 
-        dest_folder = expand_path(dest_folder)
-        if not os.path.exists(dest_folder):
-            os.makedirs(dest_folder)
+            if not os.path.exists(folder_to_archive):
+                raise FileNotFoundError(f"The folder to archive folder={folder_to_archive} does not exist")
 
-        archive_full = os.path.join(dest_folder, archive_name)
+            dest_folder = expand_path(dest_folder)
+            if not os.path.exists(dest_folder):
+                os.makedirs(dest_folder)
 
-        create_archive_of_folder(folder_to_archive, archive_full, compression_level=compression_level)
+            archive_full = os.path.join(dest_folder, archive_name)
+
+            create_archive_of_folder(folder_to_archive, archive_full, compression_level=compression_level)
+
+        finally:
+            this_type.service_lock.release()
 
         return archive_full
 
 
-    def exposed_dispose_tasking(self, *, tasking_id):
+    def exposed_dispose_tasking(self, *, session_id: str, tasking_id: str):
 
         this_type = type(self)
 
-        this_type.logger.info("Method 'exposed_dispose_tasking' was called.")
-
         this_type.service_lock.acquire()
         try:
-            if tasking_id in this_type.taskings:
 
-                task: Tasking = this_type.taskings[tasking_id]
-                del this_type.taskings[tasking_id]
+            this_type.logger.info("Method 'exposed_dispose_tasking' was called.")
 
-                this_type.service_lock.release()
-                try:
-                    task.shutdown()
-                finally:
-                    this_type.service_lock.acquire()
+            session = self._locked_get_session(session_id)
+            
+            this_type.service_lock.release()
+            try:
+                session.dispose_tasking(tasking_id)
+            finally:
+                this_type.service_lock.acquire()
 
         finally:
             this_type.service_lock.release()
@@ -148,173 +128,160 @@ class TaskerService(rpyc.Service):
         return
     
 
-    def exposed_execute_tasking(self, *, worker: str, module_name: str, tasking_name: str, parent_id: Optional[str] = None,
+    def exposed_execute_tasking(self, *, session_id: str, worker: str, module_name: str, tasking_name: str, parent_id: Optional[str] = None,
                                 aspects: Optional[TaskerAspects]=None, **kwargs) -> dict:
 
         this_type = type(self)
 
-        this_type.logger.info("Method 'exposed_execute_tasking' was called.")
-
+        this_type.service_lock.acquire()
         try:
-            taskref = None
 
-            if aspects is None:
-                aspects = this_type.aspects
+            this_type.logger.info("Method 'exposed_execute_tasking' was called.")
 
-            # Make sure the requested "Tasking" actually exists before we attempt to instantiate one in a remote
-            # process.
-            module = import_by_name(module_name)
-
-            if hasattr(module, tasking_name):
-
-                tasking_type = getattr(module, tasking_name)
-
-                tasking_id = str(uuid4())
-
-                log_dir = None
-                log_file = None
-                log_level = this_type.taskings_log_level
-
-                taskings_log_directory = this_type.taskings_log_directory
-                if not os.path.exists(taskings_log_directory):
-                    os.makedirs(taskings_log_directory)
-
-                prefix = tasking_type.PREFIX
-                
-                log_dir = os.path.join(taskings_log_directory, f"{prefix}-{tasking_id}")
-                if not os.path.exists(log_dir):
-                    os.makedirs(log_dir)
-
-                log_file = os.path.join(log_dir, f"tasking-{tasking_id}.log")
-
-
-                taskref = TaskingRef(module_name, tasking_id, tasking_name, log_dir)
-
-                # Create an instance of a TaskingManager to manage the remote process, we will manage the scope
-                # if this instance by delegating it to a thread that will execute the task and monitor its lifespan
-                mpctx = multiprocessing.get_context("spawn")
-                tasking_manager = TaskingManager(ctx=mpctx)
-                tasking_manager.start()
-
-                tasking = tasking_manager.instantiate_tasking(worker, module_name, tasking_name, tasking_id, parent_id, log_dir,
-                    log_file, log_level, this_type.notify_url, this_type.notify_headers, aspects=aspects)
-
+            session = self._locked_get_session(session_id)
+            
+            this_type.service_lock.release()
+            try:
+                taskref = session.execute_tasking(worker=worker, module_name=module_name, tasking_name=tasking_name, parent_id=parent_id,
+                                        aspects=aspects, **kwargs)
+            finally:
                 this_type.service_lock.acquire()
-                try:
-                    this_type.statuses[tasking_id] = str(ProgressCode.NotStarted.value)
-                    this_type.taskings[tasking_id] = tasking
-                finally:
-                    this_type.service_lock.release()
 
-                sgate = threading.Event()
-                sgate.clear()
-
-                dargs = (sgate, tasking_manager, tasking, tasking_name, tasking_id, prefix, parent_id, log_file, kwargs, aspects)
-
-                # We have to dispatch the task with a thread, because we need to leave a local thread running
-                # to monitor the progress of the task.
-                taskthread = threading.Thread(target=self.dispatch_task, args=dargs, daemon=True)
-                taskthread.start()
-        
-                sgate.wait()
-
-            else:
-                errmsg = f"The specified tasking 'module' was not found. module={module_name} tasking={tasking_name}"
-                raise ValueError(errmsg)
         except:
             errmsg = traceback.format_exc()
             this_type.logger.error(errmsg)
             raise
 
+        finally:
+            this_type.service_lock.release()
+
         return taskref.as_dict()
 
 
-    def exposed_file_exists(self, *, filename) -> str:
+    def exposed_file_exists(self, *, filename) -> bool:
 
-        filename = expand_path(filename)
+        this_type = type(self)
 
         exists = False
 
-        if os.path.exists(filename) and os.path.isfile(filename):
-            exists = True
+        this_type.service_lock.acquire()
+        try:
+
+            this_type.logger.info("Method 'exposed_file_exists' was called.")
+
+            filename = expand_path(filename)
+
+            if os.path.exists(filename) and os.path.isfile(filename):
+                exists = True
+
+        finally:
+            this_type.service_lock.release()
 
         return exists
     
 
-    def exposed_file_exists(self, *, folder) -> str:
+    def exposed_folder_exists(self, *, folder) -> bool:
 
-        folder = expand_path(folder)
+        this_type = type(self)
 
         exists = False
 
-        if os.path.exists(folder) and os.path.isdir(folder):
-            exists = True
+        this_type.service_lock.acquire()
+        try:
+
+            this_type.logger.info("Method 'exposed_folder_exists' was called.")
+
+            folder = expand_path(folder)
+
+            if os.path.exists(folder) and os.path.isdir(folder):
+                exists = True
+        finally:
+            this_type.service_lock.release()
 
         return exists
 
 
-    def exposed_get_tasking_result(self, *, tasking_id) -> TaskingResult:
+    def exposed_get_tasking_result(self, *, session_id: str, tasking_id: str) -> TaskingResult:
 
         this_type = type(self)
-
-        this_type.logger.info("Method 'exposed_get_tasking_result' was called.")
 
         result = None
 
         this_type.service_lock.acquire()
         try:
-            if tasking_id in this_type.results:
-                result = this_type.results[tasking_id]
-            else:
-                if tasking_id in this_type.taskings:
-                    tstatus = this_type.statuses[tasking_id]
-                    
-                    if not (tstatus == ProgressCode.Completed or tstatus == ProgressCode.Errored or tstatus == ProgressCode.Failed):
-                        errmsg = f"The task for tasking_id='{tasking_id}' is not in a completed state. The results are not yet available."
-                        raise SemanticError(errmsg)
-                else:
-                    errmsg = f"The specified tasking tasking_id={tasking_id} is not known to this TaskerService instance."
-                    raise ValueError(errmsg)
+
+            this_type.logger.info("Method 'exposed_get_tasking_result' was called.")
+
+            session = self._locked_get_session(session_id)
+            
+            this_type.service_lock.release()
+            try:
+                result_str = session.get_tasking_result(tasking_id)
+            finally:
+                this_type.service_lock.acquire()
+
+        except:
+            errmsg = traceback.format_exc()
+            this_type.logger.error(errmsg)
+            raise
+
         finally:
             this_type.service_lock.release()
 
-        result_str = pickle.dumps(result)
-
         return result_str
     
-    def exposed_get_tasking_status(self, *, tasking_id):
+    def exposed_get_tasking_status(self, *, session_id: str, tasking_id: str) -> str:
 
         this_type = type(self)
-
-        this_type.logger.info("Method 'exposed_get_tasking_status' was called.")
 
         tstatus = None
 
         this_type.service_lock.acquire()
         try:
-            if tasking_id in this_type.statuses:
-                tstatus = str(this_type.statuses[tasking_id])
+
+            this_type.logger.info("Method 'exposed_get_tasking_status' was called.")
+
+            session = self._locked_get_session(session_id)
+            
+            this_type.service_lock.release()
+            try:
+                result_str = session.get_tasking_status(tasking_id)
+            finally:
+                this_type.service_lock.acquire()
+
+        except:
+            errmsg = traceback.format_exc()
+            this_type.logger.error(errmsg)
+            raise
+
         finally:
             this_type.service_lock.release()
 
         return tstatus
     
-    def exposed_has_completed_and_result_ready(self, *, tasking_id):
+    def exposed_has_completed_and_result_ready(self, *, session_id: str, tasking_id: str) -> bool:
 
         complete_and_ready = False
 
         this_type = type(self)
 
-        this_type.logger.info("Method 'exposed_has_completed_and_result_ready' was called.")
-
         this_type.service_lock.acquire()
         try:
-            if tasking_id in this_type.statuses:
-                tstatus = str(this_type.statuses[tasking_id])
 
-                if tstatus == ProgressCode.Completed or tstatus == ProgressCode.Errored or tstatus == ProgressCode.Failed:
-                    if tasking_id in this_type.results:
-                        complete_and_ready = True
+            this_type.logger.info("Method 'exposed_has_completed_and_result_ready' was called.")
+
+            session = self._locked_get_session(session_id)
+            
+            this_type.service_lock.release()
+            try:
+                complete_and_ready = session.has_completed_and_result_ready(tasking_id)
+            finally:
+                this_type.service_lock.acquire()
+
+        except:
+            errmsg = traceback.format_exc()
+            this_type.logger.error(errmsg)
+            raise
 
         finally:
             this_type.service_lock.release()
@@ -324,29 +291,93 @@ class TaskerService(rpyc.Service):
 
     def exposed_make_folder(self, *, folder: str):
 
-        folder = expand_path(folder)
+        this_type = type(self)
 
-        os.makedirs(folder)
+        this_type.service_lock.acquire()
+        try:
+
+            this_type.logger.info("Method 'exposed_make_folder' was called.")
+
+            folder = expand_path(folder)
+
+            os.makedirs(folder)
+
+        finally:
+            this_type.service_lock.release()
 
         return
 
 
-    def exposed_reinitialize_logging(self, *, logging_directory: Optional[str] = None,
-                                     logging_level: Optional[int] = None,
-                                     taskings_log_directory: Optional[str] = None,
-                                     taskings_log_level: Optional[int] = logging.DEBUG):
-
-        if taskings_log_directory is None:
-            taskings_log_directory = logging_directory
-        if taskings_log_level is None:
-            taskings_log_level = logging_level
+    def exposed_session_close(self, *, session_id: str) -> str:
 
         this_type = type(self)
 
-        this_type.logger.info("Method 'exposed_reinitialize_logging' was called.")
+        session = None
+        session_id = None
 
         this_type.service_lock.acquire()
         try:
+            
+            this_type.logger.info("Method 'exposed_close_session' was called.")
+
+            if session_id not in this_type.active_sessions:
+                errmsg = "The specified session '{}' is not an active session."
+                raise RuntimeError(errmsg)
+
+            session = this_type.active_sessions[session_id]
+
+            del this_type.active_sessions[session_id]
+
+            session.shutdown()
+
+        finally:
+            this_type.service_lock.release()
+
+        return session_id
+
+
+    def exposed_session_open(self, *, worker_name: str, output_directory: Optional[str] = None,
+                             log_level: Optional[int] = logging.DEBUG, notify_url: Optional[str] = None,
+                             notify_headers: Optional[Dict[str, str]] = None, aspects: Optional[TaskerAspects] = None) -> str:
+
+        this_type = type(self)
+
+        session = None
+        session_id = None
+
+        this_type.service_lock.acquire()
+        try:
+            
+            this_type.logger.info("Method 'exposed_open_session' was called.")
+
+            if len(this_type.active_sessions) >= this_type.max_sessions:
+                errmsg = "Cannot open session. The maximum number of sessions has been reached."
+                raise RuntimeError(errmsg)
+
+            session = TaskerSession(this_type.logger, worker_name, output_directory=output_directory, log_level=log_level,
+                                notify_url=notify_url, notify_headers=notify_headers, aspects=aspects)
+            session_id = session.session_id
+
+            this_type.active_sessions[session_id] = session
+
+        finally:
+            this_type.service_lock.release()
+
+        return session_id
+
+    def exposed_reinitialize_logging(self, *, logging_directory: Optional[str] = None, logging_level: Optional[int] = None):
+        """
+            Called in order to change the location of the service logging.  This is typically not warranted as individual taskings
+            derive logging inputs from an established TaskerSession.
+        """
+        
+        this_type = type(self)
+
+        this_type.service_lock.acquire()
+        try:
+
+            this_type.logger.info("Method 'exposed_reinitialize_logging' was called.")
+
             reinitialize_service_logging = False
 
             if logging_directory is not None:
@@ -360,10 +391,6 @@ class TaskerService(rpyc.Service):
             if reinitialize_service_logging:
                 self._reinitialize_service_logging()
 
-            if taskings_log_directory is not None:
-                this_type.taskings_log_directory = expand_path(taskings_log_directory)
-            if taskings_log_level is not None:
-                this_type.taskings_log_level = expand_path(taskings_log_level)
         finally:
             this_type.service_lock.release()
         
@@ -372,94 +399,73 @@ class TaskerService(rpyc.Service):
 
     def exposed_resolve_path(self, *, path) -> str:
 
-        path = expand_path(path)
-
-        return path
-
-
-    def exposed_set_notify_parameters(self, *, notify_url: str, notify_headers: dict):
-
         this_type = type(self)
-
-        this_type.logger.info("Method 'exposed_set_notify_parameters' was called.")
 
         this_type.service_lock.acquire()
         try:
-            this_type.notify_url = notify_url
-            this_type.notify_headers = notify_headers
+            this_type.logger.info("Method 'exposed_resolve_path' was called.")
+
+            path = expand_path(path)
         finally:
             this_type.service_lock.release()
-        
-        return
-    
-    def dispatch_task(self, sgate: threading.Event, tasking_manager: TaskingManager, tasking: Tasking,
-                      tasking_name: str, tasking_id: str, prefix: str, parent_id: str, log_file,
-                      kwparams: dict, aspects: TaskerAspects):
+
+        return path
+
+    def log_debug(self, message: str):
 
         this_type = type(self)
-
-        # Notify the thread starting us that we have started.
-        sgate.set()
-        del sgate
-
-        this_type.logger.info(f"Dispatching task_type={tasking_name} id={tasking_id}")
-
-        progress = None
-
-        inactivity_timeout = aspects.inactivity_timeout
-
         try:
-            progress_queue = tasking_manager.Queue()
-
-            tasking.execute(progress_queue, kwparams)
-
-            while(True):
-
-                progress: ProgressInfo = progress_queue.get(block=True, timeout=inactivity_timeout)
-
-                this_type.service_lock.acquire()
-                try:
-
-                    if isinstance(progress, TaskingResult):
-                        result: TaskingResult = progress
-
-                        if len(result.errors) > 0:
-                            this_type.statuses[tasking_id] = str(ProgressCode.Errored.value)
-                        elif len(result.failures) > 0:
-                            this_type.statuses[tasking_id] = str(ProgressCode.Failed.value)
-                        else:
-                            this_type.statuses[tasking_id] = str(ProgressCode.Completed.value)
-
-                        this_type.results[tasking_id] = result
-                        break
-
-                    prog_status = str(progress.status.value)
-                    this_type.statuses[tasking_id] = prog_status
-
-                finally:
-                    this_type.service_lock.release()
-
-        except BaseException as err:
-            tbdetail = create_traceback_detail(err)
-
-            errmsg_lines = format_traceback_detail(tbdetail)
-            errmsg = os.linesep.join(errmsg_lines)
-
-            this_type.logger.error(errmsg)
-            with open(log_file, "+a") as tlogf:
-                tlogf.write(errmsg)
-            
-            tresult = TaskingResult(tasking_id, tasking.full_name, parent_id, ResultCode.ERRORED, prefix=prefix)
-            this_type.statuses[tasking_id] = str(ProgressCode.Errored.value)
-            tresult.add_error(tbdetail)
-            this_type.results[tasking_id] = tresult
-
-            raise
-
-        finally:
-            tasking_manager.shutdown()
+            this_type.logger.debug(message)
+        except:
+            pass
 
         return
+
+    def log_error(self, message: str):
+
+        this_type = type(self)
+        try:
+            this_type.logger.error(message)
+        except:
+            pass
+
+        return
+    
+    def log_info(self, message: str):
+
+        this_type = type(self)
+        try:
+            this_type.logger.info(message)
+        except:
+            pass
+
+        return
+    
+    def log_warn(self, message: str):
+
+        this_type = type(self)
+        try:
+            this_type.logger.warn(message)
+        except:
+            pass
+
+        return
+
+    def _locked_get_session(self, session_id: str) -> TaskerSession:
+
+        if session_id is None:
+            raise ValueError(f"The session_id='{session_id}' provided was None.")
+    
+        if len(self.active_sessions) == 0:
+            raise SemanticError("You must first open a tasking session before calling APIs that work with taskings.")
+
+        if session_id not in self.active_sessions:
+            raise SemanticError(f"The session_id={session_id} provided was not valid")
+
+        rtnval = self.active_sessions[session_id]
+
+        return rtnval
+
 
     def _reinitialize_service_logging(self):
 

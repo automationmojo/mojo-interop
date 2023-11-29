@@ -55,8 +55,8 @@ from mojo.xmods.jsos import CHAR_RECORD_SEPERATOR
 from mojo.interop.protocols.tasker.taskeraspects import TaskerAspects, DEFAULT_TASKER_ASPECTS
 
 
-def instantiate_tasking(worker: str, module_name: str, tasking_name: str, tasking_id: str, parent_id: str, logdir: str,
-                        logfile: str, log_level: int, notify_url: Optional[str], notify_headers: Optional[Dict[str, str]],
+def instantiate_tasking(worker: str, module_name: str, tasking_name: str, tasking_id: str, parent_id: str, output_dir: str,
+                        logdir: str, logfile: str, log_level: int, notify_url: Optional[str], notify_headers: Optional[Dict[str, str]],
                         aspects: Optional[TaskerAspects] = DEFAULT_TASKER_ASPECTS):
 
     logger = None
@@ -76,8 +76,9 @@ def instantiate_tasking(worker: str, module_name: str, tasking_name: str, taskin
 
         tasking_type: Type[Tasking] = getattr(module, tasking_name)
 
-        tasking = tasking_type(worker=worker, tasking_id=tasking_id, parent_id=parent_id, logdir=logdir, logfile=logfile, logger=logger,
-                               notify_url=notify_url, notify_headers=notify_headers, aspects=aspects)
+        tasking = tasking_type(worker=worker, tasking_id=tasking_id, parent_id=parent_id, output_dir=output_dir, 
+                               logdir=logdir, logfile=logfile, logger=logger, notify_url=notify_url,
+                               notify_headers=notify_headers, aspects=aspects)
 
     return tasking
 
@@ -113,8 +114,9 @@ class Tasking:
 
     PREFIX = "tasking"
 
-    def __init__(self, worker: str, tasking_id: str, parent_id: str, logdir: str, logfile: str, logger: logging.Logger, 
-                 notify_url: Optional[str] = None, notify_headers: Optional[dict] = None,
+    def __init__(self, worker: str, tasking_id: str, parent_id: str, output_dir: str, logdir: str,
+                 logfile: str, logger: logging.Logger, notify_url: Optional[str] = None,
+                 notify_headers: Optional[dict] = None,
                  aspects: Optional[TaskerAspects] = DEFAULT_TASKER_ASPECTS):
 
         self._worker = worker
@@ -123,6 +125,7 @@ class Tasking:
             self._tasking_id = str(uuid4())
 
         self._parent_id = parent_id
+        self._output_dir = output_dir
         self._logdir = logdir
         self._logfile = logfile
         self._logger = logger
