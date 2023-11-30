@@ -187,7 +187,7 @@ class TaskerSession:
                 f"tasking_name: {tasking_name}",
                 f"tasking_id: {tasking_id}",
                 f"parent_id: {parent_id}",
-                f"self._output_directory: {self._output_directory}",
+                f"output_directory: {self._output_directory}",
                 f"log_dir: {log_dir}",
                 f"log_file: {log_file}",
                 f"log_level: {self._log_level}",
@@ -300,8 +300,6 @@ class TaskerSession:
                       tasking_name: str, tasking_id: str, prefix: str, parent_id: str,
                       log_file: str, kwparams: dict, aspects: TaskerAspects):
 
-        this_type = type(self)
-
         # Notify the thread starting us that we have started.
         sgate.set()
         del sgate
@@ -310,9 +308,11 @@ class TaskerSession:
 
         progress = None
 
-        inactivity_timeout = aspects.inactivity_timeout
-
         try:
+            inactivity_timeout = None
+            if aspects is not None:
+                inactivity_timeout = aspects.inactivity_timeout
+
             progress_queue = tasking_manager.Queue()
 
             tasking.execute(progress_queue, kwparams)

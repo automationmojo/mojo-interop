@@ -76,6 +76,8 @@ def instantiate_tasking(worker: str, module_name: str, tasking_name: str, taskin
 
         tasking_type: Type[Tasking] = getattr(module, tasking_name)
 
+        logger.info(f"Creating tasking module_name={module_name} tasking_name={tasking_name}")
+
         tasking = tasking_type(worker=worker, tasking_id=tasking_id, parent_id=parent_id, output_dir=output_dir, 
                                logdir=logdir, logfile=logfile, logger=logger, notify_url=notify_url,
                                notify_headers=notify_headers, aspects=aspects)

@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "mojo-interop"
 description = "Automation Mojo Interop Extensions"
-version = "0.1.19"
+version = "0.1.20"
 authors = [
     "Myron Walker <myron.walker@gmail.com>"
 ]
