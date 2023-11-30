@@ -170,7 +170,7 @@ class TaskerSession:
             if not os.path.exists(log_dir):
                 os.makedirs(log_dir)
 
-            log_file: str = os.path.join(log_dir, f"tasking-{tasking_id}")
+            log_file: str = os.path.join(log_dir, f"tasking-{tasking_id}.log")
 
             taskref = TaskingRef(module_name, tasking_id, tasking_name, log_dir)
 
@@ -179,6 +179,26 @@ class TaskerSession:
             mpctx = multiprocessing.get_context("spawn")
             tasking_manager = TaskingManager(ctx=mpctx)
             tasking_manager.start()
+
+            start_msg_lines = [
+                "=============================== Instantiating Task ===============================",
+                f"worker: {worker}",
+                f"module_name: {module_name}",
+                f"tasking_name: {tasking_name}",
+                f"tasking_id: {tasking_id}",
+                f"parent_id: {parent_id}",
+                f"self._output_directory: {self._output_directory}",
+                f"log_dir: {log_dir}",
+                f"log_file: {log_file}",
+                f"log_level: {self._log_level}",
+                f"notify_url: {self._notify_url}",
+                f"notify_headers: {repr(self._notify_headers)}",
+                "==================================================================================",
+            ]
+            start_msg = os.linesep.join(start_msg_lines)
+
+            with open(log_file, "+a") as tlogf:
+                tlogf.write(start_msg)
 
             tasking = tasking_manager.instantiate_tasking(worker, module_name, tasking_name, tasking_id, parent_id, self._output_directory,
                 log_dir, log_file, self._log_level, self._notify_url, self._notify_headers, aspects=aspects)
