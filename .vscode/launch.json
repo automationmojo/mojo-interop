@@ -32,6 +32,41 @@
             "justMyCode": false
         },
         {
+            "name": "Python: Internal Tests - SSH on Casey",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/.venv/bin/testplus",
+            "envFile": "${workspaceFolder}/.env",
+            "args": [
+                "testing",
+                "run",
+                "--root=${workspaceFolder}/source/testroots/mojo",
+                "--default-configs=credentials",
+                "--default-configs=landscape",
+                "--includes=mojo.tests.interop.casey.protocols.ssh",
+                "--breakpoint=testrun-start"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "Python: Internal Tests - Tasker on Casey",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/.venv/bin/testplus",
+            "envFile": "${workspaceFolder}/.env",
+            "args": [
+                "testing",
+                "run",
+                "--root=${workspaceFolder}/source/testroots/mojo",
+                "--default-configs=credentials",
+                "--default-configs=landscape",
+                "--includes=mojo.tests.interop.casey.protocols.tasker"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
             "name": "Python: Tasker Daemon",
             "type": "python",
             "request": "launch",

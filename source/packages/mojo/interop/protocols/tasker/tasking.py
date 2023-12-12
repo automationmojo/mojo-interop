@@ -361,6 +361,7 @@ class Tasking:
             "module": this_type.__module__,
             "id": self._result.inst_id,
             "parent": self._result.parent_inst,
+            "worker": self._worker,
             "start": self._result.start,
             "stop": None,
             "status": str(ProgressCode.Running.value),
