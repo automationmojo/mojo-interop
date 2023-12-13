@@ -374,6 +374,8 @@ class SshBase(ISystemContext):
                 fsresult = sftp.stat(remotedir)
                 if fsresult.st_mode | stat.S_IFDIR:
                     exists = True
+            except IOError:
+                exists = False
             finally:
                 sftp.close()
 

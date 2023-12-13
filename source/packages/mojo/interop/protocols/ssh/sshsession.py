@@ -176,7 +176,7 @@ class SshSession(SshBase):
 
             :returns: A boolean value indicating if the remote file exists.
         """
-        exists = self._file_pull(self._ssh_client, remotedir)
+        exists = self._directory_exists(self._ssh_client, remotedir)
 
         return exists
 
@@ -227,8 +227,8 @@ class SshSession(SshBase):
 
         return
 
-    def open_session(self, primitive: bool = False, pty_params: Optional[dict] = None, interactive=False, sys_context: Optional[ISystemContext] = None,
-                     aspects: Optional[AspectsCmd] = None, **kwargs) -> ISystemContext:
+    def open_session(self, primitive: bool = False, pty_params: Optional[dict] = None, interactive=False, basis_session: Optional["SshSession"] = None,
+                     aspects: Optional[AspectsCmd] = None, **kwargs) -> "SshSession":
         """
             Provies a mechanism to create a :class:`SshSession` object with derived settings.  This method allows various parameters for the session
             to be overridden.  This allows for the performing of a series of SSH operations under a particular set of shared settings and or credentials.
@@ -244,15 +244,14 @@ class SshSession(SshBase):
             aspects = self._aspects
 
         session = None
-        if sys_context is not None:
-            bs: SshBase = sys_context
+        if basis_session is not None:
+            bs: SshSession = basis_session
             session = SshSession(bs._host, bs._primary_credential, users=bs._users, port=bs._port,
                                  jump=bs._jump, pty_params=pty_params, interactive=interactive,
-                                 sys_context=sys_context, aspects=aspects)
+                                 basis_session=bs, aspects=aspects)
         else:
             session = SshSession(self._host, self._primary_credential, users=self._users, port=self._port,
-                                 jump=self._jump, pty_params=pty_params, interactive=interactive,
-                                 sys_context=sys_context, aspects=aspects)
+                                 jump=self._jump, pty_params=pty_params, interactive=interactive, aspects=aspects)
         return session
 
     def _create_client(self, session_user: Optional[str] = None) -> paramiko.SSHClient:
