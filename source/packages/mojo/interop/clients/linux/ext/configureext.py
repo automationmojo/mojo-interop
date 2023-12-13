@@ -131,7 +131,7 @@ class ConfigureExt:
 
 
                 self.install_systemd_service("tasker", sudo_username, tasker_server_cfg_local, pidfolder=f"/var/run/tasker",
-                                             optfolder="/opt/tasker", runtime_config_file=runtime_config_file, sys_context=session)
+                                             optfolder="/opt/tasker", runtime_config_file=runtime_config_file, basis_session=session)
             finally:
                 os.remove(tasker_server_cfg_local)
 
@@ -159,7 +159,7 @@ class ConfigureExt:
 
         with client.ssh.open_session(basis_session=basis_session) as session:
 
-            python_version = self.get_python_version(sys_context=session)
+            python_version = self.get_python_version(basis_session=session)
             python_path_list = [
                 f"{remote_source_root}/source/packages",
                 f"{remote_source_root}/source/testroots/testplus",
@@ -334,7 +334,7 @@ class ConfigureExt:
                                             start_svc_cmd, status, stdout, stderr, exp_status=[0], target=client.ipaddr)
                 raise CommandError(errmsg, status, stdout, stderr)
 
-            if not self.is_service_running(svcname, sys_context=session):
+            if not self.is_service_running(svcname, basis_session=session):
 
                 start_svc_cmd = f"sudo systemctl start {svcname}"
                 status, stdout, stderr = session.run_cmd(start_svc_cmd)

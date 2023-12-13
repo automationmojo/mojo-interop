@@ -382,7 +382,7 @@ class Tasking:
         errmsg = format_traceback_detail(tbdetail)
         self._logger.error(errmsg)
 
-        self._result.add_failure(tbdetail)
+        self._result.add_error(tbdetail)
     
         self.mark_progress_errored()
         self._progress_queue.put_nowait(self._current_progress)
