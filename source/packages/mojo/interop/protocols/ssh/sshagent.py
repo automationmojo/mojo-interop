@@ -66,8 +66,8 @@ class SshAgent(SshBase, ProtocolExtension):
         ProtocolExtension.initialize(self, coord_ref, basedevice_ref, extid, location, configinfo)
         return
 
-    def open_session(self, primitive: bool = False, pty_params: Optional[dict] = None, interactive=False, sys_context: Optional[ISystemContext] = None,
-                     aspects: Optional[AspectsCmd] = None) -> ISystemContext:
+    def open_session(self, primitive: bool = False, pty_params: Optional[dict] = None, interactive=False, basis_session: Optional[SshSession] = None,
+                     aspects: Optional[AspectsCmd] = None) -> SshSession:
         """
             Provies a mechanism to create a :class:`SshSession` object with derived settings.  This method allows various parameters for the session
             to be overridden.  This allows for the performing of a series of SSH operations under a particular set of shared settings and or credentials.
@@ -75,7 +75,7 @@ class SshAgent(SshBase, ProtocolExtension):
             :param primitive: Use primitive mode for FTP operations for the session.
             :param pty_params: The default pty parameters to use to request a PTY when running commands through the session.
             :param interactive: Creates an interactive session which holds open an interactive shell so commands can interact in the shell.
-            :param sys_context: An optional ISystemContext instance to use as a session basis.  This allows re-use of sessions.
+            :param basis_session: An optional SshSession instance to use as a session basis.  This allows re-use of sessions.
             :param aspects: The default run aspects to use for the operations performed by the session.
         """
 
@@ -83,15 +83,14 @@ class SshAgent(SshBase, ProtocolExtension):
             aspects = self._aspects
 
         session = None
-        if sys_context is not None:
-            bs: SshBase = sys_context
+        if basis_session is not None:
+            bs: SshBase = basis_session
             session = SshSession(bs._host, bs._primary_credential, users=bs._users, port=bs._port,
                                  jump=bs._jump, pty_params=pty_params, interactive=interactive,
-                                 basis_session=sys_context, aspects=aspects)
+                                 basis_session=basis_session, aspects=aspects)
         else:
             session = SshSession(self._host, self._primary_credential, users=self._users, port=self._port,
-                                 jump=self._jump, pty_params=pty_params, interactive=interactive,
-                                 basis_session=sys_context, aspects=aspects)
+                                 jump=self._jump, pty_params=pty_params, interactive=interactive, aspects=aspects)
         return session
 
     def reboot(self, aspects: Optional[AspectsCmd] = None):

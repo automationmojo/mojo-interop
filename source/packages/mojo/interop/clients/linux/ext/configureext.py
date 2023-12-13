@@ -13,6 +13,8 @@ from mojo.interfaces.isystemcontext import ISystemContext
 from mojo.xmods.xformatting import format_command_result
 
 from mojo.interop.clients.clientsourcepackager import ClientSourcePackager
+from mojo.interop.protocols.ssh.sshsession import SshSession
+
 import mojo.interop.protocols.tasker.taskerservice as tasker_service
 
 if TYPE_CHECKING:
@@ -46,7 +48,7 @@ class ConfigureExt:
 
 
     def configure_tasker_service(self, remote_source_root: str, sudo_username: Optional[str] = None, sudo_password: Optional[str] = None,
-                                 config: Optional[Dict[str, Dict[str, str]]] = None, sys_context: Optional[ISystemContext] = None):
+                                 config: Optional[Dict[str, Dict[str, str]]] = None, basis_session: Optional[SshSession] = None):
 
         client = self.client
 
@@ -55,7 +57,7 @@ class ConfigureExt:
 
             sudo_username = sshcred.username
         
-        with client.ssh.open_session(sys_context=sys_context) as session:
+        with client.ssh.open_session(basis_session=basis_session) as session:
 
             status, stdout, stderr = session.run_cmd('echo "$HOME"')
             if status != 0:
@@ -140,7 +142,7 @@ class ConfigureExt:
 
 
     def deploy_source_package(self, source_root: str, package_name: str, remote_source_root: str, cache_dir: Optional[str] = None,
-                              force_repackage: Optional[bool]=False, force_deploy: Optional[bool]=False, sys_context: Optional[ISystemContext] = None):
+                              force_repackage: Optional[bool]=False, force_deploy: Optional[bool]=False, basis_session: Optional[SshSession] = None):
 
         client = self.client
 
@@ -155,7 +157,7 @@ class ConfigureExt:
 
         source_env = packager.get_environment()
 
-        with client.ssh.open_session(sys_context=sys_context) as session:
+        with client.ssh.open_session(basis_session=basis_session) as session:
 
             python_version = self.get_python_version(sys_context=session)
             python_path_list = [
@@ -175,7 +177,7 @@ class ConfigureExt:
 
 
     def enabled_no_password_sudo(self, sudo_username: Optional[str] = None, sudo_password: Optional[str] = None,
-                                 sys_context: Optional[ISystemContext] = None):
+                                 basis_session: Optional[SshSession] = None):
         
         client = self.client
 
@@ -188,7 +190,7 @@ class ConfigureExt:
         fill_dict = {"username": sudo_username}
         user_cfg_file = TEMPLATE_FILE_SUDO_CONFIG.format(**fill_dict)
 
-        with client.ssh.open_session(sys_context=sys_context) as session:
+        with client.ssh.open_session(basis_session=basis_session) as session:
 
             sudo_file_exists_cmd = f"sudo bash -c \"[[ -f {user_cfg_file} ]] && echo 0 || echo 1\""
             status, stdout, stderr = session.run_cmd(sudo_file_exists_cmd)
@@ -211,13 +213,13 @@ class ConfigureExt:
         return
     
 
-    def get_python_version(self, sys_context: Optional[ISystemContext] = None):
+    def get_python_version(self, basis_session: Optional[SshSession] = None):
 
         client = self.client
 
         python_version = None
 
-        with client.ssh.open_session(sys_context=sys_context) as session:
+        with client.ssh.open_session(basis_session=basis_session) as session:
 
             getpyver_cmd = "python3 -c \"import platform; print('python{}.{}'.format(*platform.python_version_tuple()[:2]))\""
             status, stdout, stderr = session.run_cmd(getpyver_cmd)
@@ -231,22 +233,22 @@ class ConfigureExt:
         return python_version
 
 
-    def install_required_system_packages(self, sys_context: Optional[ISystemContext] = None):
+    def install_required_system_packages(self, basis_session: Optional[SshSession] = None):
 
-        self.system_packages_install(self.REQUIRED_SYSTEM_PACKAGES, sys_context=sys_context)
+        self.system_packages_install(self.REQUIRED_SYSTEM_PACKAGES, basis_session=basis_session)
 
         return
 
 
     def install_systemd_service(self, svcname: str, svcuser: str, source_svc_config_file: str, pidfolder: Optional[str] =  None,
-                                optfolder: Optional[str] =  None, runtime_config_file: Optional[str] = None, sys_context: Optional[ISystemContext] = None):
+                                optfolder: Optional[str] =  None, runtime_config_file: Optional[str] = None, basis_session: Optional[SshSession] = None):
 
         client = self.client
 
         final_dest_svc_config_file = f"/etc/systemd/system/{svcname}.service"
         tmp_dest_svc_config_file = f"/tmp/{svcname}.service"
 
-        with client.ssh.open_session(sys_context=sys_context) as session:
+        with client.ssh.open_session(basis_session=basis_session) as session:
 
             if optfolder is not None:
                 mkdir_cmd = f"sudo mkdir -p {optfolder}"
@@ -344,13 +346,13 @@ class ConfigureExt:
         return
     
 
-    def is_service_running(self, svcname: str, sys_context: Optional[ISystemContext] = None):
+    def is_service_running(self, svcname: str, basis_session: Optional[SshSession] = None):
 
         client = self.client
 
         svc_running = False
 
-        with client.ssh.open_session(sys_context=sys_context) as session:
+        with client.ssh.open_session(basis_session=basis_session) as session:
             chk_svc_running_cmd = "systemctl is-active --quiet tasker && echo $?"
             status, stdout, stderr = session.run_cmd(chk_svc_running_cmd)
             if status != 0:
@@ -366,11 +368,11 @@ class ConfigureExt:
         return svc_running
     
 
-    def system_packages_install(self, packages_to_install: List[str], sys_context: Optional[ISystemContext] = None):
+    def system_packages_install(self, packages_to_install: List[str], basis_session: Optional[SshSession] = None):
 
         client = self.client
 
-        with client.ssh.open_session(sys_context=sys_context) as session:
+        with client.ssh.open_session(basis_session=basis_session) as session:
 
             for package in packages_to_install:
                 ensure_cmd = f"apt list --installed | grep -E '^[{package[0]}]{package[1:]}/[a-z]+'"
@@ -387,11 +389,11 @@ class ConfigureExt:
         return
 
 
-    def system_packages_update(self, sys_context: Optional[ISystemContext] = None):
+    def system_packages_update(self, basis_session: Optional[SshSession] = None):
         
         client = self.client
 
-        with client.ssh.open_session(sys_context=sys_context) as session:
+        with client.ssh.open_session(basis_session=basis_session) as session:
 
             apt_update_cmd = f"sudo apt update"
             status, stdout, stderr = session.run_cmd(apt_update_cmd)
