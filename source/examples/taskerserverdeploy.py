@@ -57,15 +57,15 @@ def tasker_server_deploy():
             print(f"Starting configuration for device ({dev.ipaddr})")
 
             print(f"Configuring sudo priviledges for device ({dev.ipaddr})")
-            dev.configure.enabled_no_password_sudo(sys_context=session)
+            dev.configure.enabled_no_password_sudo(basis_session=session)
 
             print(f"Deploying source package to device ({dev.ipaddr})")
-            dev.configure.deploy_source_package(source_root, package_name, deploy_to, sys_context=session,
+            dev.configure.deploy_source_package(source_root, package_name, deploy_to, basis_session=session,
                                                 force_repackage=force_repackage, force_deploy=True)
             force_repackage = False
 
             print(f"Configuring tasker service on device ({dev.ipaddr})")
-            dev.configure.configure_tasker_service(deploy_to, sys_context=session, config=config)
+            dev.configure.configure_tasker_service(deploy_to, basis_session=session, config=config)
 
             print(f"Finishing configuration for device ({dev.ipaddr})")
 

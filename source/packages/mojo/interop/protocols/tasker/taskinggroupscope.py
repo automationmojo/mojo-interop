@@ -140,6 +140,7 @@ class TaskingGroupScope:
     def _update_group(self):
 
         if not self._results_written:
+            self._results_written = True
             for res in self._results:
                 self._recorder.record(res)
 
