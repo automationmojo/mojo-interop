@@ -27,9 +27,6 @@ class PiNodeCoordinatorCoupling(NodeCoordinatorCouplingBase):
         The LinuxClientCoordinatorCoupling handle the requirement registration for the Linux coordinator.
     """
 
-    integration_root: str = "apod"
-    integration_section: str = "nodes"
-    integration_leaf: str = "deviceType"
     integration_class: str = INTEGRATION_CLASS_FOR_RASPBERRYPI_NODE
 
     def __init__(self, *args, **kwargs):

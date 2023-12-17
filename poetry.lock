@@ -705,14 +705,14 @@ files = [
 
 [[package]]
 name = "mojo-landscaping"
-version = "0.0.12"
+version = "0.0.13"
 description = "Automation Mojo Landscaping Package"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "mojo_landscaping-0.0.12-py3-none-any.whl", hash = "sha256:1ee90437764dca88f516ce8878a4495351cd48fda6d13f34df0566c3ea966a3a"},
-    {file = "mojo_landscaping-0.0.12.tar.gz", hash = "sha256:ff5c54b531666803cd0e7a80e3072520d5fb557762681d2f759d9d0c3c5b83a0"},
+    {file = "mojo_landscaping-0.0.13-py3-none-any.whl", hash = "sha256:521b21849d5b3bcc5e33689a398d4fcf3037001e10d963a479906b09570219a6"},
+    {file = "mojo_landscaping-0.0.13.tar.gz", hash = "sha256:06cc3e9ed406e868e6731f2d843965f446e17f852a36735509c46d188f325c7e"},
 ]
 
 [package.dependencies]
