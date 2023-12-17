@@ -28,7 +28,7 @@ class PiNodeCoordinatorCoupling(NodeCoordinatorCouplingBase):
     """
 
     integration_root: str = "apod"
-    integration_section: str = "devices"
+    integration_section: str = "nodes"
     integration_leaf: str = "deviceType"
     integration_class: str = INTEGRATION_CLASS_FOR_RASPBERRYPI_NODE
 

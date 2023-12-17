@@ -31,7 +31,7 @@ class OsxClientCoordinatorCoupling(ClientCoordinatorCouplingBase):
     COORDINATOR_TYPE = OsxClientCoordinator
 
     integration_root: str = "apod"
-    integration_section: str = "devices"
+    integration_section: str = "clients"
     integration_leaf: str = "deviceType"
     integration_class: str = INTEGRATION_CLASS_FOR_OSX_CLIENT
 
