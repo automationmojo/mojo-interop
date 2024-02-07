@@ -251,7 +251,8 @@ class SshSession(SshBase):
                                  basis_session=bs, aspects=aspects)
         else:
             session = SshSession(self._host, self._primary_credential, users=self._users, port=self._port,
-                                 jump=self._jump, pty_params=pty_params, interactive=interactive, aspects=aspects)
+                                 jump=self._jump, pty_params=pty_params, interactive=interactive, aspects=aspects,
+)
         return session
 
     def _create_client(self, session_user: Optional[str] = None) -> paramiko.SSHClient:

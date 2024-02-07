@@ -26,17 +26,14 @@ class CommandsExt:
 
     def cifs_mount(self, share: str, mpoint: str, username: Optional[str]=None,
                    password: Optional[str]=None, domain: Optional[str]=None,
-                   sysctx: Optional[ISystemContext]=None, extype: Type[Exception]=AssertionError):
+                   basis_session: Optional[ISystemContext]=None, extype: Type[Exception]=AssertionError):
 
         status, stdout, stderr = None, None, None
 
-        session: ISystemContext = None
-        if sysctx is not None:
-            session = sysctx
-        else:
-            session = self.client.get_default_system_context()
+        sysctx = self.client.get_default_system_context()
 
-        try:
+        session: ISystemContext
+        with sysctx.open_session(basis_session=basis_session) as session:
             mparent = os.path.dirname(mpoint)
             if not session.directory_exists(mparent):
                 errmsg = f"The parent directory '{mparent}' of the specified mount point must exist. mpoint={mpoint}"
@@ -70,26 +67,21 @@ class CommandsExt:
             mnt_cmd = f"mount -t cifs \"{share}\" \"{mpoint}\""
             status, stderr, stdout = session.run_cmd(mnt_cmd)
             if status != 0:
+                ipaddr = self.client.ipaddr
                 errmsg = f"Error attempting to mount cifs share={share} on mpoint={mpoint}."
-                errmsg = format_command_result(errmsg, mnt_cmd, status, stdout, stderr, exp_status=0)
+                errmsg = format_command_result(errmsg, mnt_cmd, status, stdout, stderr, exp_status=0, target=ipaddr)
                 raise extype(errmsg)
-        finally:
-            session.close()
 
         return
     
-    def nfs_mount(self, host:str, export: str, mpoint: str, sysctx: Optional[ISystemContext]=None, extype: Type[Exception]=AssertionError):
+    def nfs_mount(self, host:str, export: str, mpoint: str, basis_session: Optional[ISystemContext]=None, extype: Type[Exception]=AssertionError):
         status, stdout, stderr = None, None, None
 
-        sshclient = self.client.ssh
+        sysctx = self.client.get_default_system_context()
 
-        session: ISystemContext = None
-        if sysctx is not None:
-            session = sysctx
-        else:
-            session = self.client.get_default_system_context()
+        session: ISystemContext
+        with sysctx.open_session(basis_session=basis_session) as session:
 
-        try:
             mparent = os.path.dirname(mpoint)
             if not session.directory_exists(mparent):
                 errmsg = f"The parent directory '{mparent}' of the specified mount point must exist. mpoint={mpoint}"
@@ -105,35 +97,44 @@ class CommandsExt:
             mnt_cmd = f"mount -t nfs {host}:\"{export}\" \"{mpoint}\""
             status, stderr, stdout = session.run_cmd(mnt_cmd)
             if status != 0:
+                ipaddr = self.client.ipaddr
                 errmsg = f"Error attempting to mount nfsmoun export={export} on mpoint={mpoint}."
-                errmsg = format_command_result(errmsg, mnt_cmd, status, stdout, stderr, exp_status=0)
+                errmsg = format_command_result(errmsg, mnt_cmd, status, stdout, stderr, exp_status=0, target=ipaddr)
                 raise extype(errmsg)
-
-        finally:
-            session.close()
 
         return
 
-    def umount(self, mpoint: str, flags:str="", sysctx: Optional[ISystemContext]=None, extype: Type[Exception]=AssertionError):
+    def system_logger(self, msg: str, basis_session: Optional[ISystemContext]=None, extype: Type[Exception]=AssertionError):
+        
         status, stdout, stderr = None, None, None
 
-        sshclient = self.client.ssh
+        sysctx = self.client.get_default_system_context()
 
-        session: ISystemContext = None
-        if sysctx is not None:
-            session = sysctx
-        else:
-            session = self.client.get_default_system_context()
+        session: ISystemContext
+        with sysctx.open_session(basis_session=basis_session) as session:
+            command = f'sudo logger "{msg}"'
+            status, stderr, stdout = session.run_cmd(command)
+            if status != 0:
+                ipaddr = self.client.ipaddr
+                errmsg = f"Error attempting to log a message."
+                errmsg = format_command_result(errmsg, command, status, stdout, stderr, exp_status=0, target=ipaddr)
+                raise extype(errmsg)
 
-        try:
+        return
+
+    def umount(self, mpoint: str, flags:str="", basis_session: Optional[ISystemContext]=None, extype: Type[Exception]=AssertionError):
+        status, stdout, stderr = None, None, None
+
+        sysctx = self.client.get_default_system_context()
+
+        session: ISystemContext
+        with sysctx.open_session(basis_session=basis_session) as session:
+
             mnt_cmd = f"umount {flags} \"{mpoint}\""
             status, stderr, stdout = session.run_cmd(mnt_cmd)
             if status != 0:
                 errmsg = f"Error attempting to unmount mpoint={mpoint}."
                 errmsg = format_command_result(errmsg, mnt_cmd, status, stdout, stderr, exp_status=0)
                 raise extype(errmsg)
-
-        finally:
-            session.close()
 
         return
