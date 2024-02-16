@@ -10,8 +10,8 @@ class TaskerSessionRef:
                  notify_callback: Optional[TaskingProgressCallback] = None):
         self._id = id
         
-        if self._notify_callback is not None or self._notify_interval is not None:
-            if self._notify_callback is None or self._notify_interval is None:
+        if notify_callback is not None or notify_interval is not None:
+            if notify_callback is None or notify_interval is None:
                 errmsg = "If any notify parameter is passed then both 'notify_interval' and 'notify_callback' must be passed."
                 raise SemanticError(errmsg)
 
