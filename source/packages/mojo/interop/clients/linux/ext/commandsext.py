@@ -4,7 +4,7 @@ from typing import Optional, Type, TYPE_CHECKING
 import os
 import weakref
 
-from mojo.errors.exceptions import SemanticError
+from mojo.errors.exceptions import CommandError, SemanticError
 
 from mojo.interfaces.isystemcontext import ISystemContext
 from mojo.xmods.xformatting import format_command_result
@@ -26,7 +26,7 @@ class CommandsExt:
 
     def cifs_mount(self, share: str, mpoint: str, username: Optional[str]=None,
                    password: Optional[str]=None, domain: Optional[str]=None,
-                   basis_session: Optional[ISystemContext]=None, extype: Type[Exception]=AssertionError):
+                   basis_session: Optional[ISystemContext]=None):
 
         status, stdout, stderr = None, None, None
 
@@ -44,7 +44,7 @@ class CommandsExt:
             if status != 0:
                 errmsg = f"Error attempting to create mount point mpoint={mpoint}."
                 errmsg = format_command_result(errmsg, mount_cmd, status, stdout, stderr, exp_status=0)
-                raise extype(errmsg)
+                raise CommandError(errmsg, status, stdout, stderr)
 
             if username is not None and password is None:
                 errmsg = "If you provide a username then you must provide a password."
@@ -70,11 +70,11 @@ class CommandsExt:
                 ipaddr = self.client.ipaddr
                 errmsg = f"Error attempting to mount cifs share={share} on mpoint={mpoint}."
                 errmsg = format_command_result(errmsg, mnt_cmd, status, stdout, stderr, exp_status=0, target=ipaddr)
-                raise extype(errmsg)
+                raise CommandError(errmsg, status, stdout, stderr)
 
         return
     
-    def nfs_mount(self, host:str, export: str, mpoint: str, basis_session: Optional[ISystemContext]=None, extype: Type[Exception]=AssertionError):
+    def nfs_mount(self, host:str, export: str, mpoint: str, basis_session: Optional[ISystemContext]=None):
         status, stdout, stderr = None, None, None
 
         sysctx = self.client.get_default_system_context()
@@ -92,7 +92,7 @@ class CommandsExt:
             if status != 0:
                 errmsg = f"Error attempting to create mount point mpoint={mpoint}."
                 errmsg = format_command_result(errmsg, mkdir_cmd, status, stdout, stderr, exp_status=0)
-                raise extype(errmsg)
+                raise CommandError(errmsg, status, stdout, stderr)
 
             mnt_cmd = f"mount -t nfs {host}:\"{export}\" \"{mpoint}\""
             status, stderr, stdout = session.run_cmd(mnt_cmd)
@@ -100,11 +100,11 @@ class CommandsExt:
                 ipaddr = self.client.ipaddr
                 errmsg = f"Error attempting to mount nfsmoun export={export} on mpoint={mpoint}."
                 errmsg = format_command_result(errmsg, mnt_cmd, status, stdout, stderr, exp_status=0, target=ipaddr)
-                raise extype(errmsg)
+                raise CommandError(errmsg, status, stdout, stderr)
 
         return
 
-    def system_logger(self, msg: str, basis_session: Optional[ISystemContext]=None, extype: Type[Exception]=AssertionError):
+    def system_logger(self, msg: str, basis_session: Optional[ISystemContext]=None):
         
         status, stdout, stderr = None, None, None
 
@@ -118,11 +118,11 @@ class CommandsExt:
                 ipaddr = self.client.ipaddr
                 errmsg = f"Error attempting to log a message."
                 errmsg = format_command_result(errmsg, command, status, stdout, stderr, exp_status=0, target=ipaddr)
-                raise extype(errmsg)
+                raise CommandError(errmsg, status, stdout, stderr)
 
         return
 
-    def umount(self, mpoint: str, flags:str="", basis_session: Optional[ISystemContext]=None, extype: Type[Exception]=AssertionError):
+    def umount(self, mpoint: str, flags:str="", basis_session: Optional[ISystemContext]=None):
         status, stdout, stderr = None, None, None
 
         sysctx = self.client.get_default_system_context()
@@ -135,6 +135,6 @@ class CommandsExt:
             if status != 0:
                 errmsg = f"Error attempting to unmount mpoint={mpoint}."
                 errmsg = format_command_result(errmsg, mnt_cmd, status, stdout, stderr, exp_status=0)
-                raise extype(errmsg)
+                raise CommandError(errmsg, status, stdout, stderr)
 
         return

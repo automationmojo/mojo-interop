@@ -21,8 +21,6 @@ from typing import TYPE_CHECKING
 import os
 import time
 
-from datetime import datetime
-
 from datetime import datetime, timedelta
 
 from dataclasses import dataclass, asdict
@@ -30,6 +28,7 @@ from dataclasses import dataclass, asdict
 DEFAULT_WAIT_TIMEOUT = 600
 DEFAULT_WAIT_INTERVAL = 5
 
+from mojo.interop.protocols.tasker.taskersessionref import TaskerSessionRef
 
 if TYPE_CHECKING:
     from mojo.interop.protocols.tasker.taskernode import TaskerNode
@@ -50,12 +49,18 @@ class TaskingRef:
 
 class TaskingResultPromise:
 
-    def __init__(self, module_name: str, tasking_id: str, task_name: str, log_dir: str, node: "TaskerNode"):
+    def __init__(self, module_name: str, tasking_id: str, task_name: str, log_dir: str,
+                 session: TaskerSessionRef, node: "TaskerNode"):
         self._module_name = module_name
         self._tasking_id = tasking_id
         self._task_name = task_name
         self._log_dir = log_dir
+        self._session = session
         self._node = node
+        self._notify_callback = self._session.notify_callback
+        self._notify_interval = self._session.notify_interval
+
+        self._next_notify = datetime.now() + timedelta(seconds=self._notify_interval)
         return
 
     @property
@@ -66,6 +71,10 @@ class TaskingResultPromise:
     def module_name(self):
         return self._module_name
     
+    @property
+    def session(self):
+        return self._session
+
     @property
     def tasking_id(self):
         return self._tasking_id
@@ -103,7 +112,20 @@ class TaskingResultPromise:
             if end_time is not None and now > end_time:
                 break
 
+            if self._notify_callback is not None and now > self._next_notify:
+                try:
+                    progress = self._node.get_tasking_progress(tasking_id=self._tasking_id)
+                    if progress is not None:
+                        self._notify_callback(progress)
+                except:
+                    self._next_notify = now + timedelta(seconds=self._notify_interval)
+
             time.sleep(interval)
+
+        # Do a final progress fetch and notification after the task is complete
+        progress = self._node.get_tasking_progress(tasking_id=self._tasking_id)
+        if self._notify_callback is not None:
+            self._notify_callback(progress)
 
         if not finished:
             if end_time is not None:

@@ -77,9 +77,10 @@ class TaskerSession:
         self._start = datetime.now()
         self._last_activity = datetime.now()
 
-        self._taskings = OrderedDict()
-        self._results = OrderedDict()
-        self._statuses = OrderedDict()
+        self._taskings_table = OrderedDict()
+        self._results_table = OrderedDict()
+        self._status_table = OrderedDict()
+        self._progress_table = OrderedDict()
 
         self._session_lock = threading.Lock()
 
@@ -98,8 +99,12 @@ class TaskerSession:
         return self._output_directory
 
     @property
+    def progresses(self) -> OrderedDict: 
+        return self._progress_table
+
+    @property
     def results(self) -> OrderedDict: 
-        return self._results
+        return self._results_table
     
     @property
     def session_id(self) -> str:
@@ -111,11 +116,11 @@ class TaskerSession:
     
     @property
     def statuses(self) -> OrderedDict: 
-        return self._statuses
+        return self._status_table
     
     @property
     def taskings(self) -> OrderedDict: 
-        return self._taskings
+        return self._taskings_table
     
     @property
     def log_level(self) -> int:
@@ -229,15 +234,32 @@ class TaskerSession:
     
         return taskref
     
+    def get_tasking_progress(self, tasking_id: str) -> str:
+
+        progress = None
+
+        self._session_lock.acquire()
+        try:
+            if tasking_id in self._progress_table:
+                progress = self._progress_table[tasking_id]
+        finally:
+            self._session_lock.release()
+
+        progress_str = None
+        if progress is not None:
+            progress_str = pickle.dumps(progress)
+
+        return progress_str
+
     def get_tasking_result(self, tasking_id: str) -> str:
 
         self._session_lock.acquire()
         try:
-            if tasking_id in self._results:
-                result = self._results[tasking_id]
+            if tasking_id in self._results_table:
+                result = self._results_table[tasking_id]
             else:
-                if tasking_id in self._taskings:
-                    tstatus = self._statuses[tasking_id]
+                if tasking_id in self._taskings_table:
+                    tstatus = self._status_table[tasking_id]
                     
                     if not (tstatus == ProgressCode.Completed or tstatus == ProgressCode.Errored or tstatus == ProgressCode.Failed):
                         errmsg = f"The task for tasking_id='{tasking_id}' is not in a completed state. The results are not yet available."
@@ -256,8 +278,8 @@ class TaskerSession:
 
         self._session_lock.acquire()
         try:
-            if tasking_id in self._statuses:
-                tstatus = str(self._statuses[tasking_id])
+            if tasking_id in self._status_table:
+                tstatus = str(self._status_table[tasking_id])
         finally:
             self._session_lock.release()
 
@@ -269,11 +291,11 @@ class TaskerSession:
 
         self._session_lock.acquire()
         try:
-            if tasking_id in self._statuses:
-                tstatus = str(self._statuses[tasking_id])
+            if tasking_id in self._status_table:
+                tstatus = str(self._status_table[tasking_id])
 
                 if tstatus == ProgressCode.Completed or tstatus == ProgressCode.Errored or tstatus == ProgressCode.Failed:
-                    if tasking_id in self._results:
+                    if tasking_id in self._results_table:
                         complete_and_ready = True
 
         finally:
@@ -288,8 +310,8 @@ class TaskerSession:
         tasking: Tasking
         tstatus: ProgressCode
 
-        for tasking_id, tasking in self._taskings.items():
-            tstatus = self._statuses[tasking_id]
+        for tasking_id, tasking in self._taskings_table.items():
+            tstatus = self._status_table[tasking_id]
 
             if tstatus in [ProgressCode.NotStarted, ProgressCode.Paused, ProgressCode.Running]:
                 tasking.shutdown()
@@ -323,22 +345,23 @@ class TaskerSession:
 
                 self._session_lock.acquire()
                 try:
+                    self._progress_table[tasking_id] = progress
 
                     if isinstance(progress, TaskingResult):
                         result: TaskingResult = progress
 
                         if len(result.errors) > 0:
-                            self._statuses[tasking_id] = str(ProgressCode.Errored.value)
+                            self._status_table[tasking_id] = str(ProgressCode.Errored.value)
                         elif len(result.failures) > 0:
-                            self._statuses[tasking_id] = str(ProgressCode.Failed.value)
+                            self._status_table[tasking_id] = str(ProgressCode.Failed.value)
                         else:
-                            self._statuses[tasking_id] = str(ProgressCode.Completed.value)
+                            self._status_table[tasking_id] = str(ProgressCode.Completed.value)
 
-                        self._results[tasking_id] = result
+                        self._results_table[tasking_id] = result
                         break
 
                     prog_status = str(progress.status.value)
-                    self._statuses[tasking_id] = prog_status
+                    self._status_table[tasking_id] = prog_status
 
                 finally:
                     self._session_lock.release()
@@ -354,9 +377,9 @@ class TaskerSession:
                 tlogf.write(errmsg)
             
             tresult = TaskingResult(tasking_id, tasking.full_name, parent_id, ResultCode.ERRORED, prefix=prefix)
-            self._statuses[tasking_id] = str(ProgressCode.Errored.value)
+            self._status_table[tasking_id] = str(ProgressCode.Errored.value)
             tresult.add_error(tbdetail)
-            self._results[tasking_id] = tresult
+            self._results_table[tasking_id] = tresult
 
             raise
 

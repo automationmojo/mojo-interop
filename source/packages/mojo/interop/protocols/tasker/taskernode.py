@@ -26,9 +26,12 @@ import weakref
 
 
 from mojo.results.model.taskingresult import TaskingResult
+from mojo.results.model.progressinfo import ProgressInfo
 
 from mojo.interop.protocols.tasker.taskingresultpromise import TaskingResultPromise
 from mojo.interop.protocols.tasker.taskeraspects import TaskerAspects, DEFAULT_TASKER_ASPECTS
+from mojo.interop.protocols.tasker.taskersessionref import TaskerSessionRef
+from mojo.interop.protocols.tasker.taskingprogresscallback import TaskingProgressCallback
 
 if TYPE_CHECKING:
     from mojo.landscaping.client.clientbase import ClientBase
@@ -50,7 +53,7 @@ class TaskerNode:
         self._ipaddr = ipaddr
         self._port = port
         self._aspects = aspect
-        self._session_id = None
+        self._session_ref = None
         return
 
     @property
@@ -63,7 +66,7 @@ class TaskerNode:
 
     @property
     def session_id(self):
-        return self._session_id
+        return self._session_ref
 
     def archive_folder(self, *, folder_to_archive: str, dest_folder: str, archive_name: str, compression_level: int = 7) -> str:
         
@@ -99,12 +102,24 @@ class TaskerNode:
         
         return exists
 
+    def get_tasking_progress(self, *, tasking_id: str) -> ProgressInfo:
+
+        client = self._create_connection()
+
+        try:
+            tresult_str = client.root.get_tasking_progress(session_id=self._session_ref, tasking_id=tasking_id)
+            tresult = pickle.loads(tresult_str)
+        finally:
+            client.close()
+        
+        return tresult
+
     def get_tasking_status(self, *, tasking_id: str) -> str:
 
         client = self._create_connection()
 
         try:
-            tstatus = client.root.get_tasking_status(session_id=self._session_id, tasking_id=tasking_id)
+            tstatus = client.root.get_tasking_status(session_id=self._session_ref, tasking_id=tasking_id)
         finally:
             client.close()
         
@@ -115,7 +130,7 @@ class TaskerNode:
         client = self._create_connection()
 
         try:
-            tresult_str = client.root.get_tasking_result(session_id=self._session_id, tasking_id=tasking_id)
+            tresult_str = client.root.get_tasking_result(session_id=self._session_ref, tasking_id=tasking_id)
             tresult = pickle.loads(tresult_str)
         finally:
             client.close()
@@ -127,7 +142,7 @@ class TaskerNode:
         client = self._create_connection()
 
         try:
-            complete_and_ready = client.root.has_completed_and_result_ready(session_id=self._session_id, tasking_id=tasking_id)
+            complete_and_ready = client.root.has_completed_and_result_ready(session_id=self._session_ref, tasking_id=tasking_id)
         finally:
             client.close()
         
@@ -138,9 +153,9 @@ class TaskerNode:
         client = self._create_connection()
 
         try:
-            taskref_info = client.root.execute_tasking(session_id=self._session_id, worker=self._ipaddr, module_name=module_name, tasking_name=tasking_name, **kwargs)
+            taskref_info = client.root.execute_tasking(session_id=self._session_ref.id, worker=self._ipaddr, module_name=module_name, tasking_name=tasking_name, **kwargs)
             promise = TaskingResultPromise(taskref_info["module_name"], taskref_info["tasking_id"], taskref_info["task_name"],
-                                        taskref_info["log_dir"], self)
+                                        taskref_info["log_dir"], self._session_ref, self)
         finally:
             client.close()
 
@@ -151,27 +166,29 @@ class TaskerNode:
         client = self._create_connection()
 
         try:
-            client.root.session_close(session_id=self._session_id)
-            self._session_id = None
+            client.root.session_close(session_id=self._session_ref.id)
+            self._session_ref = None
         finally:
             client.close()
 
         return
 
     def session_open(self, *, worker_name: str, output_directory: Optional[str] = None, log_level: Optional[int] = logging.DEBUG,
-                     notify_url: Optional[str] = None, notify_headers: Optional[Dict[str, str]] = None,
-                     aspects: Optional[TaskerAspects] = DEFAULT_TASKER_ASPECTS) -> str:
+                     notify_interval: Optional[float] = None, notify_url: Optional[str] = None,
+                     notify_headers: Optional[Dict[str, str]] = None,
+                     notify_callback: Optional[TaskingProgressCallback] = None,
+                     aspects: Optional[TaskerAspects] = DEFAULT_TASKER_ASPECTS) -> TaskerSessionRef:
         
         client = self._create_connection()
 
         try:
             session_id = client.root.session_open(worker_name=worker_name, output_directory=output_directory, log_level=log_level,
                                                   notify_url=notify_url, notify_headers=notify_headers, aspects=aspects)
-            self._session_id = session_id
+            self._session_ref = TaskerSessionRef(session_id, notify_interval, notify_callback)
         finally:
             client.close()
 
-        return session_id
+        return self._session_ref
 
     def reinitialize_logging(self, *, logging_directory: Optional[str] = None,
                                       logging_level: Optional[int] = None):
