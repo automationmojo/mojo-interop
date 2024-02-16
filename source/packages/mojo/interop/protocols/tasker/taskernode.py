@@ -174,8 +174,9 @@ class TaskerNode:
         return
 
     def session_open(self, *, worker_name: str, output_directory: Optional[str] = None, log_level: Optional[int] = logging.DEBUG,
-                     notify_interval: Optional[float] = None, notify_url: Optional[str] = None,
+                     notify_url: Optional[str] = None,
                      notify_headers: Optional[Dict[str, str]] = None,
+                     notify_interval: Optional[float] = None,
                      notify_callback: Optional[TaskingProgressCallback] = None,
                      aspects: Optional[TaskerAspects] = DEFAULT_TASKER_ASPECTS) -> TaskerSessionRef:
         

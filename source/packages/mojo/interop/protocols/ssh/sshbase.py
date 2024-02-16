@@ -410,6 +410,23 @@ class SshBase(ISystemContext):
 
         return dir_info
 
+    def _get_home_directory(self, aspects: Optional[AspectsCmd] = None) -> str:
+        """
+            Private method that handles the getting of the home directory for the credential account from a remote machine.
+
+            :param aspects: The run aspects to use when running the command.
+
+            :returns: The remote home directory
+        """
+        home_dir = None
+
+        home_cmd = 'echo "$HOME"'
+        status, stdout, stderr = self._run_cmd(home_cmd, aspects=aspects)
+        if status == 0:
+            home_dir = stdout.strip()
+        
+        return home_dir
+
     def _log_command_result(self, command: str, status: int, stdout: str, stderr: str, exp_status: Union[int, Sequence[int]], logging_pattern: LoggingPattern):
         """
             Private method that handles the logging of command results based on the expected status and logging pattern

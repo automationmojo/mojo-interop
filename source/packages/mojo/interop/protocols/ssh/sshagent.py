@@ -293,3 +293,10 @@ class SshAgent(SshBase, ProtocolExtension):
                 del ssh_client
 
         return
+
+    def get_home_directory(self, aspects: Optional[AspectsCmd] = None) -> str:
+        """
+            Method used to get the home directory of the credentialed user from a remote machine.
+        """
+        home_dir = self._get_home_directory(aspects=aspects)
+        return home_dir
