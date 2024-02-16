@@ -421,7 +421,7 @@ class SshBase(ISystemContext):
         home_dir = None
 
         home_cmd = 'echo "$HOME"'
-        status, stdout, stderr = self._run_cmd(home_cmd, aspects=aspects)
+        status, stdout, stderr = self.run_cmd(home_cmd, aspects=aspects)
         if status == 0:
             home_dir = stdout.strip()
         
