@@ -60,7 +60,9 @@ class TaskingResultPromise:
         self._notify_callback = self._session.notify_callback
         self._notify_interval = self._session.notify_interval
 
-        self._next_notify = datetime.now() + timedelta(seconds=self._notify_interval)
+        self._next_notify = None
+        if self._notify_interval is not None:
+            self._next_notify = datetime.now() + timedelta(seconds=self._notify_interval)
         return
 
     @property
@@ -112,13 +114,14 @@ class TaskingResultPromise:
             if end_time is not None and now > end_time:
                 break
 
-            if self._notify_callback is not None and now > self._next_notify:
-                try:
-                    progress = self._node.get_tasking_progress(tasking_id=self._tasking_id)
-                    if progress is not None:
-                        self._notify_callback(progress)
-                except:
-                    self._next_notify = now + timedelta(seconds=self._notify_interval)
+            if self._notify_callback is not None and self._next_notify is not None:
+                if now > self._next_notify:
+                    try:
+                        progress = self._node.get_tasking_progress(tasking_id=self._tasking_id)
+                        if progress is not None:
+                            self._notify_callback(progress)
+                    except:
+                        self._next_notify = now + timedelta(seconds=self._notify_interval)
 
             time.sleep(interval)
 
