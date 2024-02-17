@@ -200,12 +200,41 @@ class TaskerService(rpyc.Service):
 
         return exists
 
+    def exposed_get_tasking_progress(self, *, session_id: str, tasking_id: str) -> TaskingResult:
+
+        this_type = type(self)
+
+        progress_str = None
+
+        this_type.service_lock.acquire()
+        try:
+
+            this_type.logger.info("Method 'exposed_get_tasking_progress' was called.")
+
+            session = self._locked_get_session(session_id)
+            
+            this_type.service_lock.release()
+            try:
+                progress_str = session.get_tasking_progress(tasking_id)
+            finally:
+                this_type.service_lock.acquire()
+
+        except:
+            errmsg = traceback.format_exc()
+            this_type.logger.error(errmsg)
+            raise
+
+        finally:
+            this_type.service_lock.release()
+
+        return progress_str
+
 
     def exposed_get_tasking_result(self, *, session_id: str, tasking_id: str) -> TaskingResult:
 
         this_type = type(self)
 
-        result = None
+        result_str = None
 
         this_type.service_lock.acquire()
         try:
