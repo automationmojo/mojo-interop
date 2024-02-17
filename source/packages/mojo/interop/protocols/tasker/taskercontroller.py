@@ -208,20 +208,21 @@ class TaskerController:
 
             # Treat our progress retrieval time as being part of our
             # interval between checks for completion.
-            if now_time > next_progress:
-                progress_list = []
-                before_progress = time.time()
+            if next_progress is not None:
+                if now_time > next_progress:
+                    progress_list = []
+                    before_progress = time.time()
 
-                # Collect the progress
-                for p in promises:
-                    progress = p.get_progress()
-                    progress_list.append(progress)
-                
-                # Report the list of progress reports
-                progress_callback(progress_list)
+                    # Collect the progress
+                    for p in promises:
+                        progress = p.get_progress()
+                        progress_list.append(progress)
+                    
+                    # Report the list of progress reports
+                    progress_callback(progress_list)
 
-                after_progress = time.time()
-                interval_remaining = interval_remaining - (after_progress - before_progress)
+                    after_progress = time.time()
+                    interval_remaining = interval_remaining - (after_progress - before_progress)
 
             if interval_remaining > 0:
                 time.sleep(interval_remaining)
