@@ -55,15 +55,7 @@ class TaskingGroupScope:
         self._results = None
         self._results_written  = False
 
-        self._progress_reports: Dict[str, dict] = {}
-        self._progress_delivery = aspects.progress_delivery
-        
-        self._summary_progress = False
-        self._summary_progress_interval = None
-        self._summary_progress_timer = None
-        if ProgressDeliveryMethod.SUMMARY_PULL_PROGRESS in self._progress_delivery:
-            self._summary_progress = True
-            self._summary_progress_interval = self._progress_delivery[ProgressDeliveryMethod.SUMMARY_PULL_PROGRESS]
+        self._progress_reported = False
 
         return
 
@@ -86,13 +78,6 @@ class TaskingGroupScope:
 
     def __enter__(self) -> "TaskingGroupScope":
         self.initialize()
-
-        if self._summary_progress and self._summary_progress_timer is not None:
-            self._summary_progress_timer = threading.Timer(
-                self._summary_progress_interval, self._notify_summary_progress)
-            self._summary_progress_timer.daemon = True
-            self._summary_progress_timer.start()
-
         return self
 
 
@@ -101,11 +86,10 @@ class TaskingGroupScope:
         # We don't want to handle exceptions here,  If any AssertionError types come through, they
         # are likely due to a consolidated check, and they should be allowed to propagate.
 
-        if self._summary_progress and self._summary_progress_timer is not None:
+        if self._progress_reported:
             self._clear_summary_progress()
 
         self.finalize()
-
         return False
 
     def initialize(self):
@@ -176,11 +160,23 @@ class TaskingGroupScope:
     
 
     def _clear_summary_progress(self):
+
+        task_ids = []
+    
+        # Collect the progress
+        for p in self._promises:
+            task_ids.append(p.tasking_id)
+
+        self._recorder.post_task_progress(task_ids)
+
         return
 
 
-    def _notify_summary_progress(self, progress: List[ProgressInfo]):
-        self._recorder.post_task_progress(progress)
+    def _notify_summary_progress(self, progress_list: List[ProgressInfo]):
+        self._progress_reported = True
+
+        self._recorder.post_task_progress(progress_list)
+
         return
 
 
