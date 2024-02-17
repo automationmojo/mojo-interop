@@ -107,7 +107,7 @@ class TaskerNode:
         client = self._create_connection()
 
         try:
-            tresult_str = client.root.get_tasking_progress(session_id=self._session_ref, tasking_id=tasking_id)
+            tresult_str = client.root.get_tasking_progress(session_id=self._session_ref.id, tasking_id=tasking_id)
             tresult = pickle.loads(tresult_str)
         finally:
             client.close()
@@ -119,7 +119,7 @@ class TaskerNode:
         client = self._create_connection()
 
         try:
-            tstatus = client.root.get_tasking_status(session_id=self._session_ref, tasking_id=tasking_id)
+            tstatus = client.root.get_tasking_status(session_id=self._session_ref.id, tasking_id=tasking_id)
         finally:
             client.close()
         
@@ -130,7 +130,7 @@ class TaskerNode:
         client = self._create_connection()
 
         try:
-            tresult_str = client.root.get_tasking_result(session_id=self._session_ref, tasking_id=tasking_id)
+            tresult_str = client.root.get_tasking_result(session_id=self._session_ref.id, tasking_id=tasking_id)
             tresult = pickle.loads(tresult_str)
         finally:
             client.close()
@@ -142,7 +142,7 @@ class TaskerNode:
         client = self._create_connection()
 
         try:
-            complete_and_ready = client.root.has_completed_and_result_ready(session_id=self._session_ref, tasking_id=tasking_id)
+            complete_and_ready = client.root.has_completed_and_result_ready(session_id=self._session_ref.id, tasking_id=tasking_id)
         finally:
             client.close()
         
