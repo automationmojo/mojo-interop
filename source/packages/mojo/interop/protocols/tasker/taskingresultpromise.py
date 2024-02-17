@@ -16,7 +16,7 @@ __status__ = "Development" # Prototype, Development or Production
 __license__ = "MIT"
 
 
-from typing import TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
 import os
 import time
@@ -28,7 +28,8 @@ from dataclasses import dataclass, asdict
 DEFAULT_WAIT_TIMEOUT = 600
 DEFAULT_WAIT_INTERVAL = 5
 
-from mojo.interop.protocols.tasker.taskersessionref import TaskerSessionRef
+from mojo.results.model.taskingresult import TaskingResult
+from mojo.results.model.progressinfo import ProgressInfo
 
 if TYPE_CHECKING:
     from mojo.interop.protocols.tasker.taskernode import TaskerNode
@@ -50,47 +51,61 @@ class TaskingRef:
 class TaskingResultPromise:
 
     def __init__(self, module_name: str, tasking_id: str, task_name: str, log_dir: str,
-                 session: TaskerSessionRef, node: "TaskerNode"):
+                 session_id: str, node: "TaskerNode"):
         self._module_name = module_name
         self._tasking_id = tasking_id
         self._task_name = task_name
         self._log_dir = log_dir
-        self._session = session
+        self._session_id = session_id
         self._node = node
-        self._notify_callback = self._session.notify_callback
-        self._notify_interval = self._session.notify_interval
-
-        self._next_notify = None
-        if self._notify_interval is not None:
-            self._next_notify = datetime.now() + timedelta(seconds=self._notify_interval)
         return
 
     @property
-    def log_dir(self):
+    def log_dir(self) -> str:
         return self._log_dir
 
     @property
-    def module_name(self):
+    def module_name(self) -> str:
         return self._module_name
     
     @property
-    def session(self):
-        return self._session
+    def session_id(self) -> str:
+        return self._session_id
 
     @property
-    def tasking_id(self):
+    def tasking_id(self) -> str:
         return self._tasking_id
     
     @property
-    def task_name(self):
+    def task_name(self) -> str:
         return self._task_name
 
-    def get_result(self):
+    def get_result(self) -> TaskingResult:
         rtnval = self._node.get_tasking_result(tasking_id=self._tasking_id)
         return rtnval
 
-    def wait(self, timeout: float=DEFAULT_WAIT_TIMEOUT, interval: float=DEFAULT_WAIT_INTERVAL):
+    def get_progress(self) -> ProgressInfo:
+        """
+            Used by TaskingGroupScope and other group wait methods to probe for progress.
+        """
 
+        progress = self._node.get_tasking_progress(tasking_id=self._tasking_id)
+
+        return progress
+
+    def wait(self, timeout: float=DEFAULT_WAIT_TIMEOUT, interval: float=DEFAULT_WAIT_INTERVAL):
+        """
+            The 'wait' method on the promise object is used to wait on a single tasking to complete
+            and will block until the tasking is complete or until a timeout has occured.  To wait
+            on a group of tasks, use the wait method on `TaskingGroupScope` to wait on multiple
+            tasks simultaneously.
+
+            :param timeout: A period of time to wait for the completion of the tasking.
+            :param interval: An interval to sleep between checks for completion.
+
+            :raises: :class:`TimeoutError`
+        """
+        
         finished = False
 
         now = datetime.now()
@@ -106,7 +121,7 @@ class TaskingResultPromise:
 
         while (True):
 
-            finished = self._is_task_complete()
+            finished = self.is_task_complete()
             if finished:
                 break
 
@@ -114,21 +129,7 @@ class TaskingResultPromise:
             if end_time is not None and now > end_time:
                 break
 
-            if self._notify_callback is not None and self._next_notify is not None:
-                if now > self._next_notify:
-                    try:
-                        progress = self._node.get_tasking_progress(tasking_id=self._tasking_id)
-                        if progress is not None:
-                            self._notify_callback(progress)
-                    except:
-                        self._next_notify = now + timedelta(seconds=self._notify_interval)
-
             time.sleep(interval)
-
-        # Do a final progress fetch and notification after the task is complete
-        progress = self._node.get_tasking_progress(tasking_id=self._tasking_id)
-        if self._notify_callback is not None:
-            self._notify_callback(progress)
 
         if not finished:
             if end_time is not None:
@@ -146,7 +147,7 @@ class TaskingResultPromise:
 
         return
     
-    def _is_task_complete(self) -> bool:
+    def is_task_complete(self) -> bool:
 
         rtnval = self._node.has_completed_and_result_ready(tasking_id=self._tasking_id)
 

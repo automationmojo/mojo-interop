@@ -1,15 +1,20 @@
-from typing import List, Optional, Type, Union, TYPE_CHECKING
+from typing import Dict, List, Optional, Type, Union, TYPE_CHECKING
 
 import logging
+import threading
 import weakref
 
 from mojo.errors.exceptions import SemanticError
 
 from mojo.results.model.taskinggroup import TaskingGroup
 from mojo.results.model.taskingresult import TaskingResult
+from mojo.results.model.progressinfo import ProgressInfo
+from mojo.results.model.progressdelivery import ProgressDeliveryMethod, SummaryProgressDelivery
+
 from mojo.results.recorders.resultrecorder import ResultRecorder
 
-from mojo.interop.protocols.tasker.taskeraspects import TaskerAspects, DEFAULT_TASKER_ASPECTS
+from mojo.interop.protocols.tasker.taskeraspects import TaskerAspects
+
 from mojo.interop.protocols.tasker.taskernode import TaskerNode
 from mojo.interop.protocols.tasker.tasking import Tasking, TaskingIdentity
 from mojo.interop.protocols.tasker.taskingresultpromise import TaskingResultPromise
@@ -33,7 +38,8 @@ class TaskingGroupScope:
     """
     """
 
-    def __init__(self, name: str, adapter: "TaskingAdapter", controller: TaskerController, recorder: ResultRecorder, tgroup: TaskingGroup, tnodes: List[TaskerNode],
+    def __init__(self, name: str, adapter: "TaskingAdapter", controller: TaskerController,
+                 recorder: ResultRecorder, tgroup: TaskingGroup, tnodes: List[TaskerNode],
                  aspects: TaskerAspects):
 
         self._name = name
@@ -48,6 +54,16 @@ class TaskingGroupScope:
         self._promises = []
         self._results = None
         self._results_written  = False
+
+        self._progress_reports: Dict[str, dict] = {}
+        self._progress_delivery = aspects.progress_delivery
+        
+        self._summary_progress = False
+        self._summary_progress_interval = None
+        self._summary_progress_timer = None
+        if ProgressDeliveryMethod.SUMMARY_PULL_PROGRESS in self._progress_delivery:
+            self._summary_progress = True
+            self._summary_progress_interval = self._progress_delivery[ProgressDeliveryMethod.SUMMARY_PULL_PROGRESS]
 
         return
 
@@ -70,6 +86,13 @@ class TaskingGroupScope:
 
     def __enter__(self) -> "TaskingGroupScope":
         self.initialize()
+
+        if self._summary_progress and self._summary_progress_timer is not None:
+            self._summary_progress_timer = threading.Timer(
+                self._summary_progress_interval, self._notify_summary_progress)
+            self._summary_progress_timer.daemon = True
+            self._summary_progress_timer.start()
+
         return self
 
 
@@ -77,6 +100,9 @@ class TaskingGroupScope:
 
         # We don't want to handle exceptions here,  If any AssertionError types come through, they
         # are likely due to a consolidated check, and they should be allowed to propagate.
+
+        if self._summary_progress and self._summary_progress_timer is not None:
+            self._clear_summary_progress()
 
         self.finalize()
 
@@ -89,6 +115,9 @@ class TaskingGroupScope:
     def execute_tasking(self, *, tasking: Union[TaskingIdentity, Type[Tasking]], aspects: Optional[TaskerAspects] = None,
                         **kwargs) -> List[TaskingResultPromise]:
 
+        if aspects is None:
+            aspects = self._aspects
+
         if self._state != TaskingGroupState.NotStarted:
             errmsg = f"The tasking group '{self._name}' has already been started."
             raise SemanticError(errmsg)
@@ -96,8 +125,16 @@ class TaskingGroupScope:
         adapter = self.adapter
         parent_id = self._tgroup.inst_id
 
-        self._promises = self._controller.execute_tasking_on_node_list(self._tnodes, tasking=tasking, parent_id=parent_id,
-                                                                       aspects=aspects, **kwargs)
+        summary_progress = None
+
+        progress_delivery = aspects.progress_delivery
+        if progress_delivery is not None and ProgressDeliveryMethod.SUMMARY_PULL_PROGRESS in progress_delivery:
+            progress_interval = progress_delivery[ProgressDeliveryMethod.SUMMARY_PULL_PROGRESS]
+            summary_progress = SummaryProgressDelivery(progress_interval, self._notify_summary_progress)
+
+        self._promises = self._controller.execute_tasking_on_node_list(
+                self._tnodes, tasking=tasking, parent_id=parent_id, aspects=aspects,
+                summary_progress=summary_progress, **kwargs)
 
         return self._promises
 
@@ -137,6 +174,16 @@ class TaskingGroupScope:
 
         return self._results
     
+
+    def _clear_summary_progress(self):
+        return
+
+
+    def _notify_summary_progress(self, progress: List[ProgressInfo]):
+        self._recorder.post_task_progress(progress)
+        return
+
+
     def _update_group(self):
 
         if not self._results_written:

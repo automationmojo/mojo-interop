@@ -18,7 +18,7 @@ __status__ = "Development" # Prototype, Development or Production
 __license__ = "MIT"
 
 
-from typing import Optional 
+from typing import Dict, Optional 
 
 DEFAULT_COMPLETION_TIMEOUT = 600
 DEFAULT_COMPLETION_INTERVAL = 10
@@ -32,12 +32,14 @@ class TaskerAspects:
     def __init__(self, completion_timeout: Optional[float] = None,
                        completion_interval: Optional[float] = DEFAULT_COMPLETION_INTERVAL,
                        inactivity_timeout: Optional[float] = None,
-                       inactivity_interval: Optional[float] = DEFAULT_INACTIVITY_INTERVAL):
+                       inactivity_interval: Optional[float] = DEFAULT_INACTIVITY_INTERVAL,
+                       progress_delivery: Optional[Dict[str, float]]= None):
         
         self.completion_timeout = completion_timeout
         self.completion_interval = completion_interval
         self.inactivity_timeout = inactivity_timeout
         self.inactivity_interval = inactivity_interval
+        self.progress_delivery = progress_delivery
         return
 
 DEFAULT_TASKER_ASPECTS = TaskerAspects()
