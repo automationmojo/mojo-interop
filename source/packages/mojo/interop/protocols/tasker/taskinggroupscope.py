@@ -169,7 +169,8 @@ class TaskingGroupScope:
         for p in self._promises:
             task_ids.append(p.tasking_id)
 
-        self._recorder.post_task_progress(task_ids)
+        self._recorder.clear_task_progress(task_ids)
+        self._recorder.update_summary()
 
         return
 
