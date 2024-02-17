@@ -26,6 +26,9 @@ DEFAULT_COMPLETION_INTERVAL = 10
 DEFAULT_INACTIVITY_TIMEOUT = 600
 DEFAULT_INACTIVITY_INTERVAL = .5
 
+DEFAULT_PROGRESS_INTERVAL = 30
+
+from mojo.results.model.progressdelivery import ProgressDeliveryMethod
 
 class TaskerAspects:
 
@@ -43,3 +46,7 @@ class TaskerAspects:
         return
 
 DEFAULT_TASKER_ASPECTS = TaskerAspects()
+
+DEFAULT_SUMMARY_PROGRESS_TASKER_ASPECTS = TaskerAspects(
+    progress_delivery={ ProgressDeliveryMethod.SUMMARY_PULL_PROGRESS: DEFAULT_PROGRESS_INTERVAL }
+)
