@@ -20,7 +20,8 @@ __license__ = "MIT"
 
 from typing import Dict, Optional 
 
-DEFAULT_COMPLETION_TIMEOUT = 600
+
+DEFAULT_COMPLETION_TIMEOUT = 7 * 24 * 60 * 60   # The Default Timeout is 1 Week
 DEFAULT_COMPLETION_INTERVAL = 10
 
 DEFAULT_INACTIVITY_TIMEOUT = 600
@@ -32,9 +33,9 @@ from mojo.results.model.progressdelivery import ProgressDeliveryMethod
 
 class TaskerAspects:
 
-    def __init__(self, completion_timeout: Optional[float] = None,
+    def __init__(self, completion_timeout: Optional[float] = DEFAULT_COMPLETION_TIMEOUT,
                        completion_interval: Optional[float] = DEFAULT_COMPLETION_INTERVAL,
-                       inactivity_timeout: Optional[float] = None,
+                       inactivity_timeout: Optional[float] = DEFAULT_INACTIVITY_TIMEOUT,
                        inactivity_interval: Optional[float] = DEFAULT_INACTIVITY_INTERVAL,
                        progress_delivery: Optional[Dict[str, float]]= None):
         

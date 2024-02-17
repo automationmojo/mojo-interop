@@ -158,7 +158,7 @@ class TaskerController:
             progress_callback = summary_progress.progress_callback
             progress_interval = summary_progress.progress_interval
 
-        if aspects == None:
+        if aspects is None:
             aspects = self._aspects
 
         # We should always have a completion_timeout and completion_interval, if we don't
