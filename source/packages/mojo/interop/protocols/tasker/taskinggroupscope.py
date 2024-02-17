@@ -178,6 +178,7 @@ class TaskingGroupScope:
         self._progress_reported = True
 
         self._recorder.post_task_progress(progress_list)
+        self._recorder.update_summary()
 
         return
 
