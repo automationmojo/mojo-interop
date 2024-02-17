@@ -109,16 +109,8 @@ class TaskingGroupScope:
         adapter = self.adapter
         parent_id = self._tgroup.inst_id
 
-        summary_progress = None
-
-        progress_delivery = aspects.progress_delivery
-        if progress_delivery is not None and ProgressDeliveryMethod.SUMMARY_PULL_PROGRESS in progress_delivery:
-            progress_interval = progress_delivery[ProgressDeliveryMethod.SUMMARY_PULL_PROGRESS]
-            summary_progress = SummaryProgressDelivery(progress_interval, self._notify_summary_progress)
-
         self._promises = self._controller.execute_tasking_on_node_list(
-                self._tnodes, tasking=tasking, parent_id=parent_id, aspects=aspects,
-                summary_progress=summary_progress, **kwargs)
+                self._tnodes, tasking=tasking, parent_id=parent_id, aspects=aspects, **kwargs)
 
         return self._promises
 
@@ -150,10 +142,20 @@ class TaskingGroupScope:
 
     def wait_for_tasking_results(self, aspects: Optional[TaskerAspects] = None) -> List[TaskingResult]:
 
+        if aspects is None:
+            aspects = self._aspects
+
         if self._results is None:
             adapter = self.adapter
 
-            self._results = self._controller.wait_for_tasking_results(self._promises)
+            summary_progress = None
+
+            progress_delivery = aspects.progress_delivery
+            if progress_delivery is not None and ProgressDeliveryMethod.SUMMARY_PULL_PROGRESS in progress_delivery:
+                progress_interval = progress_delivery[ProgressDeliveryMethod.SUMMARY_PULL_PROGRESS]
+                summary_progress = SummaryProgressDelivery(progress_interval, self._notify_summary_progress)
+
+            self._results = self._controller.wait_for_tasking_results(self._promises, summary_progress=summary_progress, aspects=aspects)
             self._update_group()
 
         return self._results

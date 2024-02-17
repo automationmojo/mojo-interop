@@ -151,6 +151,9 @@ class TaskerController:
             progress of the tasks if a summary_progress parameter is provided.
         """
 
+        if aspects is None:
+            aspects = self._aspects
+
         progress_callback = None
         progress_interval = None
         
