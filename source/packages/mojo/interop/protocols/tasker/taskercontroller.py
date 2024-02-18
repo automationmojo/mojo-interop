@@ -195,8 +195,12 @@ class TaskerController:
                 break
             else:
                 # Reset our wait lists so we can circle back
-                # after a short word from our sponsers
-                wait_on = [p for p in not_ready]
+                # after a short word from our sponsers, even
+                # though some of promises may have completed
+                # we still want to visit them because it will
+                # update the last session activity on the tasker
+                # server
+                wait_on = [p for p in promises]
                 not_ready = []
 
             now_time = datetime.now()
