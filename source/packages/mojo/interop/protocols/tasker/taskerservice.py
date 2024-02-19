@@ -105,6 +105,28 @@ class TaskerService(rpyc.Service):
         return archive_full
 
 
+    def exposed_cancel_tasking(self, *, session_id: str, tasking_id: str):
+
+        this_type = type(self)
+
+        this_type.service_lock.acquire()
+        try:
+
+            this_type.logger.info("Method 'exposed_cancel_tasking' was called.")
+
+            session = self._locked_get_session(session_id)
+            
+            this_type.service_lock.release()
+            try:
+                session.cancel_tasking(tasking_id)
+            finally:
+                this_type.service_lock.acquire()
+
+        finally:
+            this_type.service_lock.release()
+
+        return
+
     def exposed_dispose_tasking(self, *, session_id: str, tasking_id: str):
 
         this_type = type(self)

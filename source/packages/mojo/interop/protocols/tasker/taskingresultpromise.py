@@ -80,6 +80,10 @@ class TaskingResultPromise:
     def task_name(self) -> str:
         return self._task_name
 
+    def cancel(self):
+        self._node.cancel_tasking(self._tasking_id)
+        return
+
     def get_result(self) -> TaskingResult:
         rtnval = self._node.get_tasking_result(tasking_id=self._tasking_id)
         return rtnval

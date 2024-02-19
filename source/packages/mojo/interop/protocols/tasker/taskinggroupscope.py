@@ -1,7 +1,7 @@
 from typing import Dict, List, Optional, Type, Union, TYPE_CHECKING
 
 import logging
-import threading
+import os
 import weakref
 
 from mojo.errors.exceptions import SemanticError
@@ -51,7 +51,7 @@ class TaskingGroupScope:
         self._aspects = aspects
         
         self._state = TaskingGroupState.NotStarted
-        self._promises = []
+        self._promises: List[TaskingResultPromise] = []
         self._results = None
         self._results_written  = False
 
@@ -94,6 +94,32 @@ class TaskingGroupScope:
 
     def initialize(self):
         self._recorder.record(self._tgroup)
+        return
+
+    def cancel_tasks(self):
+
+        errors = []
+
+        for promise in self._promises:
+            try:
+                promise.cancel()
+            except Exception as xcpt:
+                errors.append((promise.tasking_id, xcpt))
+
+        if len(errors) > 0:
+            errmsg_lines = [
+                "Errors encountered while attempting to cancel tasks.",
+                "ERRORS:"
+            ]
+
+            xcpt: Exception
+            for tasking_id, xcpt in errors:
+                message = str(xcpt)
+                errmsg_lines.append(f"    {tasking_id}: {message}")
+
+            err_msg = os.linesep.join(errmsg_lines)
+            raise RuntimeError(err_msg)
+
         return
 
     def execute_tasking(self, *, tasking: Union[TaskingIdentity, Type[Tasking]], aspects: Optional[TaskerAspects] = None,

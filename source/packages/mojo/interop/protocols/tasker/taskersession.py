@@ -20,7 +20,7 @@ __license__ = "MIT"
 
 from typing import Dict, Optional, TYPE_CHECKING
 
-import logging
+
 import multiprocessing
 import multiprocessing.context
 import os
@@ -30,8 +30,6 @@ import threading
 from collections import OrderedDict
 from datetime import datetime
 from uuid import uuid4
-
-import rpyc
 
 from mojo.errors.exceptions import SemanticError
 
@@ -137,6 +135,31 @@ class TaskerSession:
                     task.shutdown()
                 finally:
                     self._session_lock.acquire()
+        finally:
+            self._session_lock.release()
+
+        return
+
+    def cancel_tasking(self, tasking_id: str):
+
+        self._session_lock.acquire()
+
+        try:
+
+            if tasking_id in self._taskings_table:
+                tasking: Tasking = self._taskings_table[tasking_id]
+
+                if tasking_id in self._status_table[tasking_id]:
+                    tstatus = self._status_table[tasking_id]
+
+                    if tstatus in [ProgressCode.NotStarted, ProgressCode.Paused, ProgressCode.Running]:
+                        tasking.shutdown()
+                else:
+                    errmsg = f"Unable to cancel tasking. No status found for tasking_id={tasking_id}."
+                    raise RuntimeError(errmsg)
+            else:
+                errmsg = f"Unable to cancel tasking for unknown tasking_id={tasking_id}."
+                raise RuntimeError(errmsg)
         finally:
             self._session_lock.release()
 

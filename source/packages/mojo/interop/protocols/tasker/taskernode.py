@@ -82,6 +82,17 @@ class TaskerNode:
         
         return rmt_archive_fullpath
 
+    def cancel_tasking(self, *, tasking_id: str):
+
+        client = self._create_connection()
+
+        try:
+            client.root.cancel_tasking(session_id=self._session_id, tasking_id=tasking_id)
+        finally:
+            client.close()
+
+        return
+
     def file_exists(self, *, filename: str) -> bool:
 
         client = self._create_connection()
