@@ -153,7 +153,7 @@ class TaskerSession:
             if tasking_id in self._taskings_table:
                 tasking: Tasking = self._taskings_table[tasking_id]
 
-                if tasking_id in self._status_table[tasking_id]:
+                if tasking_id in self._status_table:
                     tstatus = self._status_table[tasking_id]
 
                     if tstatus in [ProgressCode.NotStarted, ProgressCode.Paused, ProgressCode.Running]:
