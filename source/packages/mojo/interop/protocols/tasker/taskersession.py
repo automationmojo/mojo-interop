@@ -347,6 +347,12 @@ class TaskerSession:
 
         # Notify the thread starting us that we have started.
         sgate.set()
+
+        self._session_lock.acquire()
+        try:
+            self._status_table[tasking_id] = str(ProgressCode.NotStarted.value)
+        finally:
+            self._session_lock.release()
         del sgate
 
         self._service_class.log_info(f"Dispatching task_type={tasking_name} id={tasking_id}")
