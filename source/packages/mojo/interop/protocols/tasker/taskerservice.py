@@ -407,7 +407,8 @@ class TaskerService(rpyc.Service):
 
 
     def exposed_session_open(self, *, worker_name: str, output_directory: Optional[str] = None,
-                             log_level: Optional[int] = logging.DEBUG,
+                             log_level: Optional[int] = logging.DEBUG, notify_url: Optional[str] = None,
+                             notify_headers: Optional[Dict[str, str]] = None,
                              aspects: Optional[TaskerAspects] = DEFAULT_TASKER_ASPECTS) -> str:
 
         this_type = type(self)
@@ -427,7 +428,8 @@ class TaskerService(rpyc.Service):
                 errmsg = "Cannot open session. The maximum number of sessions has been reached."
                 raise RuntimeError(errmsg)
 
-            session = TaskerSession(this_type, worker_name, output_directory=output_directory, log_level=log_level, aspects=aspects)
+            session = TaskerSession(this_type, worker_name, output_directory=output_directory, log_level=log_level,
+                                    notify_url=notify_url, notify_headers=notify_headers, aspects=aspects)
             session_id = session.session_id
 
             this_type.active_sessions[session_id] = session
