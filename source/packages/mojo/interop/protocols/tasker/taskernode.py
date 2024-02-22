@@ -17,7 +17,7 @@ __status__ = "Development" # Prototype, Development or Production
 __license__ = "MIT"
 
 
-from typing import Dict, Optional, TYPE_CHECKING
+from typing import List, Optional, TYPE_CHECKING
 
 import logging
 import rpyc
@@ -34,6 +34,7 @@ from mojo.interop.protocols.tasker.taskeraspects import (
     TaskerAspects,
     DEFAULT_TASKER_ASPECTS
 )
+from mojo.interop.protocols.tasker.taskingevent import TaskingEvent
 
 if TYPE_CHECKING:
     from mojo.landscaping.client.clientbase import ClientBase
@@ -115,22 +116,40 @@ class TaskerNode:
         
         return exists
 
+    def get_tasking_events(self, *, tasking_id: str) -> List[dict]:
+
+        client = self._create_connection()
+
+        tevents = []
+        try:
+            tevents_str = client.root.get_tasking_events(session_id=self._session_id, tasking_id=tasking_id)
+            tevents = pickle.loads(tevents_str)
+
+            if tevents is not None and len(tevents) > 0:
+                tevents = [TaskingEvent.from_dict(tedata) for tedata in tevents]
+        finally:
+            client.close()
+        
+        return tevents
+
     def get_tasking_progress(self, *, tasking_id: str) -> ProgressInfo:
 
         client = self._create_connection()
 
+        tprog = None
         try:
-            tresult_str = client.root.get_tasking_progress(session_id=self._session_id, tasking_id=tasking_id)
-            tresult = pickle.loads(tresult_str)
+            tprog_str = client.root.get_tasking_progress(session_id=self._session_id, tasking_id=tasking_id)
+            tprog = pickle.loads(tprog_str)
         finally:
             client.close()
         
-        return tresult
+        return tprog
 
     def get_tasking_status(self, *, tasking_id: str) -> str:
 
         client = self._create_connection()
 
+        tstatus = None
         try:
             tstatus = client.root.get_tasking_status(session_id=self._session_id, tasking_id=tasking_id)
         finally:
@@ -142,6 +161,7 @@ class TaskerNode:
 
         client = self._create_connection()
 
+        tresult = None
         try:
             tresult_str = client.root.get_tasking_result(session_id=self._session_id, tasking_id=tasking_id)
             tresult = pickle.loads(tresult_str)

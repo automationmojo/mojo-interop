@@ -39,6 +39,7 @@ from mojo.interop.protocols.tasker.taskernode import TaskerNode, TaskerClientNod
 from mojo.interop.protocols.tasker.taskingresultpromise import TaskingResultPromise
 from mojo.interop.protocols.tasker.taskerservice import TaskerService
 from mojo.interop.protocols.tasker.taskerservermanager import TaskerServerManager, spawn_tasking_server_process
+from mojo.interop.protocols.tasker.taskingevent import TaskingEvent
 
 from mojo.landscaping.client.clientbase import ClientBase
 
@@ -141,6 +142,73 @@ class TaskerController:
     def stop_tasker_network(self):
 
         raise NotOverloadedError("The 'stop_tasker_network' method must be overloaded.")
+
+    def wait_for_all_to_event(self, event_name: str, promises: List[TaskingResultPromise],
+                            aspects: Optional[TaskerAspects] = None) -> List[TaskingEvent]:
+        """
+            This is a special wait function that checks all tasks in a list of promises to see if they 
+            are complete, without blocking on a single task.  It also can poll for progress and report
+            progress of the tasks if a summary_progress parameter is provided.
+        """
+
+        if aspects is None:
+            aspects = self._aspects
+
+        # We should always have a completion_timeout and completion_interval, if we don't
+        # something is wrong
+        timeout = aspects.completion_timeout
+        interval = aspects.completion_interval
+
+        now_time = datetime.now()
+        start_time = now_time
+        end_time = start_time + timedelta(seconds=timeout)
+
+        wait_on = [ np for np in promises ]
+        not_ready = []
+        
+        while True:
+            events_found = []
+
+            # Loop through our promises and check the status of the results
+            while len(wait_on) > 0:
+                np = wait_on.pop()
+                events = np.get_progress()
+
+                has_fired = False
+                ev: TaskingEvent
+                for ev in events:
+                    if ev.event_name == event_name:
+                        events_found.append(ev)
+                        has_fired = True
+                        break
+                
+                if not has_fired:
+                    not_ready.append(np)
+
+            if len(not_ready) == 0:
+                # We are done, every tasking has fired the specified event
+                break
+            else:
+                # Reset our wait lists so we can circle back
+                # after a short word from our sponsers, even
+                # though some of promises may have completed
+                # we still want to visit them because it will
+                # update the last session activity on the tasker
+                # server
+                wait_on = [p for p in promises]
+                not_ready = []
+
+            now_time = datetime.now()
+            if now_time > end_time:
+                err_msg_lines = [
+                    f"Timeout: Waiting for taskings to fire event='{event_name}'."
+                ]
+                errmsg = os.linesep.join(err_msg_lines)
+                raise TimeoutError(errmsg)
+
+            time.sleep(interval)
+
+        return events_found
 
     def wait_for_tasking_results(self, promises: List[TaskingResultPromise],
                                  summary_progress: Optional[SummaryProgressDelivery] = None,

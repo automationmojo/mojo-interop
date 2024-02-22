@@ -1,11 +1,12 @@
 
+from typing import Optional, Union
 
 class TaskingEvent:
     """
         A :class:`TaskingEvent` object used to report events.
     """
 
-    def __init__(self, tasking_id: str, event_name: str, payload: dict):
+    def __init__(self, tasking_id: str, event_name: str, payload: Optional[dict]):
         self._tasking_id = tasking_id
         self._event_name = event_name
         self._payload = payload
@@ -16,7 +17,7 @@ class TaskingEvent:
         return self._event_name
     
     @property
-    def payload(self) -> dict:
+    def payload(self) -> Union[dict, None]:
         return self._payload
 
     @property
@@ -24,7 +25,7 @@ class TaskingEvent:
         return self._tasking_id
         
     @classmethod
-    def from_dict(self, data: dict):
+    def from_dict(self, data: dict) -> "TaskingEvent":
         self._tasking_id = data["tasking-id"]
         self._event_name = data["event-name"]
         self._payload = data["payload"]

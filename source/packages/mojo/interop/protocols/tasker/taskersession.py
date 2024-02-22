@@ -18,7 +18,7 @@ __status__ = "Development" # Prototype, Development or Production
 __license__ = "MIT"
 
 
-from typing import Any, Dict, Optional, Tuple, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING
 
 
 import json
@@ -296,6 +296,25 @@ class TaskerSession:
     
         return taskref
     
+
+    def get_tasking_events(self, tasking_id: str) -> str:
+
+        events = []
+
+        self._session_lock.acquire()
+        try:
+            if tasking_id in self._events_table:
+                events = self._events_table[tasking_id]
+        finally:
+            self._session_lock.release()
+
+        events_str = None
+        if events is not None:
+            events_str = pickle.dumps(events)
+
+        return events_str
+
+
     def get_tasking_progress(self, tasking_id: str) -> str:
 
         progress = None
@@ -370,13 +389,14 @@ class TaskerSession:
         self._session_lock.acquire()
         try:
             tasking_id = event["tasking-id"]
-            event_name = event["even-name"]
 
             if tasking_id in self._events_table:
-                tasking_events_table = self._events_table[tasking_id]
-                tasking_events_table[event_name] = event
+                tasking_events: List[dict] = self._events_table[tasking_id]
+                tasking_events.append(event)
             else:
-                self._events_table[tasking_id] = { event_name: event}
+                tasking_events = [ event ]
+                self._events_table[tasking_id] = tasking_events
+    
         finally:
             self._session_lock.release()
 

@@ -19,7 +19,7 @@ from mojo.interop.protocols.tasker.taskernode import TaskerNode
 from mojo.interop.protocols.tasker.tasking import Tasking, TaskingIdentity
 from mojo.interop.protocols.tasker.taskingresultpromise import TaskingResultPromise
 from mojo.interop.protocols.tasker.taskercontroller import TaskerController
-
+from mojo.interop.protocols.tasker.taskingevent import TaskingEvent
 
 if TYPE_CHECKING:
     from mojo.interop.protocols.tasker.taskingadapter import TaskingAdapter
@@ -164,6 +164,16 @@ class TaskingGroupScope:
             self.wait_for_tasking_results()
 
         return
+
+
+    def wait_for_all_to_event(self, event_name: str, aspects: Optional[TaskerAspects] = None) -> List[TaskingEvent]:
+
+        if aspects is None:
+            aspects = self._aspects
+
+        events_found = self._controller.wait_for_all_to_event(event_name, self._promises)
+
+        return events_found
 
 
     def wait_for_tasking_results(self, aspects: Optional[TaskerAspects] = None) -> List[TaskingResult]:

@@ -16,7 +16,7 @@ __status__ = "Development" # Prototype, Development or Production
 __license__ = "MIT"
 
 
-from typing import Optional, TYPE_CHECKING
+from typing import List, TYPE_CHECKING
 
 import os
 import time
@@ -30,6 +30,8 @@ DEFAULT_WAIT_INTERVAL = 5
 
 from mojo.results.model.taskingresult import TaskingResult
 from mojo.results.model.progressinfo import ProgressInfo
+
+from mojo.interop.protocols.tasker.taskingevent import TaskingEvent
 
 if TYPE_CHECKING:
     from mojo.interop.protocols.tasker.taskernode import TaskerNode
@@ -83,6 +85,12 @@ class TaskingResultPromise:
     def cancel(self):
         self._node.cancel_tasking(tasking_id=self._tasking_id)
         return
+
+    def get_events(self) -> List[TaskingEvent]:
+
+        rtnval = self._node.get_tasking_events(tasking_id=self._tasking_id)
+        
+        return rtnval
 
     def get_result(self) -> TaskingResult:
         rtnval = self._node.get_tasking_result(tasking_id=self._tasking_id)
