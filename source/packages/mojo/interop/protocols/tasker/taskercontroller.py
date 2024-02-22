@@ -172,7 +172,7 @@ class TaskerController:
             # Loop through our promises and check the status of the results
             while len(wait_on) > 0:
                 np = wait_on.pop()
-                events = np.get_progress()
+                events = np.get_events()
 
                 has_fired = False
                 ev: TaskingEvent
