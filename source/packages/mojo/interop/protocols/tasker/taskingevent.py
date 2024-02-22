@@ -6,7 +6,7 @@ class TaskingEvent:
         A :class:`TaskingEvent` object used to report events.
     """
 
-    def __init__(self, tasking_id: str, event_name: str, payload: Optional[dict]):
+    def __init__(self, tasking_id: str, event_name: str, payload: Optional[dict]=None):
         self._tasking_id = tasking_id
         self._event_name = event_name
         self._payload = payload
