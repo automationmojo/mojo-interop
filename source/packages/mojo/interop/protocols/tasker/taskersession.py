@@ -27,6 +27,7 @@ import multiprocessing.context
 import os
 import pickle
 import threading
+import traceback
 import weakref
 
 from collections import OrderedDict
@@ -34,6 +35,8 @@ from datetime import datetime
 from functools import partial
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from uuid import uuid4
+
+from http import HTTPStatus
 
 from mojo.errors.exceptions import SemanticError
 
@@ -59,13 +62,15 @@ if TYPE_CHECKING:
 
 class EventNotificationHandler(BaseHTTPRequestHandler):
 
-            def __init__(self, session, *args, **kwargs):
+            def __init__(self, service_class, session, *args, **kwargs):
                 super().__init__(*args, **kwargs)
+                self._service_class = service_class
                 self._tasker_session_ref = weakref.ref(session)
+                self._logger = self._service_class.logger
                 return
             
             @property
-            def tasker_session(self):
+            def tasker_session(self) -> "TaskerSession":
                 return self._tasker_session_ref()
 
             def do_POST(self):
@@ -77,13 +82,18 @@ class EventNotificationHandler(BaseHTTPRequestHandler):
                         file_length = int(self.headers['Content-Length'])
                 
                         content = self.rfile.read(file_length)
-                        event = json.loads(content)
-                        self.tasker_session.post_event(event)
-                
 
-                self.send_response(201, 'Created')
-                self.end_headers()
+                        try:
+                            event = json.loads(content)
+                            self.tasker_session.post_event(event)
 
+                            self.send_response(HTTPStatus.ACCEPTED, 'Accepted')
+                            self.end_headers()
+                        except Exception as xcpt:
+                            errdetail = traceback.format_exc()
+                            self._logger.error(errdetail)
+                            self.send_response(HTTPStatus.INTERNAL_SERVER_ERROR, errdetail)
+                            self.end_headers()
                 return
 
 
@@ -259,7 +269,7 @@ class TaskerSession:
                 f"log_file: {log_file}",
                 f"notify_url: {self._notify_url}",
                 f"notify_headers: {repr(self._notify_headers)}",
-                f"log_level: {self._log_level}"
+                f"log_level: {self._log_level}",
                 "==================================================================================",
             ]
             start_msg = os.linesep.join(start_msg_lines)
@@ -521,7 +531,7 @@ class TaskerSession:
 
     def _event_server_thread(self, sgate: threading.Event):
         
-        handler_type = partial(EventNotificationHandler, self)
+        handler_type = partial(EventNotificationHandler, self._service_class, self)
 
         server = HTTPServer(('', 0), handler_type)
         server_host = server.server_name
