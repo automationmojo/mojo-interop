@@ -533,14 +533,15 @@ class TaskerSession:
         
         handler_type = partial(EventNotificationHandler, self._service_class, self)
 
-        server = HTTPServer(('', 0), handler_type)
-        server_host = server.server_name
+        localhost =  "127.0.0.1"
+
+        server = HTTPServer((localhost, 0), handler_type)
         server_port = server.server_port
 
         self._session_lock.acquire()
         try:
             self._events_server = server
-            self._events_endpoint = (server_host, server_port)
+            self._events_endpoint = (localhost, server_port)
         finally:
             self._session_lock.release()
 
