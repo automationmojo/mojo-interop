@@ -517,7 +517,7 @@ class Tasking:
             url = f"http://{self._events_host}:{self._events_port}/"
             data = event.as_dict()
 
-            resp = requests.post(url, headers=headers, data=data)
+            resp = requests.post(url, headers=headers, json=data)
             if resp.status_code != 200:
                 errmsg = f"Error while poisting event {event.event_name}"
                 self._logger.error(errmsg)
