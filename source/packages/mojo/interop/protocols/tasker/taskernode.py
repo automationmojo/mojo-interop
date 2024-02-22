@@ -139,7 +139,8 @@ class TaskerNode:
         tprog = None
         try:
             tprog_str = client.root.get_tasking_progress(session_id=self._session_id, tasking_id=tasking_id)
-            tprog = pickle.loads(tprog_str)
+            if tprog_str is not None:
+                tprog = pickle.loads(tprog_str)
         finally:
             client.close()
         
