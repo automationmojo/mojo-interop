@@ -18,17 +18,21 @@ __status__ = "Development" # Prototype, Development or Production
 __license__ = "MIT"
 
 
-from typing import Dict, Optional, TYPE_CHECKING
+from typing import Any, Dict, Optional, Tuple, TYPE_CHECKING
 
 
+import json
 import multiprocessing
 import multiprocessing.context
 import os
 import pickle
 import threading
+import weakref
 
 from collections import OrderedDict
 from datetime import datetime
+from functools import partial
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from uuid import uuid4
 
 from mojo.errors.exceptions import SemanticError
@@ -51,6 +55,37 @@ from mojo.interop.protocols.tasker.tasking import Tasking, TaskingManager
 
 if TYPE_CHECKING:
     from mojo.interop.protocols.tasker.taskerservice import TaskerService
+
+
+class EventNotificationHandler(BaseHTTPRequestHandler):
+
+            def __init__(self, session, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                self._tasker_session_ref = weakref.ref(session)
+                return
+            
+            @property
+            def tasker_session(self):
+                return self._tasker_session_ref()
+
+            def do_POST(self):
+
+                if "Content-Type" in self.headers:
+                    content_type = self.headers["Content-Type"].lower()
+                    if content_type == "application/json":
+
+                        file_length = int(self.headers['Content-Length'])
+                
+                        content = self.rfile.read(file_length)
+                        event = json.loads(content)
+                        self.tasker_session.post_event(event)
+                
+
+                self.send_response(201, 'Created')
+                self.end_headers()
+
+                return
+
 
 class TaskerSession:
 
@@ -79,8 +114,12 @@ class TaskerSession:
         self._results_table = OrderedDict()
         self._status_table = OrderedDict()
         self._progress_table = OrderedDict()
+        self._events_table = {}
 
         self._session_lock = threading.Lock()
+
+        self._events_server = None
+        self._events_endpoint = None
 
         return
     
@@ -229,7 +268,7 @@ class TaskerSession:
                 tlogf.write(start_msg)
 
             tasking = tasking_manager.instantiate_tasking(worker, module_name, tasking_name, tasking_id, parent_id, self._output_directory,
-                log_dir, log_file, self._log_level, self._notify_url, self._notify_headers, aspects=aspects)
+                log_dir, log_file, self._log_level, self._events_endpoint, self._notify_url, self._notify_headers, aspects=aspects)
 
             self._session_lock.acquire()
             try:
@@ -325,7 +364,24 @@ class TaskerSession:
             self._session_lock.release()
 
         return complete_and_ready
-    
+
+    def post_event(self, event: Dict[str, Any]):
+
+        self._session_lock.acquire()
+        try:
+            tasking_id = event["tasking-id"]
+            event_name = event["even-name"]
+
+            if tasking_id in self._events_table:
+                tasking_events_table = self._events_table[tasking_id]
+                tasking_events_table[event_name] = event
+            else:
+                self._events_table[tasking_id] = { event_name: event}
+        finally:
+            self._session_lock.release()
+
+        return
+
     def shutdown(self):
 
         # Go through all of the tasks and if they have not completed, cancel them
@@ -333,11 +389,37 @@ class TaskerSession:
         tasking: Tasking
         tstatus: ProgressCode
 
-        for tasking_id, tasking in self._taskings_table.items():
-            tstatus = self._status_table[tasking_id]
+        tasking_table = None
+        status_table = None
+        events_server = None
 
-            if tstatus in [ProgressCode.NotStarted, ProgressCode.Paused, ProgressCode.Running]:
-                tasking.shutdown()
+        self._session_lock.acquire()
+        try:
+            tasking_table = self._taskings_table
+            status_table = self._status_table
+            events_server = self._events_server
+        finally:
+            self._session_lock.release()
+
+        try:
+            for tasking_id, tasking in tasking_table.items():
+                tstatus = status_table[tasking_id]
+
+                if tstatus in [ProgressCode.NotStarted, ProgressCode.Paused, ProgressCode.Running]:
+                    tasking.shutdown()
+        finally:
+            events_server.shutdown()
+
+        return
+
+    def start_event_server(self) -> Tuple[str, int]:
+
+        sgate = threading.Event()
+        sgate.clear()
+
+        self._event_thread = threading.Thread(target=self._event_server_thread, name="tasker-session-event-svr", args=(sgate,), daemon=True)
+        self._event_thread.start()
+        sgate.wait()
 
         return
 
@@ -414,6 +496,29 @@ class TaskerSession:
 
         finally:
             tasking_manager.shutdown()
+
+        return
+
+    def _event_server_thread(self, sgate: threading.Event):
+        
+        handler_type = partial(EventNotificationHandler, self)
+
+        server = HTTPServer(('', 0), handler_type)
+        server_host = server.server_name
+        server_port = server.server_port
+
+        self._session_lock.acquire()
+        try:
+            self._events_server = server
+            self._events_endpoint = (server_host, server_port)
+        finally:
+            self._session_lock.release()
+
+        # After we setup the HTTP server and capture the server endpoint information,
+        # set the startgate to allow the thread starting the server to proceed.
+        sgate.set()
+
+        server.serve_forever()
 
         return
 

@@ -53,10 +53,11 @@ from mojo.xmods.ximport import import_by_name
 from mojo.xmods.jsos import CHAR_RECORD_SEPERATOR
 
 from mojo.interop.protocols.tasker.taskeraspects import TaskerAspects, DEFAULT_TASKER_ASPECTS
+from mojo.interop.protocols.tasker.taskingevent import TaskingEvent
 
 
 def instantiate_tasking(worker: str, module_name: str, tasking_name: str, tasking_id: str, parent_id: str, output_dir: str,
-                        logdir: str, logfile: str, log_level: int, notify_url: Optional[str], notify_headers: Optional[Dict[str, str]],
+                        logdir: str, logfile: str, log_level: int, events_endpoint: Tuple[str, int], notify_url: Optional[str], notify_headers: Optional[Dict[str, str]],
                         aspects: Optional[TaskerAspects] = DEFAULT_TASKER_ASPECTS):
 
     logger = None
@@ -79,8 +80,8 @@ def instantiate_tasking(worker: str, module_name: str, tasking_name: str, taskin
         logger.info(f"Creating tasking module_name={module_name} tasking_name={tasking_name}")
 
         tasking = tasking_type(worker=worker, tasking_id=tasking_id, parent_id=parent_id, output_dir=output_dir, 
-                               logdir=logdir, logfile=logfile, logger=logger, notify_url=notify_url,
-                               notify_headers=notify_headers, aspects=aspects)
+                               logdir=logdir, logfile=logfile, logger=logger, events_endpoint=events_endpoint,
+                               notify_url=notify_url, notify_headers=notify_headers, aspects=aspects)
 
     return tasking
 
@@ -117,8 +118,8 @@ class Tasking:
     PREFIX = "tasking"
 
     def __init__(self, worker: str, tasking_id: str, parent_id: str, output_dir: str, logdir: str,
-                 logfile: str, logger: logging.Logger, notify_url: Optional[str] = None,
-                 notify_headers: Optional[dict] = None,
+                 logfile: str, logger: logging.Logger, events_endpoint: Optional[Tuple[str, int]], 
+                 notify_url: Optional[str] = None, notify_headers: Optional[dict] = None,
                  aspects: Optional[TaskerAspects] = DEFAULT_TASKER_ASPECTS):
 
         self._worker = worker
@@ -131,6 +132,14 @@ class Tasking:
         self._logdir = logdir
         self._logfile = logfile
         self._logger = logger
+    
+        self._events_host = None
+        self._events_port = None
+
+        self._events_endpoint = events_endpoint
+        if self._events_endpoint is not None:
+            self._events_host, self._events_port = events_endpoint
+
         self._notify_url = notify_url
         self._notify_headers = notify_headers
         self._aspects = aspects
@@ -501,6 +510,22 @@ class Tasking:
         errmsg = "Tasking.perform method must be overloaded in derived types."
         raise NotOverloadedError(errmsg)
     
+    def post_event(self, event: TaskingEvent):
+
+        if self._events_endpoint is not None:
+            headers = { "Content-Type": "application/json"}
+            url = f"http://{self._events_host}:{self._events_port}/"
+            data = event.as_dict()
+
+            resp = requests.post(url, headers=headers, data=data)
+            if resp.status_code != 200:
+                errmsg = f"Error while poisting event {event.event_name}"
+                self._logger.error(errmsg)
+            else:
+                self._logger.info(f"Successfully posted event={event.event_name}")
+
+        return
+
     def resume(self):
         """
             Resumes the tasking loop

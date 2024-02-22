@@ -431,6 +431,7 @@ class TaskerService(rpyc.Service):
             session = TaskerSession(this_type, worker_name, output_directory=output_directory, log_level=log_level,
                                     notify_url=notify_url, notify_headers=notify_headers, aspects=aspects)
             session_id = session.session_id
+            session.start_event_server()
 
             this_type.active_sessions[session_id] = session
 
