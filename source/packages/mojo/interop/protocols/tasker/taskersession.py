@@ -318,9 +318,7 @@ class TaskerSession:
         finally:
             self._session_lock.release()
 
-        events_str = None
-        if events is not None:
-            events_str = pickle.dumps(events)
+        events_str = pickle.dumps(events)
 
         return events_str
 
