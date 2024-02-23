@@ -26,10 +26,8 @@ class TaskingEvent:
         
     @classmethod
     def from_dict(self, data: dict) -> "TaskingEvent":
-        self._tasking_id = data["tasking-id"]
-        self._event_name = data["event-name"]
-        self._payload = data["payload"]
-        return
+        obj = TaskingEvent(data["tasking-id"], data["event-name"], data["payload"])
+        return obj
 
     def as_dict(self) -> dict:
 
