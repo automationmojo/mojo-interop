@@ -63,10 +63,10 @@ if TYPE_CHECKING:
 class EventNotificationHandler(BaseHTTPRequestHandler):
 
             def __init__(self, service_class, session, *args, **kwargs):
-                super().__init__(*args, **kwargs)
                 self._service_class = service_class
                 self._tasker_session_ref = weakref.ref(session)
                 self._logger = self._service_class.logger
+                super().__init__(*args, **kwargs)
                 return
             
             @property
