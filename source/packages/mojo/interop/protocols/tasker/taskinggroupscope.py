@@ -175,6 +175,14 @@ class TaskingGroupScope:
 
         return events_found
 
+    def wait_for_any_to_event(self, event_name: str, aspects: Optional[TaskerAspects] = None) -> List[TaskingEvent]:
+
+        if aspects is None:
+            aspects = self._aspects
+
+        events_found = self._controller.wait_for_any_to_event(event_name, self._promises)
+
+        return events_found
 
     def wait_for_tasking_results(self, aspects: Optional[TaskerAspects] = None) -> List[TaskingResult]:
 
