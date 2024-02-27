@@ -214,7 +214,7 @@ class TaskerNode:
 
         return
 
-    def session_open(self, *, worker_name: str, output_directory: Optional[str] = None, log_level: Optional[int] = logging.DEBUG,
+    def session_open(self, *, worker: str, wref: str, output_directory: Optional[str] = None, log_level: Optional[int] = logging.DEBUG,
                      aspects: Optional[TaskerAspects] = None) -> str:
         
         if aspects is None:
@@ -223,7 +223,7 @@ class TaskerNode:
         client = self._create_connection()
 
         try:
-            session_id = client.root.session_open(worker_name=worker_name, output_directory=output_directory, log_level=log_level, aspects=aspects)
+            session_id = client.root.session_open(worker=worker, wref=wref, output_directory=output_directory, log_level=log_level, aspects=aspects)
             self._session_id = session_id
         finally:
             client.close()

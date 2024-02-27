@@ -99,13 +99,14 @@ class EventNotificationHandler(BaseHTTPRequestHandler):
 
 class TaskerSession:
 
-    def __init__(self, service_class: "TaskerService", worker_name: str, output_directory: str, log_level: int,
+    def __init__(self, service_class: "TaskerService", worker: str, wref: str, output_directory: str, log_level: int,
                  notify_url: str = None, notify_headers: Dict[str, str] = None,
                  aspects: TaskerAspects = DEFAULT_TASKER_ASPECTS):
 
         self._service_class = service_class
 
-        self._worker_name = worker_name
+        self._worker = worker
+        self._wref = wref
         self._output_directory = os.path.abspath(os.path.expandvars(os.path.expanduser(output_directory)))
 
         self._log_level = log_level
@@ -218,7 +219,7 @@ class TaskerSession:
 
         return
 
-    def execute_tasking(self, worker: str, module_name: str, tasking_name: str,
+    def execute_tasking(self, module_name: str, tasking_name: str,
                                parent_id: Optional[str] = None, aspects: Optional[TaskerAspects]=None, **kwargs) -> TaskingRef:
         
         if aspects is None:
@@ -259,7 +260,8 @@ class TaskerSession:
 
             start_msg_lines = [
                 "=============================== Instantiating Task ===============================",
-                f"worker: {worker}",
+                f"worker: {self._worker}",
+                f"worker-ref: {self._wref}",
                 f"module_name: {module_name}",
                 f"tasking_name: {tasking_name}",
                 f"tasking_id: {tasking_id}",
@@ -277,7 +279,7 @@ class TaskerSession:
             with open(log_file, "+a") as tlogf:
                 tlogf.write(start_msg)
 
-            tasking = tasking_manager.instantiate_tasking(worker, module_name, tasking_name, tasking_id, parent_id, self._output_directory,
+            tasking = tasking_manager.instantiate_tasking(self._worker, self._wref, module_name, tasking_name, tasking_id, parent_id, self._output_directory,
                 log_dir, log_file, self._log_level, self._events_endpoint, self._notify_url, self._notify_headers, aspects=aspects)
 
             self._session_lock.acquire()

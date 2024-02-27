@@ -56,7 +56,7 @@ from mojo.interop.protocols.tasker.taskeraspects import TaskerAspects, DEFAULT_T
 from mojo.interop.protocols.tasker.taskingevent import TaskingEvent
 
 
-def instantiate_tasking(worker: str, module_name: str, tasking_name: str, tasking_id: str, parent_id: str, output_dir: str,
+def instantiate_tasking(worker: str, wref: str, module_name: str, tasking_name: str, tasking_id: str, parent_id: str, output_dir: str,
                         logdir: str, logfile: str, log_level: int, events_endpoint: Tuple[str, int], notify_url: Optional[str], notify_headers: Optional[Dict[str, str]],
                         aspects: Optional[TaskerAspects] = DEFAULT_TASKER_ASPECTS):
 
@@ -79,7 +79,7 @@ def instantiate_tasking(worker: str, module_name: str, tasking_name: str, taskin
 
         logger.info(f"Creating tasking module_name={module_name} tasking_name={tasking_name}")
 
-        tasking = tasking_type(worker=worker, tasking_id=tasking_id, parent_id=parent_id, output_dir=output_dir, 
+        tasking = tasking_type(worker=worker, wref=wref, tasking_id=tasking_id, parent_id=parent_id, output_dir=output_dir, 
                                logdir=logdir, logfile=logfile, logger=logger, events_endpoint=events_endpoint,
                                notify_url=notify_url, notify_headers=notify_headers, aspects=aspects)
 
@@ -117,12 +117,13 @@ class Tasking:
 
     PREFIX = "tasking"
 
-    def __init__(self, worker: str, tasking_id: str, parent_id: str, output_dir: str, logdir: str,
+    def __init__(self, worker: str, wref: str,  tasking_id: str, parent_id: str, output_dir: str, logdir: str,
                  logfile: str, logger: logging.Logger, events_endpoint: Optional[Tuple[str, int]], 
                  notify_url: Optional[str] = None, notify_headers: Optional[dict] = None,
                  aspects: Optional[TaskerAspects] = DEFAULT_TASKER_ASPECTS):
 
         self._worker = worker
+        self._wref = wref
         self._tasking_id = tasking_id
         if self._tasking_id is None:
             self._tasking_id = str(uuid4())
@@ -371,6 +372,7 @@ class Tasking:
             "id": self._result.inst_id,
             "parent": self._result.parent_inst,
             "worker": self._worker,
+            "wref": self._worker_ref, 
             "start": self._result.start,
             "stop": None,
             "status": str(ProgressCode.Running.value),

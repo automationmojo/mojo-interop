@@ -394,7 +394,7 @@ class ProcessTaskerController(TaskerController):
 
         self._network_started = True
 
-        for _ in range(node_count):
+        for nindex in range(node_count):
             svr_mgr, tasking_svr_proxy = spawn_tasking_server_process(('0.0.0.0', 0), logging_directory=self._logging_directory)
 
             tasking_svr_proxy.start()
@@ -403,11 +403,13 @@ class ProcessTaskerController(TaskerController):
             self._svr_proxies.append(tasking_svr_proxy)
 
             ipaddr, port = tasking_svr_proxy.get_service_endpoint()
-            worker_name = f"{ipaddr}: {port}"
+            worker = f"{ipaddr}: {port}"
 
             node = TaskerNode(ipaddr=ipaddr, port=port)
             
-            node.session_open(worker_name=worker_name, output_directory=output_directory, log_level=log_level, aspects=self._aspects)
+            wref = str(nindex)
+
+            node.session_open(worker=worker, wref=wref, output_directory=output_directory, log_level=log_level, aspects=self._aspects)
 
             self._tasker_nodes.append(node)
 
@@ -438,13 +440,14 @@ class ClientTaskerController(TaskerController):
 
         self._network_started = True
 
-        for cl in clients:
+        for cidx, cl in enumerate(clients):
 
             node = TaskerClientNode(client=cl, ipaddr=cl.ipaddr, port=TASKER_PORT)
             
-            worker_name = cl.ipaddr
+            worker = cl.ipaddr
+            wref = str(cidx)
 
-            node.session_open(worker_name=worker_name, output_directory=output_directory, log_level=log_level, aspects=self._aspects)
+            node.session_open(worker=worker, wref=wref, output_directory=output_directory, log_level=log_level, aspects=self._aspects)
             
             self._tasker_nodes.append(node)
 

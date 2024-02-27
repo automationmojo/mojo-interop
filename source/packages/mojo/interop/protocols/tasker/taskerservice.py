@@ -150,7 +150,7 @@ class TaskerService(rpyc.Service):
         return
     
 
-    def exposed_execute_tasking(self, *, session_id: str, worker: str, module_name: str, tasking_name: str, parent_id: Optional[str] = None,
+    def exposed_execute_tasking(self, *, session_id: str, module_name: str, tasking_name: str, parent_id: Optional[str] = None,
                                 aspects: Optional[TaskerAspects]=None, **kwargs) -> dict:
 
         this_type = type(self)
@@ -164,7 +164,7 @@ class TaskerService(rpyc.Service):
             
             this_type.service_lock.release()
             try:
-                taskref = session.execute_tasking(worker=worker, module_name=module_name, tasking_name=tasking_name, parent_id=parent_id,
+                taskref = session.execute_tasking(module_name=module_name, tasking_name=tasking_name, parent_id=parent_id,
                                         aspects=aspects, **kwargs)
             finally:
                 this_type.service_lock.acquire()
@@ -437,7 +437,7 @@ class TaskerService(rpyc.Service):
         return session_id
 
 
-    def exposed_session_open(self, *, worker_name: str, output_directory: Optional[str] = None,
+    def exposed_session_open(self, *, worker: str, wref: str, output_directory: Optional[str] = None,
                              log_level: Optional[int] = logging.DEBUG, notify_url: Optional[str] = None,
                              notify_headers: Optional[Dict[str, str]] = None,
                              aspects: Optional[TaskerAspects] = DEFAULT_TASKER_ASPECTS) -> str:
@@ -459,7 +459,7 @@ class TaskerService(rpyc.Service):
                 errmsg = "Cannot open session. The maximum number of sessions has been reached."
                 raise RuntimeError(errmsg)
 
-            session = TaskerSession(this_type, worker_name, output_directory=output_directory, log_level=log_level,
+            session = TaskerSession(this_type, worker, wref, output_directory=output_directory, log_level=log_level,
                                     notify_url=notify_url, notify_headers=notify_headers, aspects=aspects)
             session_id = session.session_id
             session.start_event_server()
