@@ -186,13 +186,16 @@ class TaskerNode:
 
         client = self._create_connection()
 
+        if wref is None:
+            wref = self.ipaddr
+
         if aspects is None:
             aspects = self._aspects
 
         try:
             taskref_info = client.root.execute_tasking(session_id=self._session_id, worker=self._ipaddr,
                                                        module_name=module_name, tasking_name=tasking_name,
-                                                       aspects=aspects, **kwargs)
+                                                    aspects=aspects, **kwargs)
 
             promise = TaskingResultPromise(taskref_info["module_name"], taskref_info["tasking_id"], taskref_info["task_name"],
                                            taskref_info["log_dir"], self._session_id, self)
