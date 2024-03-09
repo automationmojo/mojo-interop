@@ -185,11 +185,7 @@ class TaskerNode:
     def execute_tasking(self, *, module_name: str, tasking_name: str, aspects: Optional[TaskerAspects]=None, **kwargs) -> TaskingResultPromise:
 
         # We are not going to automatically close this as there may be
-        # net NetRef outstanding if there is an executing tasking
         client = self._create_connection()
-
-        if wref is None:
-            wref = self.ipaddr
 
         if aspects is None:
             aspects = self._aspects
@@ -224,6 +220,9 @@ class TaskerNode:
             aspects = self._aspects
 
         client = self._create_connection()
+
+        if wref is None:
+            wref = self.ipaddr
 
         try:
             session_id = client.root.session_open(worker=worker, wref=wref, output_directory=output_directory, log_level=log_level, aspects=aspects)
