@@ -58,7 +58,7 @@ from mojo.interop.protocols.tasker.taskingevent import TaskingEvent
 
 def instantiate_tasking(worker: str, wref: str, module_name: str, tasking_name: str, tasking_id: str, parent_id: str, output_dir: str,
                         logdir: str, logfile: str, log_level: int, events_endpoint: Tuple[str, int], notify_url: Optional[str], notify_headers: Optional[Dict[str, str]],
-                        aspects: Optional[TaskerAspects] = DEFAULT_TASKER_ASPECTS):
+                        aspects: Optional[TaskerAspects] = DEFAULT_TASKER_ASPECTS) -> "Tasking":
 
     logger = None
     tasking = None
@@ -180,17 +180,17 @@ class Tasking:
         return identity
 
     @property
-    def full_name(self):
+    def full_name(self) -> str:
         this_type = type(self)
         fname = f"{this_type.__module__}@{this_type.__name__}"
         return fname
 
     @property
-    def result(self):
+    def result(self) -> TaskingResult:
         return self._result
 
     @property
-    def task_status(self):
+    def task_status(self) -> ProgressCode:
         return self._task_status
 
     def add_metrics_stream(self, stream_name: str, stream_type: str):

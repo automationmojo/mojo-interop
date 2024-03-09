@@ -22,7 +22,7 @@ class HelloWorldTasking(Tasking):
         return
 
     def mark_progress_start(self):
-        self._current_progress = ProgressInfo(self._tasking_id, ProgressType.NumericRange, self.full_name, ProgressType.NumericRange,
+        self._current_progress = ProgressInfo(self._tasking_id, ProgressType.NumericRange, self.full_name,
                                               0, 5, 0, ProgressCode.Running, self._data)
         return
 
