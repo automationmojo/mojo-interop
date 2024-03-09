@@ -457,6 +457,8 @@ class TaskerSession:
                       tasking_name: str, tasking_id: str, prefix: str, parent_id: str,
                       log_file: str, kwparams: dict, aspects: TaskerAspects):
 
+        tasking_full_name = tasking.full_name
+
         # Notify the thread starting us that we have started.
         sgate.set()
 
@@ -517,7 +519,7 @@ class TaskerSession:
             with open(log_file, "+a") as tlogf:
                 tlogf.write(errmsg)
             
-            tresult = TaskingResult(tasking_id, tasking.full_name, parent_id, ResultCode.ERRORED, prefix=prefix)
+            tresult = TaskingResult(tasking_id, tasking_full_name, parent_id, ResultCode.ERRORED, prefix=prefix)
             self._status_table[tasking_id] = str(ProgressCode.Errored.value)
             tresult.add_error(tbdetail)
             self._results_table[tasking_id] = tresult
