@@ -461,7 +461,7 @@ class Tasking:
             The `mark_progress_start` method that is called to generate a :class:`ProgressInfo` running.
         """
         self._task_status = ProgressCode.Running
-        self._current_progress = ProgressInfo(self._tasking_id, ProgressType.NumericRange, self.full_name,
+        self._current_progress = ProgressInfo(self._tasking_id, ProgressType.NumericRange, self.full_name, ProgressType.NumericRange,
                                               0, 0, 0, ProgressCode.Running, datetime.now(), {})
         return
 
