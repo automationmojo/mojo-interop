@@ -38,6 +38,7 @@ TASKER_PROTOCOL_CONFIG = {
     "allow_pickle": True,
     "import_custom_exceptions": True,
     "allow_custom_exceptions": True,
+    "sync_request_timeout": 60,
     "logger": logging.getLogger()
 }
 

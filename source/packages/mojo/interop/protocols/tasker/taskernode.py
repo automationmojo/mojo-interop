@@ -187,17 +187,19 @@ class TaskerNode:
         # We are not going to automatically close this as there may be
         client = self._create_connection()
 
-        if aspects is None:
-            aspects = self._aspects
+        try:
+            if aspects is None:
+                aspects = self._aspects
 
-        
-        taskref_info = client.root.execute_tasking(session_id=self._session_id, worker=self._ipaddr,
-                                                    module_name=module_name, tasking_name=tasking_name,
-                                                aspects=aspects, **kwargs)
+            
+            taskref_info = client.root.execute_tasking(session_id=self._session_id, worker=self._ipaddr,
+                                                        module_name=module_name, tasking_name=tasking_name,
+                                                    aspects=aspects, **kwargs)
 
-        promise = TaskingResultPromise(client, taskref_info["module_name"], taskref_info["tasking_id"], taskref_info["task_name"],
-                                        taskref_info["log_dir"], self._session_id, self)
-
+            promise = TaskingResultPromise(client, taskref_info["module_name"], taskref_info["tasking_id"], taskref_info["task_name"],
+                                            taskref_info["log_dir"], self._session_id, self)
+        finally:
+            client.close()
         
         return promise
 

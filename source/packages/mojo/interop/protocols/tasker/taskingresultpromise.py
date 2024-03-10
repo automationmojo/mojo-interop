@@ -52,26 +52,14 @@ class TaskingRef:
 
 class TaskingResultPromise:
 
-    def __init__(self, client, module_name: str, tasking_id: str, task_name: str, log_dir: str,
+    def __init__(self, module_name: str, tasking_id: str, task_name: str, log_dir: str,
                  session_id: str, node: "TaskerNode"):
-        self._client = client
         self._module_name = module_name
         self._tasking_id = tasking_id
         self._task_name = task_name
         self._log_dir = log_dir
         self._session_id = session_id
         self._node = node
-        return
-
-    def __del__(self):
-        # Keep the task run client open until this object
-        # is destroyed in case there are NetRef objects that are
-        # being used by the remote end.
-        if self._client is not None:
-            try:
-                self._client.close()
-            except:
-                pass
         return
 
     @property
