@@ -196,7 +196,7 @@ class TaskerNode:
                                                         module_name=module_name, tasking_name=tasking_name,
                                                     aspects=aspects, **kwargs)
 
-            promise = TaskingResultPromise(client, taskref_info["module_name"], taskref_info["tasking_id"], taskref_info["task_name"],
+            promise = TaskingResultPromise(taskref_info["module_name"], taskref_info["tasking_id"], taskref_info["task_name"],
                                             taskref_info["log_dir"], self._session_id, self)
         finally:
             client.close()
