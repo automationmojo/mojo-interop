@@ -95,7 +95,7 @@ def tasking_server_example_main():
     logging_directory = tempfile.mkdtemp(prefix="taskerrun-")
 
     controller = ProcessTaskerController(logging_directory=logging_directory)
-    controller.start_tasker_network(notify_url=f'http://localhost:{notify_port}/')
+    controller.start_tasker_network()
 
     try:
         print("=============== Tasker Nodes ===============")

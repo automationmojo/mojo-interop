@@ -425,7 +425,7 @@ class ProcessTaskerController(TaskerController):
 
 class ClientTaskerController(TaskerController):
 
-    def __init__(self, logging_directory: Optional[str] = None, aspects: Optional[TaskerAspects] = None):
+    def __init__(self, logging_directory: Optional[str] = None, aspects: Optional[TaskerAspects] = DEFAULT_TASKER_ASPECTS):
         super().__init__(logging_directory=logging_directory, aspects=aspects)
         return
 
