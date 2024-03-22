@@ -46,6 +46,7 @@ from mojo.landscaping.client.clientbase import ClientBase
 
 TASKER_PORT = 8686
 
+
 class TaskerController:
     """
         The :class:`TaskerController` object lets you startup and control task processing across
@@ -53,18 +54,22 @@ class TaskerController:
     """
 
     def __init__(self, logging_directory: Optional[str] = None,
+                 summary_progress: Optional[SummaryProgressDelivery] = None,
                  aspects: Optional[TaskerAspects] = DEFAULT_TASKER_ASPECTS):
         self._logging_directory = logging_directory
+        self._summary_progress = summary_progress
         self._aspects = aspects
 
         self._tasker_nodes: List[TaskerNode] = []
         self._network_started = False
         return
 
+
     @property
     def tasker_clients(self) -> List[ClientBase]:
         clients = [ tn.client for tn in self._tasker_nodes]
         return clients
+
 
     @property
     def tasker_nodes(self):
@@ -72,7 +77,7 @@ class TaskerController:
 
 
     def execute_tasking_on_all_nodes(self, *, tasking: Union[TaskingIdentity, Type[Tasking]], parent_id: str = None,
-                                     aspects: Optional[TaskerAspects] = None, **kwargs) -> List[TaskingResultPromise]:
+                                     summary_progress: Optional[SummaryProgressDelivery] = None, aspects: Optional[TaskerAspects] = None, **kwargs) -> List[TaskingResultPromise]:
 
         if aspects is None:
             aspects = self._aspects
@@ -84,13 +89,14 @@ class TaskerController:
         module_name, tasking_name = tasking.as_tuple()
 
         for node in self._tasker_nodes:
-            promise = node.execute_tasking(module_name=module_name, tasking_name=tasking_name, parent_id=parent_id, aspects=aspects, **kwargs)
+            promise = node.execute_tasking(module_name=module_name, tasking_name=tasking_name, parent_id=parent_id, summary_progress=summary_progress, aspects=aspects, **kwargs)
             promise_list.append(promise)
 
         return promise_list
 
+
     def execute_tasking_on_node(self, node: TaskerNode, *, tasking: Union[TaskingIdentity, Type[Tasking]], parent_id: str = None,
-                                aspects: Optional[TaskerAspects] = None, **kwargs) -> TaskingResultPromise:
+                                summary_progress: Optional[SummaryProgressDelivery] = None, aspects: Optional[TaskerAspects] = None, **kwargs) -> TaskingResultPromise:
 
         if aspects is None:
             aspects = self._aspects
@@ -101,12 +107,13 @@ class TaskerController:
             tasking = tasking.get_identity()
         module_name, tasking_name = tasking.as_tuple()
         
-        promise = node.execute_tasking(module_name=module_name, tasking_name=tasking_name, parent_id=parent_id, aspects=aspects, **kwargs)
+        promise = node.execute_tasking(module_name=module_name, tasking_name=tasking_name, parent_id=parent_id, summary_progress=summary_progress, aspects=aspects, **kwargs)
 
         return promise
 
+
     def execute_tasking_on_node_list(self, node_list: List[TaskerNode], *, tasking: Union[TaskingIdentity, Type[Tasking]], parent_id: str = None,
-                                     aspects: Optional[TaskerAspects] = None, **kwargs) -> List[TaskingResultPromise]:
+                                     summary_progress: Optional[SummaryProgressDelivery] = None, aspects: Optional[TaskerAspects] = None, **kwargs) -> List[TaskingResultPromise]:
 
         if aspects is None:
             aspects = self._aspects
@@ -118,10 +125,11 @@ class TaskerController:
         module_name, tasking_name = tasking.as_tuple()
 
         for node in node_list:
-            promise = node.execute_tasking(module_name=module_name, tasking_name=tasking_name, parent_id=parent_id, aspects=aspects, **kwargs)
+            promise = node.execute_tasking(module_name=module_name, tasking_name=tasking_name, parent_id=parent_id, summary_progress=summary_progress, aspects=aspects, **kwargs)
             promise_list.append(promise)
 
         return promise_list
+
 
     def reinitialize_logging_on_nodes(self, *, logging_directory: Optional[str] = None,
                                       logging_level: Optional[int] = None,
@@ -134,14 +142,17 @@ class TaskerController:
 
         return
 
+
     def start_tasker_network(self):
         """
         """
         raise NotOverloadedError("The 'start_task_network' method must be overloaded.")
 
+
     def stop_tasker_network(self):
 
         raise NotOverloadedError("The 'stop_tasker_network' method must be overloaded.")
+
 
     def wait_for_all_to_event(self, event_name: str, promises: List[TaskingResultPromise],
                             aspects: Optional[TaskerAspects] = None) -> List[TaskingEvent]:
@@ -210,6 +221,7 @@ class TaskerController:
 
         return events_found
 
+
     def wait_for_any_to_event(self, event_name: str, promises: List[TaskingResultPromise],
                             aspects: Optional[TaskerAspects] = None) -> List[TaskingEvent]:
         """
@@ -272,24 +284,14 @@ class TaskerController:
 
         return events_found
 
+
     def wait_for_tasking_results(self, promises: List[TaskingResultPromise],
-                                 summary_progress: Optional[SummaryProgressDelivery] = None,
                                  aspects: Optional[TaskerAspects] = None) -> List[TaskingResult]:
         """
             This is a special wait function that checks all tasks in a list of promises to see if they 
             are complete, without blocking on a single task.  It also can poll for progress and report
             progress of the tasks if a summary_progress parameter is provided.
         """
-
-        if aspects is None:
-            aspects = self._aspects
-
-        progress_callback = None
-        progress_interval = None
-        
-        if summary_progress is not None:
-            progress_callback = summary_progress.progress_callback
-            progress_interval = summary_progress.progress_interval
 
         if aspects is None:
             aspects = self._aspects
@@ -302,11 +304,6 @@ class TaskerController:
         now_time = datetime.now()
         start_time = now_time
         end_time = start_time + timedelta(seconds=timeout)
-
-        next_progress = None
-        if summary_progress is not None:
-            next_progress = start_time + timedelta(seconds=progress_interval)
-
         
         wait_on = [ np for np in promises ]
         not_ready = []
@@ -341,28 +338,7 @@ class TaskerController:
                 errmsg = os.linesep.join(err_msg_lines)
                 raise TimeoutError(errmsg)
 
-            interval_remaining = interval
-
-            # Treat our progress retrieval time as being part of our
-            # interval between checks for completion.
-            if next_progress is not None:
-                if now_time > next_progress:
-                    progress_list = []
-                    before_progress = time.time()
-
-                    # Collect the progress
-                    for p in promises:
-                        progress = p.get_progress()
-                        progress_list.append(progress)
-                    
-                    # Report the list of progress reports
-                    progress_callback(progress_list)
-
-                    after_progress = time.time()
-                    interval_remaining = interval_remaining - (after_progress - before_progress)
-
-            if interval_remaining > 0:
-                time.sleep(interval_remaining)
+            time.sleep(interval)
 
 
         # If we made it here, we didn't timeout, that means we should

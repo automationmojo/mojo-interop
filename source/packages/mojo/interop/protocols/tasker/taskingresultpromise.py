@@ -16,9 +16,10 @@ __status__ = "Development" # Prototype, Development or Production
 __license__ = "MIT"
 
 
-from typing import List, TYPE_CHECKING
+from typing import List, Optional, TYPE_CHECKING
 
 import os
+import threading
 import time
 
 from datetime import datetime, timedelta
@@ -32,6 +33,7 @@ from mojo.results.model.taskingresult import TaskingResult
 from mojo.results.model.progressinfo import ProgressInfo
 
 from mojo.interop.protocols.tasker.taskingevent import TaskingEvent
+from mojo.interop.protocols.tasker.taskingprogressmonitor import TaskingProgressMonitor
 
 if TYPE_CHECKING:
     from mojo.interop.protocols.tasker.taskernode import TaskerNode
@@ -53,7 +55,7 @@ class TaskingRef:
 class TaskingResultPromise:
 
     def __init__(self, client, responder, module_name: str, tasking_id: str, task_name: str, log_dir: str,
-                 session_id: str, node: "TaskerNode"):
+                 session_id: str, node: "TaskerNode", progress_monitor: Optional[TaskingProgressMonitor] = None):
         self._client = client
         self._responder = responder
         self._module_name = module_name
@@ -62,9 +64,15 @@ class TaskingResultPromise:
         self._log_dir = log_dir
         self._session_id = session_id
         self._node = node
+
+        self._progress_monitor = progress_monitor
         return
 
     def __del__(self):
+
+        if self._progress_monitor is not None:
+            self._progress_monitor.release(self._tasking_id)
+
         # Keep the task run client open until this object
         # is destroyed in case there are NetRef objects that are
         # being used by the remote end.
@@ -74,6 +82,7 @@ class TaskingResultPromise:
                 self._client.close()
             except:
                 pass
+
         return
 
     @property
@@ -178,4 +187,4 @@ class TaskingResultPromise:
         rtnval = self._node.has_completed_and_result_ready(tasking_id=self._tasking_id)
 
         return rtnval
-
+    

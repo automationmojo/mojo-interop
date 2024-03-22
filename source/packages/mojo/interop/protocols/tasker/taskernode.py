@@ -27,7 +27,7 @@ import weakref
 
 from mojo.results.model.taskingresult import TaskingResult
 from mojo.results.model.progressinfo import ProgressInfo
-
+from mojo.results.model.progressdelivery import SummaryProgressDelivery
 
 from mojo.interop.protocols.tasker.taskingresultpromise import TaskingResultPromise
 from mojo.interop.protocols.tasker.taskeraspects import (
@@ -52,9 +52,11 @@ class TaskerNode:
         The :class:`TaskerNode` object represents a remote tasker service endpoint.
     """
 
-    def __init__(self, ipaddr: str, port: int, aspect: TaskerAspects=DEFAULT_TASKER_ASPECTS):
+    def __init__(self, ipaddr: str, port: int, summary_progress: Optional[SummaryProgressDelivery] = None,
+                 aspect: TaskerAspects=DEFAULT_TASKER_ASPECTS):
         self._ipaddr = ipaddr
         self._port = port
+        self._summary_progress = summary_progress
         self._aspects = aspect
         self._session_id = None
         return
@@ -182,7 +184,8 @@ class TaskerNode:
         
         return complete_and_ready
 
-    def execute_tasking(self, *, module_name: str, tasking_name: str, aspects: Optional[TaskerAspects]=None, **kwargs) -> TaskingResultPromise:
+    def execute_tasking(self, *, module_name: str, tasking_name: str, summary_progress: Optional[SummaryProgressDelivery] = None, 
+                        aspects: Optional[TaskerAspects]=None, **kwargs) -> TaskingResultPromise:
 
         # We are not going to automatically close this as there may be
         client = self._create_connection()
@@ -192,9 +195,14 @@ class TaskerNode:
         if aspects is None:
             aspects = self._aspects
 
+        aspects = pickle.dumps(aspects.as_dict())
+
+        if summary_progress is None:
+            summary_progress = self._summary_progress
+
         taskref_info = client.root.execute_tasking(session_id=self._session_id, worker=self._ipaddr,
-                                                    module_name=module_name, tasking_name=tasking_name,
-                                                aspects=aspects, **kwargs)
+                                                   module_name=module_name, tasking_name=tasking_name,
+                                                   aspects=aspects, **kwargs)
 
         promise = TaskingResultPromise(client, responder, taskref_info["module_name"], taskref_info["tasking_id"], taskref_info["task_name"],
                                         taskref_info["log_dir"], self._session_id, self)

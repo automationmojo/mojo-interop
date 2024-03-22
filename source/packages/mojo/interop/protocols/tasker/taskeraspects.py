@@ -46,6 +46,22 @@ class TaskerAspects:
         self.progress_delivery = progress_delivery
         return
 
+    def as_dict(self) -> dict:
+        data = {
+            "completion_timeout": self.completion_timeout,
+            "completion_interval": self.completion_interval,
+            "inactivity_timeout": self.inactivity_timeout,
+            "inactivity_interval": self.inactivity_interval,
+            "progress_delivery": self.progress_delivery,
+        }
+        return data
+    
+    @classmethod
+    def from_dict(self, data: dict) -> "TaskerAspects":
+        obj = TaskerAspects(**data)
+        return obj
+
+
 DEFAULT_TASKER_ASPECTS = TaskerAspects()
 
 DEFAULT_SUMMARY_PROGRESS_TASKER_ASPECTS = TaskerAspects(

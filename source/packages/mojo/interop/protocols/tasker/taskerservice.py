@@ -22,6 +22,7 @@ from typing import Dict, Optional
 
 import logging
 import os
+import pickle
 import tempfile
 import threading
 import traceback
@@ -164,6 +165,8 @@ class TaskerService(rpyc.Service):
             
             this_type.service_lock.release()
             try:
+                aspects = TaskerAspects.from_dict(pickle.loads(aspects))
+
                 taskref = session.execute_tasking(module_name=module_name, tasking_name=tasking_name, parent_id=parent_id,
                                         aspects=aspects, **kwargs)
             finally:
