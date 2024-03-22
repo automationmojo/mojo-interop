@@ -30,6 +30,7 @@ import requests
 import threading
 import traceback
 
+from http import HTTPStatus
 from pprint import pformat
 
 from dataclasses import dataclass
@@ -388,9 +389,21 @@ class Tasking:
             Marks the tasking as having errored.  This indicates to the TaskingServer that shutdown of the
             tasking has begun.
         """
-        tbdetail = create_traceback_detail(err)
+        backup_detail = traceback.format_exc()
 
-        errmsg = format_traceback_detail(tbdetail)
+        try:
+            # Make sure we don't throw an exception formatting a traceback
+            # if we do, we will end up using the backup traceback
+            tbdetail = create_traceback_detail(err)
+
+            errmsg = format_traceback_detail(tbdetail)
+        except BaseException as fmterr:
+            fmterr_msg = traceback.format_exc()
+            self._logger.error(fmterr_msg)
+
+            errmsg = backup_detail
+        
+
         self._logger.error(errmsg)
 
         self._result.add_error(tbdetail)
@@ -520,8 +533,8 @@ class Tasking:
             data = event.as_dict()
 
             resp = requests.post(url, headers=headers, json=data)
-            if resp.status_code != 200:
-                errmsg = f"Error while poisting event {event.event_name}"
+            if resp.status_code != HTTPStatus.ACCEPTED:
+                errmsg = f"Error while posting event {event.event_name}"
                 self._logger.error(errmsg)
             else:
                 self._logger.info(f"Successfully posted event={event.event_name}")
