@@ -122,7 +122,7 @@ class TaskingGroupScope:
 
         return
 
-    def execute_tasking(self, *, tasking: Union[TaskingIdentity, Type[Tasking]], aspects: Optional[TaskerAspects] = None,
+    def execute_tasking(self, *, tasking: Union[TaskingIdentity, Type[Tasking]], ncount: int = 1, aspects: Optional[TaskerAspects] = None,
                         **kwargs) -> List[TaskingResultPromise]:
 
         if aspects is None:
@@ -135,10 +135,11 @@ class TaskingGroupScope:
         adapter = self.adapter
         parent_id = self._tgroup.inst_id
 
-        self._promises = self._controller.execute_tasking_on_node_list(
-                self._tnodes, tasking=tasking, parent_id=parent_id, aspects=aspects, **kwargs)
+        new_promises = self._controller.execute_tasking_on_node_list(
+                self._tnodes, tasking=tasking, ncount=ncount, parent_id=parent_id, aspects=aspects, **kwargs)
+        self._promises.extend(new_promises)
 
-        return self._promises
+        return new_promises
 
 
     def finalize(self, sync: bool = True):
