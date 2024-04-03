@@ -46,9 +46,9 @@ class SshAgent(SshBase, ProtocolExtension):
         provides run patterning to help eliminate duplication of code associated with running SSH commands in loops.
     """
     def __init__(self, host: str, primary_credential: SshCredential, users: Optional[dict] = None, port: int = 22, jump: Union[str, SshJumpParams, None] = None,
-                 pty_params: Optional[dict] = None, called_id: Optional[str]=None, aspects: AspectsCmd = DEFAULT_CMD_ASPECTS):
+                 pty_params: Optional[dict] = None, called_id: Optional[str]=None, look_for_keys: bool = False, aspects: AspectsCmd = DEFAULT_CMD_ASPECTS):
         SshBase.__init__(self, host, primary_credential, users=users, port=port, jump=jump,
-                         pty_params=pty_params, called_id=called_id, aspects=aspects)
+                         pty_params=pty_params, called_id=called_id, look_for_keys=look_for_keys, aspects=aspects)
         ProtocolExtension.__init__(self)
         return
 
@@ -87,10 +87,10 @@ class SshAgent(SshBase, ProtocolExtension):
             bs: SshBase = basis_session
             session = SshSession(bs._host, bs._primary_credential, users=bs._users, port=bs._port,
                                  jump=bs._jump, pty_params=pty_params, interactive=interactive,
-                                 basis_session=basis_session, aspects=aspects)
+                                 basis_session=basis_session, look_for_keys=bs._look_for_keys, aspects=aspects)
         else:
             session = SshSession(self._host, self._primary_credential, users=self._users, port=self._port,
-                                 jump=self._jump, pty_params=pty_params, interactive=interactive, aspects=aspects)
+                                 jump=self._jump, pty_params=pty_params, interactive=interactive, look_for_keys=self._look_for_keys, aspects=aspects)
         return session
 
     def reboot(self, aspects: Optional[AspectsCmd] = None):

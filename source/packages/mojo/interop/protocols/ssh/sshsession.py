@@ -50,9 +50,9 @@ class SshSession(SshBase):
     """
     def __init__(self, host: str, primary_credential: SshCredential, users: Optional[dict] = None, port:int=22, jump: Union[str, SshJumpParams, None] = None,
                  pty_params: Optional[dict] = None, session_user=None, interactive=False, basis_session: Optional["SshSession"]=None,
-                 called_id: Optional[str]=None, aspects: AspectsCmd=DEFAULT_CMD_ASPECTS):
+                 called_id: Optional[str]=None, look_for_keys: bool = False, aspects: AspectsCmd=DEFAULT_CMD_ASPECTS):
         SshBase.__init__(self, host, primary_credential, users=users, port=port, jump=jump,
-                         pty_params=pty_params, called_id=called_id, aspects=aspects)
+                         pty_params=pty_params, called_id=called_id, look_for_keys=look_for_keys, aspects=aspects)
 
         self._session_user = session_user
         self._interactive = interactive
@@ -255,11 +255,11 @@ class SshSession(SshBase):
             bs: SshSession = basis_session
             session = SshSession(bs._host, bs._primary_credential, users=bs._users, port=bs._port,
                                  jump=bs._jump, pty_params=pty_params, interactive=interactive,
-                                 basis_session=bs, aspects=aspects)
+                                 basis_session=bs, look_for_keys=bs._look_for_keys, aspects=aspects)
         else:
             session = SshSession(self._host, self._primary_credential, users=self._users, port=self._port,
-                                 jump=self._jump, pty_params=pty_params, interactive=interactive, aspects=aspects,
-)
+                                 jump=self._jump, pty_params=pty_params, interactive=interactive,
+                                 look_for_keys=self._look_for_keys, aspects=aspects)
         return session
 
     def _create_client(self, session_user: Optional[str] = None) -> paramiko.SSHClient:

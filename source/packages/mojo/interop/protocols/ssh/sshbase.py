@@ -68,7 +68,7 @@ class SshBase(ISystemContext):
     """
     def __init__(self, host: str, primary_credential: SshCredential, users: Optional[dict] = None,
                  port: int = 22, jump: Union[str, SshJumpParams, None] = None, pty_params: Optional[dict] = None,
-                 called_id: Optional[str]=None,
+                 called_id: Optional[str]=None, look_for_keys: bool = False,
                  aspects: AspectsCmd = DEFAULT_CMD_ASPECTS):
 
         self._host = host
@@ -99,6 +99,7 @@ class SshBase(ISystemContext):
         if self._called_id is not None:
             self._target_tag = "[{}]".format(called_id)
         
+        self._look_for_keys = look_for_keys
         self._aspects = aspects
 
         self._ipaddr = socket.gethostbyname(self._host)
@@ -137,6 +138,13 @@ class SshBase(ISystemContext):
             A 'ProxyCommand' jump command that can be used for Advanced Server Access.
         """
         return self._jump
+    
+    @property
+    def look_for_keys(self):
+        """
+            A value indicating if paramiko should search for keys.
+        """
+        return self._look_for_keys
 
     @property
     def port(self) -> int:
@@ -309,10 +317,10 @@ class SshBase(ISystemContext):
                 if self._jump is not None:
                     proxy = paramiko.ProxyCommand(self._jump)
                     ssh_client.connect(self._ipaddr, port=self._port, username=cl_username, password=cl_password,
-                                    pkey=pkey, allow_agent=cl_allow_agent, sock = proxy)
+                                    pkey=pkey, allow_agent=cl_allow_agent, sock = proxy, look_for_keys=self._look_for_keys)
                 else:
                     ssh_client.connect(self._ipaddr, port=self._port, username=cl_username, password=cl_password,
-                                    pkey=pkey, allow_agent=cl_allow_agent)
+                                    pkey=pkey, allow_agent=cl_allow_agent, look_for_keys=self._look_for_keys)
                 
                 break
 
