@@ -213,7 +213,7 @@ class ClientSourcePackager:
             raise RuntimeError(errmsg)
         
 
-        setup_command = f"bash -l -c \"cd {destination}; {destination}/development/setup-environment reset\""
+        setup_command = f"bash -l -c \"cd {destination}; EXTRA_POETRY_SETUP_FLAGS='--without dev' {destination}/development/setup-environment reset\""
         status, stdout, stderr = session.run_cmd(setup_command)
         if status != 0:
             errmsg_lines = [

@@ -6,6 +6,7 @@ REPOSITORY_DIR = os.path.abspath(os.path.join(PARENT_DIR, "..", ".."))
 
 from mojo.collections.context import Context
 from mojo.collections.contextpaths import ContextPaths
+from mojo.collections.wellknown import ContextSingleton
 
 from mojo.config.variables import resolve_configuration_variables
 from mojo.config.configurationmaps import resolve_configuration_maps
@@ -25,7 +26,7 @@ def tasker_server_deploy():
 
     resolve_configuration_maps(use_credentials=True, use_landscape=True)
 
-    ctx = Context()
+    ctx = ContextSingleton()
     ctx.insert(ContextPaths.OUTPUT_DIRECTORY, output_dir)
 
     activation_params = LandscapeActivationParams(allow_unknown_devices=True, allow_unknown_services=True)

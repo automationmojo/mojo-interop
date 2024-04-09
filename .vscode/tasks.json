@@ -36,6 +36,24 @@
             "type": "shell",
             "command": "${workspaceFolder}/development/setup-environment",
             "problemMatcher": []
+        },
+        {
+            "label": "Web Service - Test Result",
+            "type": "shell",
+            "options": {
+                "cwd": "${env:HOME}/mjr/results"
+            },
+            "command": "${workspaceFolder}/.venv/bin/python -m http.server 8000",
+            "problemMatcher": []
+        },
+        {
+            "label": "Web Service - Examples",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceFolder}/source/examples"
+            },
+            "command": "${workspaceFolder}/.venv/bin/python -m http.server 8000",
+            "problemMatcher": []
         }
     ]
 }

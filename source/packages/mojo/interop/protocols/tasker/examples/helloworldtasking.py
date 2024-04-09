@@ -2,6 +2,8 @@
 import os
 import time
 
+from datetime import datetime
+
 from mojo.results.model.progressinfo import ProgressInfo, ProgressType, ProgressCode
 
 from mojo.interop.protocols.tasker.tasking import Tasking
@@ -22,8 +24,9 @@ class HelloWorldTasking(Tasking):
         return
 
     def mark_progress_start(self):
-        self._current_progress = ProgressInfo(self._tasking_id, ProgressType.NumericRange, self.full_name,
-                                              0, 5, 0, ProgressCode.Running, self._data)
+        now = datetime.now()
+        self._current_progress = ProgressInfo(self._tasking_id, "hello", self.full_name, ProgressType.NumericRange,
+                                              0, 5, 0, ProgressCode.Running, now, self._data)
         return
 
     def perform(self):

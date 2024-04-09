@@ -192,7 +192,7 @@ class ConfigureExt:
 
         with client.ssh.open_session(basis_session=basis_session) as session:
 
-            sudo_file_exists_cmd = f"sudo bash -c \"[[ -f {user_cfg_file} ]] && echo 0 || echo 1\""
+            sudo_file_exists_cmd = f"echo {sudo_password} | sudo -S bash -c \"[[ -f {user_cfg_file} ]] && echo 0 || echo 1\""
             status, stdout, stderr = session.run_cmd(sudo_file_exists_cmd)
             if int(stdout.strip()) == 1:
 
