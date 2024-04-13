@@ -16,7 +16,7 @@ __status__ = "Development" # Prototype, Development or Production
 __license__ = "MIT"
 
 
-from typing import List, Optional, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING
 
 import os
 import threading
@@ -108,6 +108,12 @@ class TaskingResultPromise:
     def cancel(self):
         self._node.cancel_tasking(tasking_id=self._tasking_id)
         return
+
+    def call_tasking_method(self, method_name: str, *args, **kwargs) -> Any:
+
+        rtnval = self._node.call_tasking_method(tasking_id=self._tasking_id, method_name=method_name, args=args, kwargs=kwargs)
+
+        return rtnval
 
     def get_events(self) -> List[TaskingEvent]:
 

@@ -128,6 +128,40 @@ class TaskerService(rpyc.Service):
 
         return
 
+    def exposed_call_tasking_method(self, *, session_id: str, tasking_id: str, method_name: str, pkl_args: bytes, pkl_kwargs: bytes) -> bytes:
+
+        tasking = None
+
+        this_type = type(self)
+
+        this_type.service_lock.acquire()
+        try:
+
+            this_type.logger.info("Method 'exposed_call_tasking_method' was called.")
+
+            session = self._locked_get_session(session_id)
+            
+            this_type.service_lock.release()
+            try:
+                tasking = session.get_tasking(tasking_id)
+            finally:
+                this_type.service_lock.acquire()
+
+        finally:
+            this_type.service_lock.release()
+
+        # If we didn't find the tasking, an exception should have been raised
+        args = pickle.loads(pkl_args)
+        kwargs = pickle.loads(pkl_kwargs)
+
+        # We are getting this method off of an instance of a tasking so it should already be bound to 'self'
+        method_to_call = getattr(tasking, method_name)
+        rtnval = method_to_call(*args, **kwargs)
+
+        pkl_rtnval = pickle.dumps(rtnval)
+
+        return pkl_rtnval
+
     def exposed_dispose_tasking(self, *, session_id: str, tasking_id: str):
 
         this_type = type(self)

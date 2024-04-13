@@ -17,7 +17,7 @@ __status__ = "Development" # Prototype, Development or Production
 __license__ = "MIT"
 
 
-from typing import List, Optional, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
 import logging
 import rpyc
@@ -85,8 +85,37 @@ class TaskerNode:
         
         return rmt_archive_fullpath
 
-    def cancel_tasking(self, *, tasking_id: str):
+    def call_tasking_method(self, *, tasking_id: str, method_name: str, args: List[Any], kwargs: Dict[str, Any]) -> Any:
+        """
+            Calls  the specified method on the remote tasking.
 
+            :param tasking_id: The id of the tasking whose method you want to call.
+            :param method_name: The name of the method to call on the tasking.
+            :param args: A list of positiional arguements to pass to the remote method.
+            :param kwargs: A dictionary of keyword arguements to pass to the remote method.
+
+            :returns: Returns the response from the remote method.
+        """
+        client = self._create_connection()
+
+        try:
+            pkl_args = pickle.dumps(args)
+            pkl_kwargs = pickle.dumps(kwargs)
+
+            pkl_rtnval = client.root.call_tasking_method(session_id=self._session_id, tasking_id=tasking_id, method_name=method_name, pkl_args=pkl_args, pkl_kwargs=pkl_kwargs)
+            rtnval = pickle.loads(pkl_rtnval)
+
+        finally:
+            client.close()
+
+        return rtnval
+
+    def cancel_tasking(self, *, tasking_id: str):
+        """
+            Cancel the specified tasking.
+
+            :param tasking_id: The id of the tasking to cancel.
+        """
         client = self._create_connection()
 
         try:

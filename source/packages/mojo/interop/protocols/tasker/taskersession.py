@@ -219,6 +219,24 @@ class TaskerSession:
 
         return
 
+    def get_tasking(self, tasking_id: str) -> Tasking:
+
+        tasking = None
+
+        self._session_lock.acquire()
+
+        try:
+
+            if tasking_id in self._taskings_table:
+                tasking = self._taskings_table[tasking_id]
+            else:
+                errmsg = f"Unable to cancel tasking for unknown tasking_id={tasking_id}."
+                raise RuntimeError(errmsg)
+        finally:
+            self._session_lock.release()
+
+        return tasking
+
     def execute_tasking(self, module_name: str, tasking_name: str,
                                parent_id: Optional[str] = None, aspects: Optional[TaskerAspects]=None, **kwargs) -> TaskingRef:
         
