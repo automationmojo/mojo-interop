@@ -5,6 +5,7 @@ import os
 import weakref
 
 from mojo.errors.exceptions import SemanticError
+from mojo.errors.xtraceback import format_exception
 
 from mojo.results.model.taskinggroup import TaskingGroup
 from mojo.results.model.taskingresult import TaskingResult
@@ -82,6 +83,12 @@ class TaskingGroupScope:
 
 
     def __exit__(self, ex_type, ex_inst, ex_tb) -> bool:
+
+        if ex_inst is not None:
+            err_msg = format_exception(ex_inst)
+            logger.error(err_msg)
+
+            self.cancel_tasks()
 
         # We don't want to handle exceptions here,  If any AssertionError types come through, they
         # are likely due to a consolidated check, and they should be allowed to propagate.

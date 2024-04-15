@@ -106,22 +106,39 @@ class TaskingResultPromise:
         return self._task_name
 
     def cancel(self):
+        """
+            Cancel the assocated tasking.
+        """
         self._node.cancel_tasking(tasking_id=self._tasking_id)
         return
 
     def call_tasking_method(self, method_name: str, *args, **kwargs) -> Any:
+        """
+            Calls the method on the tasking associated with this :class:`TaskingResultPromise` object.
 
+            :param method_name: The name of the method to call on the tasking.
+            :param *args: A list of variable positional arguements.
+            :param **kwargs: A dictionary of the key-word argurements for the function.
+
+            :returns: Returns the result returned by the remote method.
+        """
+        
         rtnval = self._node.call_tasking_method(tasking_id=self._tasking_id, method_name=method_name, args=args, kwargs=kwargs)
 
         return rtnval
 
     def get_events(self) -> List[TaskingEvent]:
-
+        """
+            Get the events that have been posted by the associated tasking.
+        """
         rtnval = self._node.get_tasking_events(tasking_id=self._tasking_id)
         
         return rtnval
 
     def get_result(self) -> TaskingResult:
+        """
+            Get the result of the associated tasking.
+        """
         rtnval = self._node.get_tasking_result(tasking_id=self._tasking_id)
         return rtnval
 
@@ -189,6 +206,12 @@ class TaskingResultPromise:
         return
     
     def is_task_complete(self) -> bool:
+        """
+            Returns a boolean value indicating if the associated tasking is complete.
+
+            ..node:  This is intentionally implemented as a method and not a property in order to ensure that
+                     we do not make cross process or across network calls from an object property.
+        """
 
         rtnval = self._node.has_completed_and_result_ready(tasking_id=self._tasking_id)
 
