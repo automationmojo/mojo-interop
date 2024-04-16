@@ -4,6 +4,7 @@ from typing import Generator, List
 
 import os
 import tempfile
+import time
 import zipfile
 
 from mojo import testplus
@@ -86,9 +87,14 @@ def test_tasker_say_hello(tadapter: TaskingAdapter):
 
     with tadapter.create_tasking_group_scope("Hello Group") as hgrp:
 
-        hgrp.execute_tasking(tasking=HelloWorldTasking, message="Hello World")
-        results: List[TaskingResult] = hgrp.wait_for_tasking_results()
+        hgrp.execute_tasking(tasking=HelloWorldTasking, message="Hello World", iterations=100)
 
+        time.sleep(5)
+
+        for prom in hgrp.promises:
+            prom.call_tasking_method("log_message", "Special Message")
+
+        results: List[TaskingResult] = hgrp.wait_for_tasking_results()
         testplus.verify_tasking_results(results, "The specified taskings did not complete successfully.", hgrp.name)
 
     return

@@ -150,13 +150,19 @@ class TaskerService(rpyc.Service):
         finally:
             this_type.service_lock.release()
 
+        this_type.logger.info("Tasking found.")
+
         # If we didn't find the tasking, an exception should have been raised
         args = pickle.loads(pkl_args)
         kwargs = pickle.loads(pkl_kwargs)
 
         # We are getting this method off of an instance of a tasking so it should already be bound to 'self'
         method_to_call = getattr(tasking, method_name)
+        this_type.logger.info("Got tasking method")
+
         rtnval = method_to_call(*args, **kwargs)
+
+        this_type.logger.info(f"Tasking method returned={rtnval}")
 
         pkl_rtnval = pickle.dumps(rtnval)
 

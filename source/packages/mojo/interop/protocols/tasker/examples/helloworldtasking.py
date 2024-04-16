@@ -14,9 +14,13 @@ class HelloWorldTasking(Tasking):
 
     def begin(self, kwparams: dict):
 
+        self._message = kwparams["message"]
+        self._iterations = kwparams["iterations"]
+
         self._data = {
             "pid": os.getpid(),
-            "message": kwparams["message"]
+            "message": self._message,
+            "iterations": self._iterations
         }
         
         time.sleep(5)
@@ -26,8 +30,12 @@ class HelloWorldTasking(Tasking):
     def mark_progress_start(self):
         now = datetime.now()
         self._current_progress = ProgressInfo(self._tasking_id, "hello", self.full_name, ProgressType.NumericRange,
-                                              0, 5, 0, ProgressCode.Running, now, self._data)
+                                              0, self._iterations, 0, ProgressCode.Running, now, self._data)
         return
+
+    def log_message(self, message) -> bool:
+        self._logger.info(message)
+        return True
 
     def perform(self):
 
