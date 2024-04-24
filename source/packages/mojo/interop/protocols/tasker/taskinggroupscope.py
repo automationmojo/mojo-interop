@@ -23,6 +23,7 @@ from mojo.interop.protocols.tasker.taskercontroller import TaskerController
 from mojo.interop.protocols.tasker.taskingevent import TaskingEvent
 
 if TYPE_CHECKING:
+    from mojo.testplus.sequencing.testsequencer import TestSequencer
     from mojo.interop.protocols.tasker.taskingadapter import TaskingAdapter
 
 
@@ -41,7 +42,7 @@ class TaskingGroupScope:
 
     def __init__(self, name: str, adapter: "TaskingAdapter", controller: TaskerController,
                  recorder: ResultRecorder, tgroup: TaskingGroup, tnodes: List[TaskerNode],
-                 aspects: TaskerAspects):
+                 aspects: TaskerAspects, sequencer: Optional[TestSequencer]=None):
 
         self._name = name
         self._adapter_ref = weakref.ref(adapter)
@@ -50,6 +51,7 @@ class TaskingGroupScope:
         self._tgroup = tgroup
         self._tnodes: List[TaskerNode] = tnodes
         self._aspects = aspects
+        self._sequencer = sequencer
         
         self._state = TaskingGroupState.NotStarted
         self._promises: List[TaskingResultPromise] = []
@@ -76,6 +78,9 @@ class TaskingGroupScope:
         plist = [p for p in self._promises]
         return plist
 
+    @property
+    def sequencer(self) -> "TestSequencer":
+        return self._sequencer
 
     def __enter__(self) -> "TaskingGroupScope":
         self.initialize()
@@ -163,6 +168,13 @@ class TaskingGroupScope:
 
         return
 
+    def mark_activity(self, activity_name: str, target: str="NA", detail: Optional[dict] = None):
+        """
+            A convenience method for marking activity in the current test scope.
+        """
+        if self._sequencer is not None:
+            self._sequencer.mark_activity(activity_name, target=target, detail=detail)
+        return
 
     def synchronize(self):
 
