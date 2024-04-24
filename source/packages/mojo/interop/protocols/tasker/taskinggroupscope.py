@@ -42,7 +42,7 @@ class TaskingGroupScope:
 
     def __init__(self, name: str, adapter: "TaskingAdapter", controller: TaskerController,
                  recorder: ResultRecorder, tgroup: TaskingGroup, tnodes: List[TaskerNode],
-                 aspects: TaskerAspects, sequencer: Optional[TestSequencer]=None):
+                 aspects: TaskerAspects, sequencer: Optional["TestSequencer"]=None):
 
         self._name = name
         self._adapter_ref = weakref.ref(adapter)
