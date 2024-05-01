@@ -1,0 +1,254 @@
+#!/usr/bin/env python3
+
+from typing import Tuple
+
+import configparser
+import os
+import platform
+import subprocess
+import shutil
+import sys
+
+LNSEP = os.linesep
+
+PYTHON_CMD = "python3"
+if platform.system() == "Windows":
+    PYTHON_CMD = "python"
+
+def customize_activation_script(activate_script: str, env_file: str, cli_alias: str, cli_entry_point_script: str):
+
+    global PYTHON_CMD
+
+    venv_bin = os.path.dirname(activate_script)
+    venv_python = os.path.join(venv_bin, PYTHON_CMD)
+
+    print("# ================ Development Environment Customizations ================")
+    print("")
+    if os.path.exists(activate_script):
+        with open(activate_script, 'a') as asf:
+            lnsep = os.linesep
+            asf.write(LNSEP)
+            asf.write(f"if [ -f {env_file} ]{LNSEP}")
+            asf.write(f"then{LNSEP}")
+            asf.write(f"    set -a{LNSEP}")
+            asf.write(f"    source {env_file}{LNSEP}")
+            asf.write(f"    set +a{LNSEP}")
+            asf.write(f"fi{LNSEP}")
+            asf.write(LNSEP)
+            asf.write(LNSEP)
+
+            print("DEBUG:")
+            cli_alias_len = len(cli_alias)
+            print(f"cli_alias_len={cli_alias_len}")
+
+            cli_entry_point_script_len = len(cli_entry_point_script)
+            print(f"cli_entry_point_script_len={cli_entry_point_script_len}")
+
+            # Check to see if we have a custom commandline to setup
+            if (cli_alias is not None) and (cli_alias_len > 0) and (cli_entry_point_script is not None) and (cli_entry_point_script_len > 0):
+
+                # We were given both cli_alias and cli_entry_point
+                asf.write(f"# Create an alias for the " + cli_alias + f" command{LNSEP}")
+                asf.write("function " + cli_alias + "() {" + LNSEP)
+                asf.write(f"    {venv_python} {cli_entry_point_script}{LNSEP}")
+                asf.write("}" + LNSEP)
+                asf.write("export -f " + cli_alias)
+
+            elif ((cli_alias is not None) and (len(cli_alias) > 0)) or ((cli_entry_point_script is not None) and (len(cli_entry_point_script) > 0)):
+                errmsg = "To add a custom commandline, you must set both 'CUSTOM_CLI_ALIAS' and 'CUSTOM_CLI_ENTRY_SCRIPT'"
+                print(errmsg, file=sys.stderr)
+                exit(1)
+    
+    return
+
+def normalize_variable_value(val: str):
+
+    print("DEBUG")
+    print(f"val={val}")
+    val = val.strip()
+    print(f"val={val}")
+
+    if (val.startswith('"') and val.endswith('"')) or  (val.startswith("'") and val.endswith("'")):
+        
+        print(f"val={val}")
+
+        if len(val) > 2:
+            val = val[1: -1]
+        else:
+            val = ""
+
+    print(f"val={val}")
+
+    return val
+
+def run_cmd(command: str) -> Tuple[int, str, str]:
+
+    print("")
+    print(f"RUNNING COMMAND: {command}")
+    print("")
+
+    proc = subprocess.Popen(command, stdout=sys.stdout, stderr=sys.stderr, shell=True)
+    proc.communicate(timeout=300)
+    status = proc.returncode
+
+    return status
+
+
+def setup_environment_main():
+
+    THIS_DIR = os.path.abspath(os.path.dirname(__file__))
+
+    print ("------------------------------------ VARIABLES ----------------------------------------")
+
+    REPOSITORY_DIR = os.path.abspath(os.path.join(THIS_DIR, ".."))
+    REPOSITORY_CONFIG_FILE = os.path.join(REPOSITORY_DIR, "repository-setup", "repository-config.ini")
+
+    print (f"THIS_DIR={THIS_DIR}")
+    print (f"REPOSITORY_DIR={REPOSITORY_DIR}")
+    print (f"REPOSITORY_CONFIG_FILE={REPOSITORY_CONFIG_FILE}")
+
+    if not os.path.exists(REPOSITORY_CONFIG_FILE):
+        errmsg_lines = [
+            "ERROR: Repository config file not found.",
+            "    location=$REPOSITORY_CONFIG_FILE"
+        ]
+        errmsg = os.linesep.join(errmsg_lines)
+        print(errmsg, file=sys.stderr)
+        exit(1)
+
+    CACHE_DIR = os.path.join(REPOSITORY_DIR, ".cache")
+    if not os.path.exists(CACHE_DIR):
+        os.makedirs(CACHE_DIR)
+
+    INITIALIZED_FILE = os.path.join(CACHE_DIR, "initialized")
+    VIRTUAL_ENV_DIR = os.path.join(REPOSITORY_DIR, ".venv")
+    VIRTUAL_ENV_BIN_DIR = os.path.join(VIRTUAL_ENV_DIR, "bin")
+    ACTIVATE_SCRIPT = os.path.join(VIRTUAL_ENV_DIR, "bin", "activate")
+
+    ENV_FILE = os.path.join(REPOSITORY_DIR, ".env")
+    if not os.path.exists(ENV_FILE):
+        errmsg_lines = [
+            "ERROR: Development environment file not found. Did you run the 'repository-setup' script.",
+            f"    location=$ENV_FILE"
+        ]
+        errmsg = os.linesep.join(errmsg_lines)
+        print(errmsg, file=sys.stderr)
+        exit(1)
+
+    print(f"ENV_FILE={ENV_FILE}")
+
+    PYTHON_VERSION = ""
+    CUSTOM_CLI_ALIAS = ""
+    CUSTOM_CLI_ENTRY_SCRIPT =  ""
+
+    with open(ENV_FILE, 'r') as ef:
+        content_lines = ef.readlines()
+        for nxtline in content_lines:
+            nxtline = nxtline.strip()
+
+            if nxtline.startswith("PYTHON_VERSION="):
+                _, PYTHON_VERSION = nxtline.split("=", maxsplit=1)
+                PYTHON_VERSION = normalize_variable_value(PYTHON_VERSION)
+
+
+    if len(PYTHON_VERSION.strip()) == 0:
+        errmsg_lines = [
+            "ERROR: The 'PYTHON_VERSION' variable should be set in the development environment file. Did you rehome your repository?",
+            f"    location=$ENV_FILE"
+        ]
+        errmsg = os.linesep.join(errmsg_lines)
+        print(errmsg, file=sys.stderr)
+        exit(1)
+    
+
+    config = configparser.ConfigParser()
+    config.read(REPOSITORY_CONFIG_FILE)
+    if "DEFAULT" in config:
+        default_section = config["DEFAULT"]
+        
+        if "CUSTOM_CLI_ALIAS" in default_section:
+            CUSTOM_CLI_ALIAS = normalize_variable_value(default_section["CUSTOM_CLI_ALIAS"])
+
+        if "CUSTOM_CLI_ENTRY_SCRIPT" in default_section:
+            CUSTOM_CLI_ENTRY_SCRIPT = normalize_variable_value(default_section["CUSTOM_CLI_ENTRY_SCRIPT"])
+
+
+    EXTRA_POETRY_SETUP_FLAGS=""
+    if "EXTRA_POETRY_SETUP_FLAGS" in os.environ:
+        EXTRA_POETRY_SETUP_FLAGS = os.environ["EXTRA_POETRY_SETUP_FLAGS"]
+
+    print(f"CUSTOM_CLI_ALIAS={CUSTOM_CLI_ALIAS}")
+    print(f"CUSTOM_CLI_ENTRY_SCRIPT={CUSTOM_CLI_ENTRY_SCRIPT}")
+    print(f"PYTHON_VERSION={PYTHON_VERSION}")
+    print(f"VIRTUAL_ENV_DIR={VIRTUAL_ENV_DIR}")
+    print(f"VIRTUAL_ENV_BIN_DIR={VIRTUAL_ENV_BIN_DIR}")
+    print(f"EXTRA_POETRY_SETUP_FLAGS={EXTRA_POETRY_SETUP_FLAGS}")
+
+    print("---------------------------------------------------------------------------------------")
+
+    # -------------------------------------------------------------------------------------------
+    #                                 Perform Reset if Required
+    # -------------------------------------------------------------------------------------------
+    if len(sys.argv) > 1 and sys.argv[1] == "reset":
+        if os.path.exists(VIRTUAL_ENV_DIR):
+            shutil.rmtree(VIRTUAL_ENV_DIR, ignore_errors=False)
+        if os.path.exists(INITIALIZED_FILE):
+            os.remove(INITIALIZED_FILE)
+
+
+    # -------------------------------------------------------------------------------------------
+    #                                 Create the Virtual Environment
+    # -------------------------------------------------------------------------------------------
+    print("")
+    print("")
+    print("---------------------------- VIRTUAL ENVIRONMENT CREATION -----------------------------")
+    if not os.path.exists(INITIALIZED_FILE):
+
+        prev_dir = os.curdir
+
+        os.chdir(REPOSITORY_DIR)
+
+        if not os.path.exists(ACTIVATE_SCRIPT):
+            
+            command = f"poetry env use {PYTHON_VERSION}"
+            status = run_cmd(command)
+            if status != 0:
+                errmsg_lines = [
+                    "Error attempting to select the python version for our virtual environment",
+                    f"    COMMAND: {command}"
+                ]
+                errmsg = os.linesep.join(errmsg_lines)
+                print(errmsg, file=sys.stderr)
+                exit(1)
+
+            command = f"poetry install {EXTRA_POETRY_SETUP_FLAGS}"
+            status = run_cmd(command)
+            if status != 0:
+                errmsg_lines = [
+                    "Error attempting install the poetry virtual environment depedencies.",
+                    f"    COMMAND: {command}"
+                ]
+                errmsg = os.linesep.join(errmsg_lines)
+                print(errmsg, file=sys.stderr)
+                exit(1)
+        
+        os.chdir(prev_dir)
+
+        customize_activation_script(ACTIVATE_SCRIPT, ENV_FILE, CUSTOM_CLI_ALIAS, CUSTOM_CLI_ENTRY_SCRIPT)
+
+        with open(INITIALIZED_FILE, 'w+') as initf:
+            initf.write("TRUE")
+            initf.write(LNSEP)
+
+    else:
+        print("")
+        print("Virtual environment already intialized...")
+        print("")
+
+    print("---------------------------------------------------------------------------------------")
+
+    return
+
+
+if __name__ == "__main__":
+    setup_environment_main()
