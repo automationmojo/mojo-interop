@@ -11,11 +11,7 @@
 __author__ = "Myron Walker"
 __copyright__ = "Copyright 2020, Myron W Walker"
 __credits__ = []
-__version__ = "1.0.0"
-__maintainer__ = "Myron Walker"
-__email__ = "myron.walker@gmail.com"
-__status__ = "Development" # Prototype, Development or Production
-__license__ = "MIT"
+
 
 from mojo.interop.protocols.dns.dnsconst import HAS_A_TO_Z
 from mojo.interop.protocols.dns.dnsconst import HAS_ONLY_A_TO_Z_NUM_HYPHEN

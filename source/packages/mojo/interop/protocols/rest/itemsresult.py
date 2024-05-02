@@ -1,4 +1,9 @@
 
+__author__ = "Myron Walker"
+__copyright__ = "Copyright 2023, Myron W Walker"
+__credits__ = []
+
+
 from typing import Any, Callable, Dict, Generic, List, Optional, TypeVar, Union
 
 from requests import Response

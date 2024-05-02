@@ -6,6 +6,10 @@
 .. moduleauthor:: Myron Walker <myron.walker@gmail.com>
 """
 
+__author__ = "Myron Walker"
+__copyright__ = "Copyright 2023, Myron W Walker"
+__credits__ = []
+
 class VmHardwareVersion:
     VMX_03 = "VMX_03"
     VMX_04 = "VMX_04"

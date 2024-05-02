@@ -1,4 +1,8 @@
 
+__author__ = "Myron Walker"
+__copyright__ = "Copyright 2023, Myron W Walker"
+__credits__ = []
+
 import dataclasses
 import urllib.parse
 

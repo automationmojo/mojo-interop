@@ -6,6 +6,10 @@
 .. moduleauthor:: Myron Walker <myron.walker@gmail.com>
 """
 
+__author__ = "Myron Walker"
+__copyright__ = "Copyright 2023, Myron W Walker"
+__credits__ = []
+
 class VmGuestOS:
     DOS = "DOS" # MS-DOS.
     WIN_31 = "WIN_31" # Windows 3.1
