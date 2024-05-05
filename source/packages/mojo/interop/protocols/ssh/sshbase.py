@@ -304,8 +304,7 @@ class SshBase(ISystemContext):
 
                 pkey = None
                 if cl_keyfile is not None:
-                    cl_keyfile = os.path.expanduser(os.path.expandvars(cl_keyfile))
-                    pkey = paramiko.RSAKey.from_private_key_file(cl_keyfile, password=cl_keypasswd)
+                    pkey = self._load_key_file(cl_keyfile, cl_keypasswd)
 
                 ssh_client = paramiko.SSHClient()
                 ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -653,6 +652,34 @@ class SshBase(ISystemContext):
             primitive_file_push(ssh_client, localpath, remotepath)
 
         return
+
+    def _load_key_file(keyfile: str, keypasswd: str):
+
+        keyfile = os.path.expanduser(os.path.expandvars(keyfile))
+
+        pkey = None
+        try:
+            pkey = paramiko.RSAKey.from_private_key_file(keyfile, password=keypasswd)
+        except Exception as klerr:
+            pass
+        
+        if pkey is None:
+            try:
+                pkey = paramiko.ECDSAKey.from_private_key_file(keyfile)
+            except:
+                pass
+
+        if pkey is None:
+            try:
+                pkey = paramiko.Ed25519Key.from_private_key_file(keyfile)
+            except:
+                pass
+
+        if pkey is None:
+            errmsg = f"ERROR: Unable to load private keyfile={keyfile}"
+            raise ConfigurationError(errmsg)
+
+        return pkey
 
     def _ssh_execute_command(self, ssh_runner, command: str, pty_params=None, inactivity_timeout: float=DEFAULT_SSH_TIMEOUT, inactivity_interval: float=DEFAULT_SSH_RETRY_INTERVAL, chunk_size: int=1024) -> Tuple[int, str, str]: # pylint: disable=no-self-use
         """
