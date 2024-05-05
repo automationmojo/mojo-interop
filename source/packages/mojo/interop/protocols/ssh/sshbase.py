@@ -653,7 +653,7 @@ class SshBase(ISystemContext):
 
         return
 
-    def _load_key_file(keyfile: str, keypasswd: str):
+    def _load_key_file(self, keyfile: str, keypasswd: str):
 
         keyfile = os.path.expanduser(os.path.expandvars(keyfile))
 
