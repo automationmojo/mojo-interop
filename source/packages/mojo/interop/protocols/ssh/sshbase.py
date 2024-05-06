@@ -22,6 +22,7 @@ import threading
 import time
 
 from datetime import datetime, timedelta
+from io import StringIO
 
 import paramiko
 
@@ -75,6 +76,9 @@ class SshBase(ISystemContext):
         self._keyfile = None
         if hasattr(primary_credential, "keyfile"):
             self._keyfile = primary_credential.keyfile
+        self._keyraw = None
+        if hasattr(primary_credential, "keyraw"):
+            self._keyraw = primary_credential.keyraw
         self._keypasswd = None
         if hasattr(primary_credential, "keypasswd"):
             self._keypasswd = primary_credential.keypasswd
@@ -272,6 +276,7 @@ class SshBase(ISystemContext):
         cl_username = self._username
         cl_password = self._password
         cl_keyfile = self._keyfile
+        cl_keyraw = self._keyraw
         cl_keypasswd = self._keypasswd
         cl_allow_agent = self._allow_agent
 
@@ -305,6 +310,8 @@ class SshBase(ISystemContext):
                 pkey = None
                 if cl_keyfile is not None:
                     pkey = self._load_key_file(cl_keyfile, cl_keypasswd)
+                elif cl_keyraw is not None:
+                    pkey = self._load_key(cl_keyraw, cl_keypasswd)
 
                 ssh_client = paramiko.SSHClient()
                 ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -650,6 +657,34 @@ class SshBase(ISystemContext):
             
         else:
             primitive_file_push(ssh_client, localpath, remotepath)
+
+        return
+
+    def _load_key(self, keyraw: str, keypasswd: str):
+
+        keybuffer = StringIO(keyraw)
+
+        pkey = None
+        try:
+            pkey = paramiko.RSAKey.from_private_key(keybuffer, password=keypasswd)
+        except Exception as klerr:
+            pass
+        
+        if pkey is None:
+            try:
+                pkey = paramiko.ECDSAKey.from_private_key(keybuffer, password=keypasswd)
+            except:
+                pass
+
+        if pkey is None:
+            try:
+                pkey = paramiko.Ed25519Key.from_private_key(keybuffer, password=keypasswd)
+            except:
+                pass
+
+        if pkey is None:
+            errmsg = f"ERROR: Unable to load private from raw content."
+            raise ConfigurationError(errmsg)
 
         return
 
