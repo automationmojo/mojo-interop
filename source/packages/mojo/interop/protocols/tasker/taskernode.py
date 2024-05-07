@@ -293,7 +293,8 @@ class TaskerNode:
 
     def _create_connection(self):
         
-        self._protocol_config["sync_request_timeout"] = self._aspects.sync_request_timeout
+        if self._aspects is not None:
+            self._protocol_config["sync_request_timeout"] = self._aspects.sync_request_timeout
 
         client = rpyc.connect(self._ipaddr, self._port, keepalive=True, config=self._protocol_config)
 
