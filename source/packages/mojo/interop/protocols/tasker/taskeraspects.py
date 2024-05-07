@@ -33,13 +33,15 @@ class TaskerAspects:
                        completion_interval: Optional[float] = DEFAULT_COMPLETION_INTERVAL,
                        inactivity_timeout: Optional[float] = DEFAULT_INACTIVITY_TIMEOUT,
                        inactivity_interval: Optional[float] = DEFAULT_INACTIVITY_INTERVAL,
-                       progress_delivery: Optional[Dict[str, float]]= None):
+                       progress_delivery: Optional[Dict[str, float]]= None,
+                       sync_request_timeout: Optional[float]=120):
         
         self.completion_timeout = completion_timeout
         self.completion_interval = completion_interval
         self.inactivity_timeout = inactivity_timeout
         self.inactivity_interval = inactivity_interval
         self.progress_delivery = progress_delivery
+        self.sync_request_timeout = sync_request_timeout
         return
 
     def as_dict(self) -> dict:
@@ -49,6 +51,7 @@ class TaskerAspects:
             "inactivity_timeout": self.inactivity_timeout,
             "inactivity_interval": self.inactivity_interval,
             "progress_delivery": self.progress_delivery,
+            "sync_request_timeout": self.sync_request_timeout
         }
         return data
     

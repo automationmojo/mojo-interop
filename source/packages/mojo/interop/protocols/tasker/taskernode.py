@@ -40,7 +40,9 @@ TASKER_PROTOCOL_CONFIG = {
     "allow_public_attrs": True,
     "allow_pickle": True,
     "import_custom_exceptions": True,
-    "allow_custom_exceptions": True
+    "allow_custom_exceptions": True,
+    "sync_request_timeout": 120,
+    "logger": logging.getLogger()
 }
 
 class TaskerNode:
