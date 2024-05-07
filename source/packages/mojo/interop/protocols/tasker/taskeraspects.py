@@ -34,7 +34,7 @@ class TaskerAspects:
                        inactivity_timeout: Optional[float] = DEFAULT_INACTIVITY_TIMEOUT,
                        inactivity_interval: Optional[float] = DEFAULT_INACTIVITY_INTERVAL,
                        progress_delivery: Optional[Dict[str, float]]= None,
-                       sync_request_timeout: Optional[float]=120):
+                       sync_request_timeout: Optional[float]=None):
         
         self.completion_timeout = completion_timeout
         self.completion_interval = completion_interval

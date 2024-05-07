@@ -51,12 +51,13 @@ class TaskerNode:
     """
 
     def __init__(self, ipaddr: str, port: int, summary_progress: Optional[SummaryProgressDelivery] = None,
-                 aspect: TaskerAspects=DEFAULT_TASKER_ASPECTS):
+                 protocol_config: Optional[Dict[str, Any]] = TASKER_PROTOCOL_CONFIG, aspect: TaskerAspects=DEFAULT_TASKER_ASPECTS):
         self._ipaddr = ipaddr
         self._port = port
         self._summary_progress = summary_progress
         self._aspects = aspect
         self._session_id = None
+        self._protocol_config = protocol_config
         return
 
     @property
@@ -291,7 +292,11 @@ class TaskerNode:
         return full_path
 
     def _create_connection(self):
-        client = rpyc.connect(self._ipaddr, self._port, keepalive=True, config=TASKER_PROTOCOL_CONFIG)
+        
+        self._protocol_config["sync_request_timeout"] = self._aspects.sync_request_timeout
+
+        client = rpyc.connect(self._ipaddr, self._port, keepalive=True, config=self._protocol_config)
+
         return client
 
 
