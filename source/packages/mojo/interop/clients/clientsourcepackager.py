@@ -32,7 +32,8 @@ class ClientSourcePackager:
 
     EXCLUDE_FILE_LEAFS = [
         ".gitattributes",
-        ".gitignore"
+        ".gitignore",
+        ".env"
     ]
 
     EXCLUDE_FILENAME_MATCHES = [
@@ -216,6 +217,15 @@ class ClientSourcePackager:
             errmsg = os.linesep.join(errmsg_lines)
             raise RuntimeError(errmsg)
         
+        rehome_command = f"bash -l -c \"cd {destination}; {destination}/repository-setup/rehome-repository --skip-workspaces\""
+        status, stdout, stderr = session.run_cmd(rehome_command)
+        if status != 0:
+            errmsg_lines = [
+                "Unable to rehome the remote repository.",
+                f"STDERR: {stderr}"
+            ]
+            errmsg = os.linesep.join(errmsg_lines)
+            raise RuntimeError(errmsg)
 
         setup_command = f"bash -l -c \"cd {destination}; EXTRA_POETRY_SETUP_FLAGS='--without dev' {destination}/development/setup-environment reset\""
         status, stdout, stderr = session.run_cmd(setup_command)
