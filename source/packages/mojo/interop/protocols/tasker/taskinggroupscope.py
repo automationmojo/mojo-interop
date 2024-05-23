@@ -81,6 +81,10 @@ class TaskingGroupScope:
     @property
     def sequencer(self) -> "TestSequencer":
         return self._sequencer
+    
+    @property
+    def nodes(self) -> List[TaskerNode]:
+        return self._tnodes
 
     def __enter__(self) -> "TaskingGroupScope":
         self.initialize()
@@ -153,6 +157,24 @@ class TaskingGroupScope:
 
         return new_promises
 
+    def execute_tasking_on_node(self, node: TaskerNode, *, tasking: Union[TaskingIdentity, Type[Tasking]], ncount: int = 1, aspects: Optional[TaskerAspects] = None,
+                        **kwargs) -> List[TaskingResultPromise]:
+
+        if aspects is None:
+            aspects = self._aspects
+
+        if self._state != TaskingGroupState.NotStarted:
+            errmsg = f"The tasking group '{self._name}' has already been started."
+            raise SemanticError(errmsg)
+
+        adapter = self.adapter
+        parent_id = self._tgroup.inst_id
+
+        promise = self._controller.execute_tasking_on_node(
+                node, tasking=tasking, ncount=ncount, parent_id=parent_id, aspects=aspects, **kwargs)
+        self._promises.append(promise)
+
+        return promise
 
     def finalize(self, sync: bool = True):
 
