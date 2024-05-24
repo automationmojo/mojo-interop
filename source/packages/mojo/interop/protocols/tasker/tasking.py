@@ -307,7 +307,7 @@ class Tasking:
         stop_fmt = format_datetime_with_fractional(self._result.stop)
 
         finalize_msg_lines = [
-            "------------------------------- TASKING FINALIZED -------------------------------"
+            "------------------------------- TASKING FINALIZED -------------------------------",
             f"    TASK_NAME: {self._result.name}",
             f"      TASK_ID: {self._result.inst_id}",
             f"    PARENT_ID: {self._result.parent_inst}",
@@ -614,7 +614,15 @@ class Tasking:
 
         prefix = self.PREFIX
 
-        self._logger.info(f"Starting thread for tasking name={self.full_name} tasking_id={self._tasking_id}")
+        info_msg_lines = [
+            f"Starting thread for:",
+            f"    tasking name={self.full_name}",
+            f"    tasking_id={self._tasking_id}"
+        ]
+
+        info_msg = os.linesep.join(info_msg_lines)
+
+        self._logger.info(info_msg)
 
         self._result = self.create_tasking_result(self._tasking_id, self.full_name, self._parent_id, prefix)
         self._running = True
