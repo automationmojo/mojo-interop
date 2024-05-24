@@ -39,6 +39,7 @@ from mojo.interop.protocols.tasker.taskingevent import TaskingEvent
 
 from mojo.landscaping.client.clientbase import ClientBase
 
+from mojo.xmods.xformatting import indent_lines_list
 
 TASKER_PORT = 8686
 
@@ -247,7 +248,23 @@ class TaskerController:
             # Loop through our promises and check the status of the results
             while len(wait_on) > 0:
                 np = wait_on.pop()
+
                 events = np.get_events()
+                completed = np.is_task_complete()
+                if completed and len(events) > 0:
+                    err_msg_lines = [
+                        f"Task is complete but we are still waiting on event name={event_name}. A task likely had an error."
+                        "TASK RESULT:"
+                    ]
+
+                    result = np.get_result()
+                    result_fmt_lines = result.format_result()
+                    result_fmt_lines = indent_lines_list(result_fmt_lines, 1)
+                    
+                    err_msg_lines.extend(result_fmt_lines)
+
+                    err_msg = os.linesep.join(err_msg_lines)
+                    raise RuntimeError(err_msg)
 
                 ev: TaskingEvent
                 for ev in events:
