@@ -251,7 +251,7 @@ class TaskerController:
 
                 events = np.get_events()
                 completed = np.is_task_complete()
-                if completed and len(events) > 0:
+                if completed and len(events) == 0:
                     err_msg_lines = [
                         f"Task is complete but we are still waiting on event name={event_name}. A task likely had an error."
                         "TASK RESULT:"
