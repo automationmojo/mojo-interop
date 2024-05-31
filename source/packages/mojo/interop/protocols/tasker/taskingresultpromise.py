@@ -14,8 +14,8 @@ __credits__ = []
 
 from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING
 
+import logging
 import os
-import threading
 import time
 
 from datetime import datetime, timedelta
@@ -34,6 +34,8 @@ from mojo.interop.protocols.tasker.taskingprogressmonitor import TaskingProgress
 if TYPE_CHECKING:
     from mojo.interop.protocols.tasker.taskernode import TaskerNode
 
+
+logger = logging.getLogger()
 
 @dataclass
 class TaskingRef:
@@ -175,9 +177,15 @@ class TaskingResultPromise:
 
         while (True):
 
-            finished = self.is_task_complete()
-            if finished:
-                break
+            try:
+                finished = self.is_task_complete()
+                if finished:
+                    break
+            except EOFError as ferr:
+                # rpyc might throw an EOFError here, absorb and retry
+                # until we timeout
+                errmsg = "'EOFError' encountered while waiting on task to complete"
+                logger.info(errmsg)
 
             now = datetime.now()
             if end_time is not None and now > end_time:
