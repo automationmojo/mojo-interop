@@ -415,7 +415,7 @@ class UpnpCoordinator(CoordinatorBase):
         return
 
     def startup_scan(self, query_devices: Dict[str, dict], required_devices: Optional[List[str]] = None,
-                           watchlist: Optional[List[str]] = None, exclude_interfaces: List = [],
+                           watchlist: Optional[List[str]] = None, exclude_interfaces: Optional[List] = None,
                             response_timeout: float = 20, pre_msearch_timeout=20, retry: int = 2, 
                             upnp_recording: bool = False, allow_unknown_devices: bool = False):
         """
@@ -430,6 +430,9 @@ class UpnpCoordinator(CoordinatorBase):
             :param upnp_recording: Forces the updating or recording of device descriptions from devices found on the network.
         """
         # pylint: disable=dangerous-default-value
+
+        if exclude_interfaces is None:
+            exclude_interfaces = []
 
         self._allow_unknown_devices = allow_unknown_devices
         self._upnp_recording = upnp_recording
