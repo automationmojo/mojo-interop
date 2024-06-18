@@ -26,13 +26,15 @@ from datetime import datetime, timedelta
 
 import requests
 
+from mojo.errors.xtraceback import format_exc_lines
 from mojo.waiting.waitmodel import TimeoutContext
 
+from mojo.collections.context import Context
+from mojo.collections.contextpaths import ContextPaths
+
 from mojo.xmods.aspects import ActionPattern
-from mojo.errors.exceptions import format_exc_lines
 from mojo.xmods.eventing.eventedvariablesink import EventedVariableSink
 from mojo.xmods.eventing.eventedvariable import EventedVariable
-from mojo.xmods.xcollections.context import Context, ContextPaths
 from mojo.xmods.xlogging.scopemonitoring import MonitoredScope
 
 from mojo.interop.protocols.upnp.aspects import AspectsUPnP, DEFAULT_UPNP_ASPECTS

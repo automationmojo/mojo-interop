@@ -22,7 +22,6 @@ from mojo.xmods.extension.dynamic import (
 )
 from mojo.xmods.ximport import import_by_name
 from mojo.collections.context import Context
-from mojo.collections.contextpaths import ContextPaths
 
 from mojo.interop.protocols.upnp.devices.upnpembeddeddevice import UpnpEmbeddedDevice
 from mojo.interop.protocols.upnp.devices.upnprootdevice import UpnpRootDevice

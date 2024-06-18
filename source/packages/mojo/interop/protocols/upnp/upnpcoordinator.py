@@ -30,7 +30,9 @@ from requests.exceptions import ConnectionError
 
 from mojo.errors.exceptions import ConfigurationError, SemanticError
 from mojo.landscaping.friendlyidentifier import FriendlyIdentifier
-from mojo.xmods.xcollections.context import Context, ContextPaths
+
+from mojo.collections.context import Context
+from mojo.collections.contextpaths import ContextPaths
 
 from mojo.networking.constants import HTTP1_1_LINESEP, HTTP1_1_END_OF_HEADER
 from mojo.networking.interfaces import get_interface_for_ip

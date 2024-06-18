@@ -14,7 +14,7 @@ __credits__ = []
 from typing import Dict, List, Tuple, TYPE_CHECKING
 
 from mojo.collections.contextpaths import ContextPaths
-from mojo.errors.exceptions import ConfigurationError, SemanticError
+from mojo.errors.exceptions import SemanticError
 from mojo.landscaping.coupling.coordinatorcoupling import CoordinatorCoupling
 
 from mojo.interop.protocols.upnp.upnpcoordinator import UpnpCoordinator

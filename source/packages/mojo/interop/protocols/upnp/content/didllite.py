@@ -396,11 +396,13 @@ class DidlLitePacket:
 
 def parse_didl_lite_packet(content, namespaces=DIDL_NAMESPACES):
 
-    root_element = from_xml_string(content)
+    root_element: Element = from_xml_string(content)
 
     obj_items = []
 
-    for obj_element in root_element.getchildren():
+    root_children = [ ce for ce in root_element ]
+
+    for obj_element in root_children:
         
         class_element = obj_element.find("upnp:class", namespaces=namespaces)
         didl_class = class_element.text
@@ -409,6 +411,8 @@ def parse_didl_lite_packet(content, namespaces=DIDL_NAMESPACES):
 
         if didl_class == "object.container.storageFolder":
             obj = DidlContainerStorageFolder.from_xml(obj_element, namespaces=namespaces)
+        elif didl_class == "object.container.album.photoAlbum":
+            obj = DidlContainerPhotoAlbum.from_xml(obj_element, namespaces=namespaces)
         elif didl_class == "object.item.imageItem.photo.vendorAlbumArt":
             obj = DidlItemAlbumArt.from_xml(obj_element, namespaces=namespaces)
         elif didl_class == "object.item.audioItem.musicTrack":
@@ -423,7 +427,7 @@ def parse_didl_lite_packet(content, namespaces=DIDL_NAMESPACES):
 
     return
 
-parse_didl_lite_packet("""
+EXAMPLE_DIDL_PACKET = """
 <DIDL-Lite xmlns:dc="http://purl.org/dc/elements/1.1/"
            xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/"
            xmlns:r="urn:schemas-rinconnetworks-com:metadata-1-0/"
@@ -480,4 +484,7 @@ parse_didl_lite_packet("""
         </res>
     </item> 
 </DIDL-Lite>
-""")
+"""
+
+if __name__ == "__main__":
+    parse_didl_lite_packet(EXAMPLE_DIDL_PACKET)
