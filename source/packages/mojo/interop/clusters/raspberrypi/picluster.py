@@ -21,7 +21,7 @@ class PiCluster(LandscapeDeviceCluster):
     """
     """
 
-    def __init__(self, label: str, nodes: Dict[NodeBase], spares: Dict[NodeBase],
+    def __init__(self, label: str, nodes: Dict[str, NodeBase], spares: Dict[str, NodeBase],
                  group: LandscapeDeviceGroup) -> None:
         super().__init__(label, nodes, spares, group)
         return
