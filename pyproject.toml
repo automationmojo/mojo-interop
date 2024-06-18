@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "mojo-interop"
 description = "Automation Mojo Interop Extensions"
-version = "1.3.73"
+version = "1.3.74"
 
 authors = [
     "Myron Walker <myron.walker@gmail.com>"
@@ -26,20 +26,15 @@ python = ">=3.9,<4.0"
 rpyc = "^6.0.0"
 pexpect = "^4.8.0"
 psutil = "^5.9.6"
-mojo-errors = ">=1.3.7 <1.4.0"
-mojo-networking = ">=1.3.5 <1.4.0"
-mojo-xmodules = ">=1.3.19 <1.4.0"
-mojo-config = ">=1.3.19 <1.4.0"
-mojo-credentials = ">=1.3.14 <1.4.0"
-mojo-landscaping = ">=1.3.6 <1.4.0"
-mojo-results = ">=1.3.17 <1.4.0"
-mojo-runtime = ">=1.3.20 <1.4.0"
-mojo-testplus = ">=1.3.31 <1.4.0"
-
-[tool.poetry.group.dev.dependencies]
-myst-parser = "^0.18.1"
-sphinx = ">=1.6,<6"
-sphinx-rtd-theme = "^1.1.1"
+mojo-errors = ">=1.3.9 <1.4.0"
+mojo-networking = ">=1.3.6 <1.4.0"
+mojo-xmodules = ">=1.3.23 <1.4.0"
+mojo-config = ">=1.3.21 <1.4.0"
+mojo-credentials = ">=1.3.17 <1.4.0"
+mojo-landscaping = ">=1.3.7 <1.4.0"
+mojo-results = ">=1.3.19 <1.4.0"
+mojo-runtime = ">=1.3.30 <1.4.0"
+mojo-testplus = ">=1.3.34 <1.4.0"
 
 [build-system]
 requires = ["poetry-core"]
