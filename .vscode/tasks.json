@@ -29,12 +29,18 @@
             "label": "Environment - Reset",
             "type": "shell",
             "command": "${workspaceFolder}/development/setup-environment reset",
+            "windows": {
+                "command": "python ${workspaceFolder}/development/setup-environment reset",
+            },
             "problemMatcher": []
         },
         {
             "label": "Environment - Setup",
             "type": "shell",
             "command": "${workspaceFolder}/development/setup-environment",
+            "windows": {
+                "command": "python ${workspaceFolder}/development/setup-environment",
+            },
             "problemMatcher": []
         },
         {
