@@ -11,8 +11,9 @@ __copyright__ = "Copyright 2023, Myron W Walker"
 __credits__ = []
 
 
+from typing import TYPE_CHECKING, Generator
 
-from typing import TYPE_CHECKING
+from mojo import testplus
 
 from mojo.landscaping.client.clientcoordinatorcouplingbase import ClientCoordinatorCouplingBase
 
@@ -37,3 +38,8 @@ class LinuxClientCoordinatorCoupling(ClientCoordinatorCouplingBase):
         """
         super().__init__(*args, **kwargs)
         return
+
+@testplus.integration()
+def create_linux_client_coordinator_coupling() -> Generator[LinuxClientCoordinatorCoupling, None, None]:
+    lc_coupling = LinuxClientCoordinatorCoupling()
+    yield lc_coupling
