@@ -50,6 +50,21 @@
             "justMyCode": false
         },
         {
+            "name": "Python: Internal Tests - Query",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/.venv/bin/testplus",
+            "envFile": "${workspaceFolder}/.env",
+            "args": [
+                "testing",
+                "query",
+                "--root=${workspaceFolder}/source/testroots/mojo",
+                "--includes=mojo.tests"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
             "name": "Python: Internal Tests - Tasker on Casey",
             "type": "python",
             "request": "launch",

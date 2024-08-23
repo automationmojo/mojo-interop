@@ -446,14 +446,14 @@ files = [
 
 [[package]]
 name = "mojo-collections"
-version = "2.0.1"
+version = "2.0.22"
 description = "Mojo Collections Package"
 category = "main"
 optional = false
 python-versions = "<4.0,>=3.9"
 files = [
-    {file = "mojo_collections-2.0.1-py3-none-any.whl", hash = "sha256:97d186cb7262fd604dde62634d9929cbb0ee0bb8bdb2ad53e3e353e3542b7909"},
-    {file = "mojo_collections-2.0.1.tar.gz", hash = "sha256:79f3a46614cc1a1d07173a738fae122049e3251238596fd3c32c1b205a4e066c"},
+    {file = "mojo_collections-2.0.22-py3-none-any.whl", hash = "sha256:b9307c8de82d687167becdf822cd35d5fe8d3abf3a698edbbed54898dedbad30"},
+    {file = "mojo_collections-2.0.22.tar.gz", hash = "sha256:0cfb71917dc7aaefa7004ad73278f844ff88da03f0d4614cb1e9fc24820e89f4"},
 ]
 
 [[package]]
@@ -630,14 +630,14 @@ typing-extensions = ">=4.11.0,<5.0.0"
 
 [[package]]
 name = "mojo-testplus"
-version = "2.0.0"
+version = "2.0.1"
 description = "Automation Mojo TestPlus Test Framework"
 category = "main"
 optional = false
 python-versions = "<4.0,>=3.9"
 files = [
-    {file = "mojo_testplus-2.0.0-py3-none-any.whl", hash = "sha256:75fd51aafbf7433878e08338080dcbedbbab32af44006af8d1397a1b79b47e9f"},
-    {file = "mojo_testplus-2.0.0.tar.gz", hash = "sha256:0d74151625582488c82b2e6e05b38dae6f5ace5b2ddb441e5a1c72283b1d6463"},
+    {file = "mojo_testplus-2.0.1-py3-none-any.whl", hash = "sha256:3213cf89f940439a1b908c162be15f4e4b874289e9dd6d967de3d359bb91e781"},
+    {file = "mojo_testplus-2.0.1.tar.gz", hash = "sha256:b6f777d7eab41f5d85d71158834c1b256d67f9dc7d560c7a99f7b95aa4abd585"},
 ]
 
 [package.dependencies]
