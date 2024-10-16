@@ -18,6 +18,8 @@ from mojo.errors.exceptions import SemanticError
 from mojo.landscaping.coupling.coordinatorcoupling import CoordinatorCoupling
 from mojo.landscaping.friendlyidentifier import FriendlyIdentifier
 from mojo.landscaping.landscape import LandscapeDevice
+
+from mojo.interop.protocols.integrationclasses import INTEGRATION_CLASS_NETWORK_DLIPOWER
 from mojo.interop.protocols.ssh.sshcoordinator import SshCoordinator
 
 from mojo.landscaping.constants import StartupLevel
@@ -25,8 +27,6 @@ from mojo.landscaping.constants import StartupLevel
 # Types imported only for type checking purposes
 if TYPE_CHECKING:
     from mojo.landscaping.landscape import Landscape
-
-INTEGRATION_CLASS_NETWORK_DLIPOWER = "network/dlipower"
 
 def is_dlipower_type(config_info) -> bool:
     is_sst = False

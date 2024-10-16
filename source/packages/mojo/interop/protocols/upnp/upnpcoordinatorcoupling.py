@@ -17,6 +17,7 @@ from mojo.collections.contextpaths import ContextPaths
 from mojo.errors.exceptions import SemanticError
 from mojo.landscaping.coupling.coordinatorcoupling import CoordinatorCoupling
 
+from mojo.interop.protocols.integrationclasses import INTEGRATION_CLASS_NETWORK_UPNP
 from mojo.interop.protocols.upnp.upnpcoordinator import UpnpCoordinator
 
 # Types imported only for type checking purposes
@@ -29,6 +30,11 @@ class UpnpCoordinatorIntegration(CoordinatorCoupling):
     """
 
     pathbase = "/upnp"
+
+    integration_root: str = "apod"
+    integration_section: str = "devices"
+    integration_leaf: str = "deviceType"
+    integration_class: str = INTEGRATION_CLASS_NETWORK_UPNP
 
     def __init__(self, *args, **kwargs):
         """

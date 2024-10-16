@@ -15,6 +15,8 @@ __credits__ = []
 from typing import Any, Dict, List, Tuple, TYPE_CHECKING
 
 from mojo.landscaping.coupling.coordinatorcoupling import CoordinatorCoupling
+
+from mojo.interop.protocols.integrationclasses import INTEGRATION_CLASS_NETWORK_TCPSERIAL
 from mojo.interop.protocols.ssh.sshcoordinator import SshCoordinator
 
 from mojo.landscaping.constants import StartupLevel
@@ -22,8 +24,6 @@ from mojo.landscaping.constants import StartupLevel
 # Types imported only for type checking purposes
 if TYPE_CHECKING:
     from mojo.landscaping.landscape import Landscape
-
-INTEGRATION_CLASS_NETWORK_TCPSERIAL = "network/tcpserial"
 
 def is_tcp_serial_type(config_info) -> bool:
     is_sst = False

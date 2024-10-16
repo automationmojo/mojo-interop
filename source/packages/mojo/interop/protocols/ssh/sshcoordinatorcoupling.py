@@ -14,6 +14,8 @@ __credits__ = []
 from typing import Any, Dict, List, Tuple, TYPE_CHECKING
 
 from mojo.landscaping.coupling.coordinatorcoupling import CoordinatorCoupling
+
+from mojo.interop.protocols.integrationclasses import INTEGRATION_CLASS_NETWORK_SSH
 from mojo.interop.protocols.ssh.sshcoordinator import SshCoordinator
 
 from mojo.landscaping.constants import StartupLevel
@@ -22,13 +24,12 @@ from mojo.landscaping.constants import StartupLevel
 if TYPE_CHECKING:
     from mojo.landscaping.landscape import Landscape
 
-SUPPORTED_INTEGRATION_CLASS = "network/ssh"
 
 def is_ssh_device_config(device_info):
     is_ssh_dev = False
 
     dev_type = device_info["deviceType"]
-    if dev_type == SUPPORTED_INTEGRATION_CLASS:
+    if dev_type == INTEGRATION_CLASS_NETWORK_SSH:
         is_ssh_dev = True
 
     return is_ssh_dev
@@ -43,7 +44,7 @@ class SshCoordinatorCoupling(CoordinatorCoupling):
     integration_root: str = "apod"
     integration_section: str = "devices"
     integration_leaf: str = "deviceType"
-    integration_class: str = SUPPORTED_INTEGRATION_CLASS
+    integration_class: str = INTEGRATION_CLASS_NETWORK_SSH
 
     def __init__(self, *args, **kwargs):
         """
