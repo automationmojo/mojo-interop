@@ -21,7 +21,7 @@ from mojo.interop.clients.constants import INTEGRATION_CLASS_FOR_OSX_CLIENT
 from mojo.interop.clients.osx.osxclient import OsxClient
 
 from mojo.interop.protocols.ssh.sshagent import SshAgent
-from mojo.interop.protocols.ssh.sshcoordinator import INTEGRATION_CLASS_NETWORK_SSH
+from mojo.interop.protocols.integrationclasses import INTEGRATION_CLASS_NETWORK_SSH
 
 if TYPE_CHECKING:
     from mojo.landscaping.landscape import Landscape
