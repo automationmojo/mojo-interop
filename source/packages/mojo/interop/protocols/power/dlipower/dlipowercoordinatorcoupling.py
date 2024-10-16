@@ -26,14 +26,14 @@ from mojo.landscaping.constants import StartupLevel
 if TYPE_CHECKING:
     from mojo.landscaping.landscape import Landscape
 
-SUPPORTED_INTEGRATION_CLASS = "network/dlipower"
+INTEGRATION_CLASS_NETWORK_DLIPOWER = "network/dlipower"
 
 def is_dlipower_type(config_info) -> bool:
     is_sst = False
 
     if "powerType" in config_info:
         stval = config_info["powerType"]
-        if stval == SUPPORTED_INTEGRATION_CLASS:
+        if stval == INTEGRATION_CLASS_NETWORK_DLIPOWER:
             is_sst = True
 
     return is_sst
@@ -46,7 +46,7 @@ class PowerCoordinatorCoupling(CoordinatorCoupling):
     integration_root: str = "apod"
     integration_section: str = "power"
     integration_leaf: str = "powerType"
-    integration_class: str = SUPPORTED_INTEGRATION_CLASS
+    integration_class: str = INTEGRATION_CLASS_NETWORK_DLIPOWER
 
     def __init__(self, *args, **kwargs):
         """

@@ -23,7 +23,7 @@ from mojo.interop.clusters.raspberrypi.pinode import PiNode
 from mojo.interop.clusters.raspberrypi.picluster import PiCluster
 
 from mojo.interop.protocols.ssh.sshagent import SshAgent
-from mojo.interop.protocols.ssh.sshcoordinator import SUPPORTED_INTEGRATION_CLASS
+from mojo.interop.protocols.ssh.sshcoordinator import INTEGRATION_CLASS_NETWORK_SSH
 
 if TYPE_CHECKING:
     from mojo.landscaping.landscape import Landscape
@@ -50,5 +50,5 @@ class PiNodeCoordinator(NodeCoordinatorBase):
         
         ssh_agent = SshAgent(host, cred, users=users, port=port, pty_params=pty_params)
 
-        device.attach_extension(SUPPORTED_INTEGRATION_CLASS, ssh_agent)
+        device.attach_extension(INTEGRATION_CLASS_NETWORK_SSH, ssh_agent)
         return

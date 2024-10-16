@@ -21,7 +21,7 @@ from mojo.interop.clients.constants import INTEGRATION_CLASS_FOR_OSX_CLIENT
 from mojo.interop.clients.osx.osxclient import OsxClient
 
 from mojo.interop.protocols.ssh.sshagent import SshAgent
-from mojo.interop.protocols.ssh.sshcoordinator import SUPPORTED_INTEGRATION_CLASS
+from mojo.interop.protocols.ssh.sshcoordinator import INTEGRATION_CLASS_NETWORK_SSH
 
 if TYPE_CHECKING:
     from mojo.landscaping.landscape import Landscape
@@ -47,5 +47,5 @@ class OsxClientCoordinator(ClientCoordinatorBase):
         
         ssh_agent = SshAgent(host, cred, users=users, port=port, pty_params=pty_params)
 
-        device.attach_extension(SUPPORTED_INTEGRATION_CLASS, ssh_agent)
+        device.attach_extension(INTEGRATION_CLASS_NETWORK_SSH, ssh_agent)
         return

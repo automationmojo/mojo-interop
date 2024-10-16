@@ -23,14 +23,14 @@ from mojo.landscaping.constants import StartupLevel
 if TYPE_CHECKING:
     from mojo.landscaping.landscape import Landscape
 
-SUPPORTED_INTEGRATION_CLASS = "network/tcpserial"
+INTEGRATION_CLASS_NETWORK_TCPSERIAL = "network/tcpserial"
 
 def is_tcp_serial_type(config_info) -> bool:
     is_sst = False
 
     if "serialType" in config_info:
         stval = config_info["serialType"]
-        if stval == SUPPORTED_INTEGRATION_CLASS:
+        if stval == INTEGRATION_CLASS_NETWORK_TCPSERIAL:
             is_sst = True
 
     return is_sst
@@ -43,7 +43,7 @@ class TcpSerialCoordinatorCoupling(CoordinatorCoupling):
     integration_root: str = "apod"
     integration_section: str = "serial"
     integration_leaf: str = "serialType"
-    integration_class: str = SUPPORTED_INTEGRATION_CLASS
+    integration_class: str = INTEGRATION_CLASS_NETWORK_TCPSERIAL
 
     def __init__(self, *args, **kwargs):
         """

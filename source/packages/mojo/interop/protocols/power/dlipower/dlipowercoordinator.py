@@ -20,9 +20,6 @@ from mojo.landscaping.landscapedevice import LandscapeDevice
 if TYPE_CHECKING:
     from mojo.landscaping.landscape import Landscape
 
-SUPPORTED_INTEGRATION_CLASS = "network/ssh"
-
-
 class DliPowerCoordinator(CoordinatorBase):
     """
         The :class:`DliPowerCoordinator` creates a pool of agents that can be used to

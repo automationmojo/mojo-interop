@@ -29,7 +29,7 @@ from mojo.interop.protocols.ssh.sshdevice import SshDevice
 if TYPE_CHECKING:
     from mojo.landscaping.landscape import Landscape
 
-SUPPORTED_INTEGRATION_CLASS = "network/ssh"
+INTEGRATION_CLASS_NETWORK_SSH = "network/ssh"
 
 def format_ssh_device_configuration_error(message, sshdev_config):
     """

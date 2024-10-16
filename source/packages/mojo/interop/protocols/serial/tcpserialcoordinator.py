@@ -25,9 +25,6 @@ from mojo.interop.protocols.serial.tcpserialagent import TcpSerialAgent
 if TYPE_CHECKING:
     from mojo.landscaping.landscape import Landscape
 
-SUPPORTED_INTEGRATION_CLASS = "network/ssh"
-
-
 class TcpSerialCoordinator(CoordinatorBase):
     """
         The :class:`TcpSerialCoordinator` creates a pool of agents that can be used to

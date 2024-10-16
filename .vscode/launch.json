@@ -24,7 +24,7 @@
         },
         {
             "name": "Python: Example - Tasking Server Deploy",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/source/examples/taskerserverdeploy.py",
             "args": [],
@@ -33,7 +33,7 @@
         },
         {
             "name": "Python: Internal Tests - SSH on Casey",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/.venv/bin/testplus",
             "envFile": "${workspaceFolder}/.env",
@@ -66,7 +66,7 @@
         },
         {
             "name": "Python: Internal Tests - Tasker on Casey",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/.venv/bin/testplus",
             "envFile": "${workspaceFolder}/.env",
@@ -83,7 +83,7 @@
         },
         {
             "name": "Python: Tasker Daemon",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/source/packages/mojo/interop/protocols/tasker/taskerdaemon.py",
             "args": [
